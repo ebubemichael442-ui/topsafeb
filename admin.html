@@ -39,8 +39,8 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p class="muted">Customer profiles available to this admin account.</p>
 <div class="table-wrap">
 <table>
-<thead><tr><th>Full name</th><th>Email</th></tr></thead>
-<tbody id="customer-rows"><tr><td colspan="2">Loading customer list…</td></tr></tbody>
+<thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th></tr></thead>
+<tbody id="customer-rows"><tr><td colspan="3">Loading customer list…</td></tr></tbody>
 </table>
 </div>
 </section>
@@ -67,17 +67,21 @@ async function loadAdmin(){
  if(adminError)throw adminError;
  if(!adminRecord){statusEl.textContent="Access denied. This account is not registered as a TopSafeB administrator.";return;}
  statusEl.textContent="Administrator access confirmed.";
- const {data:customers,error:customerError}=await supabase.from("profiles").select("full_name,email").order("full_name",{ascending:true});
+ const {data:customers,error:customerError}=await supabase.from("profiles").select("user_id,full_name,email").order("full_name",{ascending:true});
  if(customerError)throw customerError;
  const list=customers||[];
+ const {data:progressRows,error:progressError}=await supabase.from("learning_progress").select("user_id,completed_lessons");
+ if(progressError)throw progressError;
+ const progressByUser=new Map((progressRows||[]).map(item=>[item.user_id,Array.isArray(item.completed_lessons)?item.completed_lessons.length:0]));
  countEl.textContent=String(list.length);
  rowsEl.replaceChildren();
- if(!list.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=2;td.textContent="No customer profiles are available yet.";tr.append(td);rowsEl.append(tr);}
+ if(!list.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=3;td.textContent="No customer profiles are available yet.";tr.append(td);rowsEl.append(tr);}
  for(const customer of list){
   const tr=document.createElement("tr");
   const name=document.createElement("td");name.textContent=customer.full_name||"—";
   const email=document.createElement("td");email.textContent=customer.email||"—";
-  tr.append(name,email);rowsEl.append(tr);
+  const progress=document.createElement("td");progress.textContent=(progressByUser.get(customer.user_id)||0)+" of 4";
+  tr.append(name,email,progress);rowsEl.append(tr);
  }
 }
 signoutButton.addEventListener("click",async()=>{
@@ -87,7 +91,7 @@ signoutButton.addEventListener("click",async()=>{
  window.location.replace("login.html");
 });
 supabase.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace("login.html");});
-loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='2'>Customer list could not be loaded.</td></tr>";});
+loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='3'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
 </script>
 </body>
 </html>

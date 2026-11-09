@@ -94,7 +94,7 @@ async function loadAdmin(){
   tr.append(name,email,progress,completedOn,updatedOn);rowsEl.append(tr);
  }
 }
-const csvCell=value=>{let text=String(value??"");if(/^[=+\\-@\\t\\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
+const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].includes(text[0]))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
 exportButton.addEventListener("click",()=>{
  const headers=["Full name","Email","Lessons completed","Completed on","Last progress update"];
  const csv="\\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\\r\\n");

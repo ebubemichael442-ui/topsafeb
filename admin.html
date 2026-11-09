@@ -48,6 +48,16 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </div>
 <section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
 </section>
+<section class="panel" id="feedback-management">
+<h2>Customer feedback</h2>
+<p class="muted">Private feedback submitted by signed-in customers. Only authorised administrators can view these submissions.</p>
+<p id="feedback-count" class="stat">—</p>
+<p id="feedback-admin-status" class="muted" role="status" aria-live="polite">Loading customer feedback…</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Date</th><th>Customer</th><th>Rating</th><th>Feedback</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="feedback-rows"><tr><td colspan="6">Loading feedback…</td></tr></tbody>
+</table></div>
+</section>
 <div class="notice"><strong>Privacy:</strong> This page displays customer names, email addresses and learning progress dates available to the administrator. Do not share this information. TopSafeB is an educational platform, not a bank; this dashboard cannot access deposits, bank accounts or payments.</div>
 </main>
 <footer><strong>TopSafeB</strong><p>Restricted owner administration area.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
@@ -66,6 +76,38 @@ const customerSearch=document.getElementById("customer-search");
 const searchSummary=document.getElementById("search-summary");
 const detailsPanel=document.getElementById("customer-details");
 const lessonNames={investing:"Investment Basics",safety:"Financial Safety",banking:"Banking Demonstration",research:"Research and Fees"};
+async function loadFeedback(){
+ const feedbackStatus=document.getElementById("feedback-admin-status");
+ const feedbackRows=document.getElementById("feedback-rows");
+ const feedbackCount=document.getElementById("feedback-count");
+ const {data,error}=await supabase.from("customer_feedback").select("id,customer_name,customer_email,rating,message,status,created_at").order("created_at",{ascending:false});
+ if(error){feedbackStatus.textContent="Feedback storage is not ready yet. Run the customer feedback SQL setup in Supabase, then refresh this page.";feedbackRows.innerHTML="<tr><td colspan='6'>No feedback can be displayed until the database setup is complete.</td></tr>";feedbackCount.textContent="—";return;}
+ const items=data||[];
+ feedbackCount.textContent=String(items.length);
+ feedbackStatus.textContent=items.length? "Feedback submissions are shown below.":"No customer feedback has been submitted yet.";
+ feedbackRows.replaceChildren();
+ if(!items.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No feedback submissions yet.";tr.append(td);feedbackRows.append(tr);return;}
+ for(const item of items){
+  const tr=document.createElement("tr");
+  const date=document.createElement("td");date.textContent=new Date(item.created_at).toLocaleString();
+  const customer=document.createElement("td");customer.textContent=(item.customer_name||"Customer")+"\\n"+(item.customer_email||"");
+  const rating=document.createElement("td");rating.textContent=item.rating;
+  const message=document.createElement("td");message.textContent=item.message;message.style.whiteSpace="pre-wrap";message.style.minWidth="220px";
+  const status=document.createElement("td");status.textContent=item.status;
+  const action=document.createElement("td");
+  if(item.status==="New"){
+   const button=document.createElement("button");button.type="button";button.className="secondary";button.textContent="Mark reviewed";
+   button.addEventListener("click",async()=>{
+    button.disabled=true;
+    const {error:updateError}=await supabase.from("customer_feedback").update({status:"Reviewed"}).eq("id",item.id);
+    if(updateError){button.disabled=false;feedbackStatus.textContent="Could not update this feedback. Please try again.";return;}
+    status.textContent="Reviewed";button.remove();feedbackStatus.textContent="Feedback marked as reviewed.";
+   });
+   action.append(button);
+  }else{action.textContent="—";}
+  tr.append(date,customer,rating,message,status,action);feedbackRows.append(tr);
+ }
+}
 document.getElementById("close-details").addEventListener("click",()=>{detailsPanel.hidden=true;});
 let exportRows=[];
 let customerTableRows=[];
@@ -119,6 +161,7 @@ async function loadAdmin(){
   customerTableRows.push(tr);rowsEl.append(tr);
  }
  rowsEl.append(noSearchResults);filterCustomers();
+ await loadFeedback();
 }
 function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));}
 function printCustomerReport(customer,record,formatDate){

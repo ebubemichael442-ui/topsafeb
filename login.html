@@ -9,7 +9,7 @@
 :root{--navy:#102b50;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f6fa}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--ink);background:var(--pale)}
 header{background:var(--navy);color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}
+.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #b18a3e;outline-offset:3px}
 main{max-width:520px;margin:42px auto;padding:0 18px 55px}.panel{background:white;padding:28px;border-radius:16px;box-shadow:0 8px 30px #102b5012}
 h1{color:var(--navy);font-size:34px;line-height:1.2;margin:8px 0}.muted{color:var(--muted)}
 label{display:block;font-weight:700;margin:16px 0 6px}input{width:100%;padding:13px;border:1px solid #cbd4df;border-radius:8px;font-size:16px}
@@ -46,7 +46,7 @@ const nameWrap=document.getElementById("name-wrap"),nameInput=document.getElemen
 const submitButton=document.getElementById("submit-button"),signupButton=document.getElementById("signup-button"),resetButton=document.getElementById("reset-button");
 let mode="login";
 const say=text=>message.textContent=text;
-function setMode(next){mode=next;const signup=mode==="signup";nameWrap.hidden=!signup;nameInput.required=signup;submitButton.textContent=signup?"Create account":"Sign in";signupButton.hidden=signup;resetButton.hidden=signup;say(signup?"Enter your name, email and password to register.":"Enter your email and password to sign in.");}
+function setMode(next){mode=next;const signup=mode==="signup";nameWrap.hidden=!signup;nameInput.required=signup;document.getElementById("password").autocomplete=signup?"new-password":"current-password";submitButton.textContent=signup?"Create account":"Sign in";signupButton.hidden=signup;resetButton.hidden=signup;say(signup?"Enter your name, email and password to register.":"Enter your email and password to sign in.");}
 signupButton.addEventListener("click",()=>setMode("signup"));
 form.addEventListener("submit",async event=>{
  event.preventDefault();submitButton.disabled=true;

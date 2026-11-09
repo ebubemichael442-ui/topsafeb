@@ -69,7 +69,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p><strong>Topics completed:</strong> Investment Basics, Financial Safety, Banking Demonstration, and Research and Fees.</p>
 <p id="certificate-date" class="muted"></p>
 <p style="margin-top:28px;font-weight:bold;color:var(--navy)">TopSafeB Learning Programme</p>
-<button id="print-certificate" type="button">Print / Save Certificate</button>
+<button id="download-certificate" type="button">Download Certificate PDF</button> <button id="print-certificate" class="secondary" type="button">Print Certificate</button>
 <p class="muted" style="font-size:12px">Educational recognition only. This is not a professional qualification, licence or financial accreditation.</p>
 </section>
 <section class="panel" style="margin-top:22px">
@@ -115,6 +115,43 @@ document.getElementById("reset-progress").addEventListener("click",()=>{
 });
 updateProgress();
 document.getElementById("print-certificate").addEventListener("click",()=>window.print());
+document.getElementById("download-certificate").addEventListener("click",async()=>{
+  const button=document.getElementById("download-certificate");
+  button.disabled=true;button.textContent="Preparing PDF…";
+  try{
+    const {jsPDF}=await import("https://esm.sh/jspdf@2.5.2");
+    const pdf=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
+    const width=pdf.internal.pageSize.getWidth(),height=pdf.internal.pageSize.getHeight();
+    pdf.setDrawColor(16,43,80);pdf.setLineWidth(2.5);pdf.rect(10,10,width-20,height-20);
+    pdf.setDrawColor(223,189,112);pdf.setLineWidth(.7);pdf.rect(13,13,width-26,height-26);
+    pdf.setTextColor(16,43,80);pdf.setFont("helvetica","bold");pdf.setFontSize(15);
+    pdf.text("TOPSAFEB",width/2,35,{align:"center"});
+    pdf.setTextColor(190,150,65);pdf.setFontSize(11);
+    pdf.text("CERTIFICATE OF COMPLETION",width/2,45,{align:"center"});
+    pdf.setTextColor(16,43,80);pdf.setFontSize(29);
+    pdf.text("Certificate of Achievement",width/2,62,{align:"center"});
+    pdf.setTextColor(24,50,82);pdf.setFont("helvetica","normal");pdf.setFontSize(14);
+    pdf.text("This certificate is proudly presented to",width/2,82,{align:"center"});
+    pdf.setTextColor(16,43,80);pdf.setFont("helvetica","bold");pdf.setFontSize(27);
+    const customerName=certificateName.textContent || "TopSafeB Customer";
+    pdf.text(customerName,width/2,101,{align:"center"});
+    pdf.setDrawColor(223,189,112);pdf.setLineWidth(.8);pdf.line(55,106,width-55,106);
+    pdf.setTextColor(24,50,82);pdf.setFont("helvetica","normal");pdf.setFontSize(13);
+    pdf.text("for completing all four lessons in the TopSafeB financial education programme.",width/2,121,{align:"center"});
+    pdf.setFontSize(11);
+    pdf.text("Topics completed: Investment Basics, Financial Safety, Banking Demonstration, and Research and Fees.",width/2,135,{align:"center"});
+    pdf.text(certificateDate.textContent,width/2,149,{align:"center"});
+    pdf.setFont("helvetica","bold");pdf.text("TopSafeB Learning Programme",width/2,165,{align:"center"});
+    pdf.setFont("helvetica","normal");pdf.setFontSize(8);
+    pdf.text("Educational recognition only. This is not a professional qualification, licence or financial accreditation.",width/2,180,{align:"center"});
+    const safeName=customerName.replace(/[^a-z0-9_-]+/gi,"_").replace(/^_+|_+$/g,"")||"Customer";
+    pdf.save("TopSafeB_Certificate_"+safeName+".pdf");
+  }catch(error){
+    alert("The PDF could not be created. Please check your internet connection and try again.");
+  }finally{
+    button.disabled=false;button.textContent="Download Certificate PDF";
+  }
+});
 async function loadSession(){
   const {data:{session},error}=await supabase.auth.getSession();
   if(error) throw error;

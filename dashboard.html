@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="TopSafeB customer learning dashboard.">
+<title>Customer Dashboard | TopSafeB</title>
+<style>
+:root{--navy:#102b50;--blue:#194875;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--ink);background:var(--pale)}
+header{background:var(--navy);color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}
+main{max-width:960px;margin:36px auto;padding:0 18px 55px}h1,h2{color:var(--navy)}h1{font-size:clamp(30px,5vw,42px);line-height:1.2;margin:8px 0}
+.muted{color:var(--muted)}.panel,.tile{background:white;padding:22px;border-radius:14px;box-shadow:0 8px 30px #102b5010}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:20px 0}
+.tile h2{font-size:20px;margin-top:0}.tile a{color:var(--blue);font-weight:bold}
+button,.button{display:inline-block;background:var(--gold);color:var(--navy);padding:12px 18px;border:0;border-radius:8px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer}
+button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);background:#fff9e9;padding:15px;border-radius:8px;margin:20px 0}
+#status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
+footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
+@media(max-width:600px){main{margin-top:24px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="index.html">Home</a><a href="investment-basics.html">Investing</a><a href="financial-safety.html">Safety</a><a href="online-banking-demo.html">Banking Demo</a></nav></header>
+<main>
+<p class="muted">CUSTOMER LEARNING AREA</p>
+<h1>Welcome to your dashboard</h1>
+<section class="panel">
+<p class="muted">SIGNED-IN CUSTOMER</p>
+<h2 id="customer-name">Loading your profile…</h2>
+<p id="customer-email" class="muted"></p>
+<p id="status" role="status" aria-live="polite">Checking your sign-in session…</p>
+<button id="signout" class="secondary" type="button">Sign out</button>
+</section>
+<div class="notice"><strong>Education only:</strong> This dashboard is not a bank account. It does not hold deposits, display real balances, process payments or transfer money. Never enter bank passwords, PINs, card details or OTPs.</div>
+<h2>Explore your learning resources</h2>
+<div class="grid">
+<article class="tile"><h2>Investment Basics</h2><p>Learn about saving, investing, risk and diversification.</p><a href="investment-basics.html">Read the guide</a></article>
+<article class="tile"><h2>Financial Safety</h2><p>Learn how to recognise scams and protect your information.</p><a href="financial-safety.html">Read safety tips</a></article>
+<article class="tile"><h2>Banking Demonstration</h2><p>Explore a fictional account and sample activity.</p><a href="online-banking-demo.html">Open demo</a></article>
+<article class="tile"><h2>Contact TopSafeB</h2><p>Find the website contact information.</p><a href="contact.html">Contact page</a></article>
+</div>
+</main>
+<footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabase = createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
+const nameEl=document.getElementById("customer-name");
+const emailEl=document.getElementById("customer-email");
+const statusEl=document.getElementById("status");
+const signoutButton=document.getElementById("signout");
+async function loadSession(){
+  const {data:{session},error}=await supabase.auth.getSession();
+  if(error) throw error;
+  if(!session){window.location.replace("login.html");return;}
+  const user=session.user;
+  nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
+  emailEl.textContent=user.email || "";
+  statusEl.textContent="You are signed in. This is your educational customer dashboard.";
+}
+signoutButton.addEventListener("click",async()=>{
+  signoutButton.disabled=true;
+  statusEl.textContent="Signing out…";
+  const {error}=await supabase.auth.signOut();
+  if(error){statusEl.textContent=error.message;signoutButton.disabled=false;return;}
+  window.location.replace("login.html");
+});
+supabase.auth.onAuthStateChange((_event,session)=>{
+  if(!session) window.location.replace("login.html");
+});
+loadSession().catch(error=>{statusEl.textContent="Could not load your session: "+error.message;});
+</script>
+</body>
+</html>

@@ -1,10 +1,13 @@
 -- TopSafeB: account-based lesson progress
 -- Run this script once in Supabase SQL Editor.
 
+alter table public.learning_progress add column if not exists completed_at timestamptz;
+
 create table if not exists public.learning_progress (
   user_id uuid primary key references auth.users(id) on delete cascade,
   completed_lessons jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now(),
+  completed_at timestamptz,
   constraint learning_progress_completed_lessons_is_array
     check (jsonb_typeof(completed_lessons) = 'array')
 );

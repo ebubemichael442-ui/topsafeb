@@ -17,7 +17,7 @@ button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);ba
 #status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
 table{width:100%;border-collapse:collapse;margin-top:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e4eaf1;overflow-wrap:anywhere}th{background:#f3f6fa}
 .table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy)}
-.search-tools{margin:18px 0}.search-tools label{display:block;font-weight:700;margin-bottom:6px}.search-tools input{width:100%;max-width:480px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.search-summary{font-size:14px;color:var(--muted);margin:6px 0}
+.search-tools{margin:18px 0}.search-tools label{display:block;font-weight:700;margin-bottom:6px}.search-tools input{width:100%;max-width:480px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.search-summary{font-size:14px;color:var(--muted);margin:6px 0}.detail-panel{margin-top:18px;border:1px solid #dbe3ed;border-radius:10px;padding:18px;background:#f8fafc}.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.detail-item{background:white;padding:12px;border-radius:8px}.detail-item strong{display:block;color:var(--muted);font-size:13px}.lesson-list{margin:8px 0 0;padding-left:22px}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 @media(max-width:600px){main{margin-top:24px}th,td{padding:9px;font-size:14px}}
 </style>
@@ -42,10 +42,11 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <div class="search-tools" id="customer-search-tools" hidden><label for="customer-search">Search customers by name or email</label><input id="customer-search" type="search" placeholder="Enter a customer name or email" autocomplete="off"><p class="search-summary" id="search-summary" aria-live="polite"></p></div>
 <div class="table-wrap">
 <table>
-<thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th><th>Completed on</th><th>Last progress update</th></tr></thead>
+<thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th><th>Completed on</th><th>Last progress update</th><th>Details</th></tr></thead>
 <tbody id="customer-rows"><tr><td colspan="5">Loading customer list…</td></tr></tbody>
 </table>
 </div>
+<section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><button id="close-details" class="secondary" type="button">Close details</button></section>
 </section>
 <div class="notice"><strong>Privacy:</strong> This page displays customer names, email addresses and learning progress dates available to the administrator. Do not share this information. TopSafeB is an educational platform, not a bank; this dashboard cannot access deposits, bank accounts or payments.</div>
 </main>
@@ -63,11 +64,14 @@ const exportButton=document.getElementById("export-csv");
 const searchTools=document.getElementById("customer-search-tools");
 const customerSearch=document.getElementById("customer-search");
 const searchSummary=document.getElementById("search-summary");
+const detailsPanel=document.getElementById("customer-details");
+const lessonNames={investing:"Investment Basics",safety:"Financial Safety",banking:"Banking Demonstration",research:"Research and Fees"};
+document.getElementById("close-details").addEventListener("click",()=>{detailsPanel.hidden=true;});
 let exportRows=[];
 let customerTableRows=[];
 const noSearchResults=document.createElement("tr");
 const noSearchResultsCell=document.createElement("td");
-noSearchResultsCell.colSpan=5;noSearchResultsCell.textContent="No customers match your search.";
+noSearchResultsCell.colSpan=6;noSearchResultsCell.textContent="No customers match your search.";
 noSearchResults.append(noSearchResultsCell);noSearchResults.hidden=true;
 function filterCustomers(){
  const query=customerSearch.value.trim().toLocaleLowerCase();
@@ -108,11 +112,25 @@ async function loadAdmin(){
   progress.textContent=Math.min(completed,4)+" of 4";
   const completedOn=document.createElement("td");completedOn.textContent=formatDate(record?.completed_at);
   const updatedOn=document.createElement("td");updatedOn.textContent=formatDate(record?.updated_at);
-  tr.append(name,email,progress,completedOn,updatedOn);
+  const action=document.createElement("td");const viewButton=document.createElement("button");viewButton.type="button";viewButton.className="secondary";viewButton.textContent="View details";
+  viewButton.addEventListener("click",()=>showCustomerDetails(customer,record,formatDate));action.append(viewButton);
+  tr.append(name,email,progress,completedOn,updatedOn,action);
   tr.dataset.search=((customer.full_name||"")+" "+(customer.email||"")).toLocaleLowerCase();
   customerTableRows.push(tr);rowsEl.append(tr);
  }
  rowsEl.append(noSearchResults);filterCustomers();
+}
+function showCustomerDetails(customer,record,formatDate){
+ const completed=Array.isArray(record?.completed_lessons)?record.completed_lessons.filter(id=>Object.hasOwn(lessonNames,id)):[];
+ document.getElementById("detail-heading").textContent="Learning details for "+(customer.full_name||"customer");
+ document.getElementById("detail-name").textContent=customer.full_name||"—";
+ document.getElementById("detail-email").textContent=customer.email||"—";
+ document.getElementById("detail-count").textContent=completed.length+" of 4 lessons";
+ document.getElementById("detail-completed").textContent=formatDate(record?.completed_at);
+ document.getElementById("detail-updated").textContent=formatDate(record?.updated_at);
+ const list=document.getElementById("detail-lessons");list.replaceChildren();
+ for(const [id,label] of Object.entries(lessonNames)){const item=document.createElement("li");item.textContent=label+" — "+(completed.includes(id)?"Completed":"Not completed");list.append(item);}
+ detailsPanel.hidden=false;detailsPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].includes(text[0]))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
 customerSearch.addEventListener("input",filterCustomers);

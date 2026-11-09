@@ -40,7 +40,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <div class="table-wrap">
 <table>
 <thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th><th>Completed on</th><th>Last progress update</th></tr></thead>
-<tbody id="customer-rows"><tr><td colspan="3">Loading customer list…</td></tr></tbody>
+<tbody id="customer-rows"><tr><td colspan="5">Loading customer list…</td></tr></tbody>
 </table>
 </div>
 </section>
@@ -81,8 +81,12 @@ async function loadAdmin(){
   const tr=document.createElement("tr");
   const name=document.createElement("td");name.textContent=customer.full_name||"—";
   const email=document.createElement("td");email.textContent=customer.email||"—";
-  const progress=document.createElement("td");progress.textContent=(progressByUser.get(customer.user_id)||0)+" of 4";
-  tr.append(name,email,progress);rowsEl.append(tr);
+  const progress=document.createElement("td");const record=progressByUser.get(customer.user_id);
+  const completed=Array.isArray(record?.completed_lessons)?record.completed_lessons.length:0;
+  progress.textContent=Math.min(completed,4)+" of 4";
+  const completedOn=document.createElement("td");completedOn.textContent=formatDate(record?.completed_at);
+  const updatedOn=document.createElement("td");updatedOn.textContent=formatDate(record?.updated_at);
+  tr.append(name,email,progress,completedOn,updatedOn);rowsEl.append(tr);
  }
 }
 signoutButton.addEventListener("click",async()=>{
@@ -92,7 +96,7 @@ signoutButton.addEventListener("click",async()=>{
  window.location.replace("login.html");
 });
 supabase.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace("login.html");});
-loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='3'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
+loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='5'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
 </script>
 </body>
 </html>

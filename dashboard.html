@@ -75,7 +75,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <button type="submit">Prepare feedback email</button>
 <p id="feedback-status" class="muted" role="status" aria-live="polite"></p>
 </form>
-<p class="muted">When you submit, your email app will open with your feedback prepared. You must tap Send in your email app. Feedback is not stored on this website. Do not include passwords, PINs, OTPs, bank details or other sensitive information.</p>
+<p class="muted">Your feedback is submitted securely and can be reviewed by the TopSafeB owner. Do not include passwords, PINs, OTPs, bank details or other sensitive information. Do not include passwords, PINs, OTPs, bank details or other sensitive information.</p>
 </section>
 <section class="panel" style="margin-top:22px">
 <h2>Your learning progress</h2>
@@ -221,25 +221,30 @@ async function loadSession(){
   const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
   if(adminRecord) document.getElementById("admin-entry").hidden=false;
 }
-document.getElementById("feedback-form").addEventListener("submit",event=>{
+document.getElementById("feedback-form").addEventListener("submit",async event=>{
   event.preventDefault();
   const rating=document.getElementById("feedback-rating").value;
   const message=document.getElementById("feedback-message").value.trim();
   const feedbackStatus=document.getElementById("feedback-status");
+  const submitButton=event.currentTarget.querySelector('button[type="submit"]');
   if(!rating||!message){feedbackStatus.textContent="Please choose a rating and enter your feedback.";return;}
-  const subject="TopSafeB customer feedback";
-  const body=[
-    "TopSafeB customer feedback",
-    "",
-    "Name: "+(nameEl.textContent||"Not provided"),
-    "Email: "+(emailEl.textContent||"Not provided"),
-    "Rating: "+rating,
-    "",
-    "Feedback:",
+  if(!currentUserId){feedbackStatus.textContent="Please sign in again before submitting feedback.";return;}
+  submitButton.disabled=true;
+  feedbackStatus.textContent="Submitting your feedback securely…";
+  const {error}=await supabase.from("customer_feedback").insert({
+    user_id:currentUserId,
+    customer_name:nameEl.textContent||"",
+    customer_email:emailEl.textContent||"",
+    rating,
     message
-  ].join("\\n");
-  feedbackStatus.textContent="Opening your email app. Please review the message and tap Send.";
-  window.location.href="mailto:ebubemichael442@gmail.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  });
+  submitButton.disabled=false;
+  if(error){
+    feedbackStatus.textContent="Your feedback was not saved. Please try again later. If the problem continues, contact TopSafeB support.";
+    return;
+  }
+  event.currentTarget.reset();
+  feedbackStatus.textContent="Thank you. Your feedback has been submitted securely to TopSafeB.";
 });
 signoutButton.addEventListener("click",async()=>{
   signoutButton.disabled=true;

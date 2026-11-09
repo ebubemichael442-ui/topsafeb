@@ -9,7 +9,7 @@
 :root{--navy:#102b50;--blue:#194875;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f6fa}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--ink);background:var(--pale)}
 header{background:var(--navy);color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}
+.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #b18a3e;outline-offset:3px}
 main{max-width:1000px;margin:36px auto;padding:0 18px 55px}h1,h2{color:var(--navy)}h1{font-size:clamp(30px,5vw,42px);line-height:1.2;margin:8px 0}
 .muted{color:var(--muted)}.panel{background:white;padding:22px;border-radius:14px;box-shadow:0 8px 30px #102b5010;margin:18px 0}
 button,.button{display:inline-block;background:var(--gold);color:var(--navy);padding:12px 18px;border:0;border-radius:8px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer}
@@ -19,7 +19,7 @@ table{width:100%;border-collapse:collapse;margin-top:14px}th,td{text-align:left;
 .table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy)}
 .search-tools{margin:18px 0}.search-tools label{display:block;font-weight:700;margin-bottom:6px}.search-tools input{width:100%;max-width:480px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.search-summary{font-size:14px;color:var(--muted);margin:6px 0}.detail-panel{margin-top:18px;border:1px solid #dbe3ed;border-radius:10px;padding:18px;background:#f8fafc}.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.detail-item{background:white;padding:12px;border-radius:8px}.detail-item strong{display:block;color:var(--muted);font-size:13px}.lesson-list{margin:8px 0 0;padding-left:22px}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
-@media(max-width:600px){main{margin-top:24px}th,td{padding:9px;font-size:14px}}
+@media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:16px 5%}nav{gap:10px}nav a{font-size:14px}main{margin-top:24px}th,td{padding:9px;font-size:14px}.panel{padding:16px}}
 </style>
 </head>
 <body>
@@ -102,7 +102,7 @@ async function loadAdmin(){
  exportRows=list.map(customer=>{const record=progressByUser.get(customer.user_id);const completed=Array.isArray(record?.completed_lessons)?Math.min(record.completed_lessons.length,4):0;return [customer.full_name||"",customer.email||"",completed+" of 4",formatDate(record?.completed_at),formatDate(record?.updated_at)];});
  exportButton.hidden=false;exportButton.disabled=false;
  rowsEl.replaceChildren();
- if(!list.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="No customer profiles are available yet.";tr.append(td);rowsEl.append(tr);}
+ if(!list.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No customer profiles are available yet.";tr.append(td);rowsEl.append(tr);}
  for(const customer of list){
   const tr=document.createElement("tr");
   const name=document.createElement("td");name.textContent=customer.full_name||"—";
@@ -161,7 +161,7 @@ signoutButton.addEventListener("click",async()=>{
  window.location.replace("login.html");
 });
 supabase.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace("login.html");});
-loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='5'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
+loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='6'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
 </script>
 </body>
 </html>

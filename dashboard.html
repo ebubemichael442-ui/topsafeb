@@ -31,7 +31,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <h2 id="customer-name">Loading your profile…</h2>
 <p id="customer-email" class="muted"></p>
 <p id="status" role="status" aria-live="polite">Checking your sign-in session…</p>
-<button id="signout" class="secondary" type="button">Sign out</button>
+<p id="admin-entry" hidden><a class="button" href="admin.html">Open Owner / Admin Dashboard</a></p><button id="signout" class="secondary" type="button">Sign out</button>
 </section>
 <div class="notice"><strong>Education only:</strong> This dashboard is not a bank account. It does not hold deposits, display real balances, process payments or transfer money. Never enter bank passwords, PINs, card details or OTPs.</div>
 <h2>Explore your learning resources</h2>
@@ -58,6 +58,8 @@ async function loadSession(){
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
   emailEl.textContent=user.email || "";
   statusEl.textContent="You are signed in. This is your educational customer dashboard.";
+  const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
+  if(adminRecord) document.getElementById("admin-entry").hidden=false;
 }
 signoutButton.addEventListener("click",async()=>{
   signoutButton.disabled=true;

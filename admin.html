@@ -17,6 +17,7 @@ button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);ba
 #status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
 table{width:100%;border-collapse:collapse;margin-top:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e4eaf1;overflow-wrap:anywhere}th{background:#f3f6fa}
 .table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy)}
+.search-tools{margin:18px 0}.search-tools label{display:block;font-weight:700;margin-bottom:6px}.search-tools input{width:100%;max-width:480px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.search-summary{font-size:14px;color:var(--muted);margin:6px 0}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 @media(max-width:600px){main{margin-top:24px}th,td{padding:9px;font-size:14px}}
 </style>
@@ -38,6 +39,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p class="stat" id="customer-count">—</p>
 <p class="muted">Customer profiles available to this admin account.</p>
 <p><button id="export-csv" class="secondary" type="button" hidden disabled>Export customer records (CSV)</button></p>
+<div class="search-tools" id="customer-search-tools" hidden><label for="customer-search">Search customers by name or email</label><input id="customer-search" type="search" placeholder="Enter a customer name or email" autocomplete="off"><p class="search-summary" id="search-summary" aria-live="polite"></p></div>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th><th>Completed on</th><th>Last progress update</th></tr></thead>
@@ -58,7 +60,21 @@ const countEl=document.getElementById("customer-count");
 const rowsEl=document.getElementById("customer-rows");
 const signoutButton=document.getElementById("signout");
 const exportButton=document.getElementById("export-csv");
+const searchTools=document.getElementById("customer-search-tools");
+const customerSearch=document.getElementById("customer-search");
+const searchSummary=document.getElementById("search-summary");
 let exportRows=[];
+let customerTableRows=[];
+const noSearchResults=document.createElement("tr");
+const noSearchResultsCell=document.createElement("td");
+noSearchResultsCell.colSpan=5;noSearchResultsCell.textContent="No customers match your search.";
+noSearchResults.append(noSearchResultsCell);noSearchResults.hidden=true;
+function filterCustomers(){
+ const query=customerSearch.value.trim().toLocaleLowerCase();
+ let visible=0;
+ for(const row of customerTableRows){const match=row.dataset.search.includes(query);row.hidden=!match;if(match)visible++;}
+ noSearchResults.hidden=visible!==0;searchSummary.textContent=query?`Showing ${visible} of ${customerTableRows.length} customers.`:`Showing all ${customerTableRows.length} customers.`;
+}
 async function loadAdmin(){
  const {data:{session},error:sessionError}=await supabase.auth.getSession();
  if(sessionError)throw sessionError;
@@ -78,6 +94,7 @@ async function loadAdmin(){
  const progressByUser=new Map((progressRows||[]).map(item=>[item.user_id,item]));
  const formatDate=value=>{if(!value)return "—";const date=new Date(value);return Number.isNaN(date.getTime())?"—":date.toLocaleString(undefined,{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});};
  countEl.textContent=String(list.length);
+ searchTools.hidden=false;customerTableRows=[];
  exportRows=list.map(customer=>{const record=progressByUser.get(customer.user_id);const completed=Array.isArray(record?.completed_lessons)?Math.min(record.completed_lessons.length,4):0;return [customer.full_name||"",customer.email||"",completed+" of 4",formatDate(record?.completed_at),formatDate(record?.updated_at)];});
  exportButton.hidden=false;exportButton.disabled=false;
  rowsEl.replaceChildren();
@@ -91,13 +108,17 @@ async function loadAdmin(){
   progress.textContent=Math.min(completed,4)+" of 4";
   const completedOn=document.createElement("td");completedOn.textContent=formatDate(record?.completed_at);
   const updatedOn=document.createElement("td");updatedOn.textContent=formatDate(record?.updated_at);
-  tr.append(name,email,progress,completedOn,updatedOn);rowsEl.append(tr);
+  tr.append(name,email,progress,completedOn,updatedOn);
+  tr.dataset.search=((customer.full_name||"")+" "+(customer.email||"")).toLocaleLowerCase();
+  customerTableRows.push(tr);rowsEl.append(tr);
  }
+ rowsEl.append(noSearchResults);filterCustomers();
 }
 const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].includes(text[0]))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
+customerSearch.addEventListener("input",filterCustomers);
 exportButton.addEventListener("click",()=>{
  const headers=["Full name","Email","Lessons completed","Completed on","Last progress update"];
- const csv="\\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\\r\\n");
+ const csv="\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\r\n");
  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
  const url=URL.createObjectURL(blob);const link=document.createElement("a");
  link.href=url;link.download="topsafeb-customer-records-"+new Date().toISOString().slice(0,10)+".csv";

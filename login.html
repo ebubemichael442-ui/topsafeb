@@ -50,7 +50,85 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}foote
 </section>
 </main>
 <footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL = "https://wivxqaratjrrhpeeeboc.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
+const message = document.getElementById("message");
+const form = document.getElementById("auth-form");
+const nameInput = document.getElementById("full-name");
+const nameLabel = document.getElementById("name-label");
+const submitButton = document.getElementById("submit-button");
+const signupButton = document.getElementById("signup-button");
+const resetButton = document.getElementById("reset-button");
+let mode = "login";
+const setMessage = (value) => { message.textContent = value; };
+
+function setMode(nextMode) {
+  mode = nextMode;
+  const signingUp = mode === "signup";
+  nameInput.hidden = !signingUp;
+  nameLabel.hidden = !signingUp;
+  nameInput.required = signingUp;
+  submitButton.textContent = signingUp ? "Create account" : "Sign in";
+  signupButton.hidden = signingUp;
+  resetButton.hidden = signingUp;
+  setMessage(signingUp ? "Enter your name, email and a password to register." : "Enter your email and password to sign in.");
+}
+
+let supabaseClient;
+try {
+  if (!SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_")) {
+    throw new Error("The public Supabase key is missing or has the wrong format.");
+  }
+  supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  setMessage("Connection ready. You can create your learning account or sign in.");
+} catch (error) {
+  setMessage("Supabase could not load. Please refresh this page or try another browser connection.");
+  console.error(error);
+}
+
+signupButton.addEventListener("click", () => setMode("signup"));
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!supabaseClient) { setMessage("Connection is not ready. Refresh the page and try again."); return; }
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  submitButton.disabled = true;
+  try {
+    if (mode === "signup") {
+      const fullName = nameInput.value.trim();
+      const { error } = await supabaseClient.auth.signUp({
+        email, password,
+        options: { data: { full_name: fullName }, emailRedirectTo: window.location.href }
+      });
+      if (error) throw error;
+      setMessage("Registration request received. Check your email for a confirmation link before signing in.");
+    } else {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setMessage("You are signed in. Your customer dashboard will be added in the next step.");
+    }
+  } catch (error) {
+    setMessage(error.message || "Something went wrong. Please try again.");
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+resetButton.addEventListener("click", async () => {
+  if (!supabaseClient) { setMessage("Connection is not ready. Refresh the page and try again."); return; }
+  const email = document.getElementById("email").value.trim();
+  if (!email) { setMessage("Enter your email address first, then choose Forgot password."); return; }
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+    if (error) throw error;
+    setMessage("If an account exists for that email, a password reset link will be sent.");
+  } catch (error) {
+    setMessage(error.message || "Unable to request a password reset.");
+  }
+});
+</script>
 <script>
 /*
   SETUP REQUIRED:

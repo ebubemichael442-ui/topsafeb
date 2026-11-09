@@ -114,7 +114,8 @@ function saveLocalProgress(ids){const saved={};lessonIds.forEach(id=>saved[id]=i
 async function saveProgress(ids){
   saveLocalProgress(ids);renderProgress(ids);
   if(!currentUserId||!progressReady)return;
-  const now=new Date().toISOString();\n  const {error}=await supabase.from("learning_progress").upsert({user_id:currentUserId,completed_lessons:ids,updated_at:now,completed_at:ids.length===lessonIds.length?now:null},{onConflict:"user_id"});
+  const now=new Date().toISOString();
+  const {error}=await supabase.from("learning_progress").upsert({user_id:currentUserId,completed_lessons:ids,updated_at:now,completed_at:ids.length===lessonIds.length?now:null},{onConflict:"user_id"});
   if(error){statusEl.textContent="Your change is saved on this device, but account sync failed: "+error.message;}
   else{statusEl.textContent="Your learning progress is saved to your TopSafeB account.";}
 }
@@ -127,7 +128,8 @@ async function loadProgress(userId){
   else{
     ids=completedIdsFromLocal();
     if(ids.length){
-      const now=new Date().toISOString();\n      const {error:saveError}=await supabase.from("learning_progress").upsert({user_id:userId,completed_lessons:ids,updated_at:now,completed_at:ids.length===lessonIds.length?now:null},{onConflict:"user_id"});
+      const now=new Date().toISOString();
+      const {error:saveError}=await supabase.from("learning_progress").upsert({user_id:userId,completed_lessons:ids,updated_at:now,completed_at:ids.length===lessonIds.length?now:null},{onConflict:"user_id"});
       if(saveError)throw saveError;
     }
   }

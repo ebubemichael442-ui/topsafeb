@@ -46,7 +46,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <tbody id="customer-rows"><tr><td colspan="5">Loading customer list…</td></tr></tbody>
 </table>
 </div>
-<section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><button id="close-details" class="secondary" type="button">Close details</button></section>
+<section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
 </section>
 <div class="notice"><strong>Privacy:</strong> This page displays customer names, email addresses and learning progress dates available to the administrator. Do not share this information. TopSafeB is an educational platform, not a bank; this dashboard cannot access deposits, bank accounts or payments.</div>
 </main>
@@ -120,6 +120,17 @@ async function loadAdmin(){
  }
  rowsEl.append(noSearchResults);filterCustomers();
 }
+function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));}
+function printCustomerReport(customer,record,formatDate){
+ const completed=Array.isArray(record?.completed_lessons)?record.completed_lessons.filter(id=>Object.hasOwn(lessonNames,id)):[];
+ const lessons=Object.entries(lessonNames).map(([id,label])=>"<li>"+escapeHTML(label)+" — "+(completed.includes(id)?"Completed":"Not completed")+"</li>").join("");
+ const reportWindow=window.open("","_blank");
+ if(!reportWindow){statusEl.textContent="Please allow pop-ups for this site, then try the PDF report again.";return;}
+ const reportTitle="TopSafeB Learning Report";
+ reportWindow.document.open();
+ reportWindow.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${reportTitle}</title><style>body{font-family:Arial,sans-serif;color:#183252;max-width:760px;margin:32px auto;padding:0 20px;line-height:1.6}header{background:#102b50;color:white;padding:20px;border-radius:10px}header h1{margin:0;color:white}header p{margin:4px 0;color:#dfbd70}.meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}.item{padding:12px;background:#f3f6fa;border-radius:8px;overflow-wrap:anywhere}.item strong{display:block;color:#657286;font-size:13px}h2{color:#102b50}li{margin:8px 0}.actions{margin:24px 0}button{padding:12px 18px;background:#dfbd70;color:#102b50;border:0;border-radius:8px;font-weight:bold;font-size:15px}@media print{.actions{display:none}body{margin:0 auto}}</style></head><body><header><h1>TopSafeB</h1><p>Customer Learning Report</p></header><h2>Learning details for ${escapeHTML(customer.full_name||"customer")}</h2><div class="meta"><div class="item"><strong>Full name</strong>${escapeHTML(customer.full_name||"—")}</div><div class="item"><strong>Email</strong>${escapeHTML(customer.email||"—")}</div><div class="item"><strong>Lessons completed</strong>${completed.length} of 4 lessons</div><div class="item"><strong>Completed on</strong>${escapeHTML(formatDate(record?.completed_at))}</div><div class="item"><strong>Last progress update</strong>${escapeHTML(formatDate(record?.updated_at))}</div></div><h2>Lesson-by-lesson progress</h2><ul>${lessons}</ul><p>This report records progress in the TopSafeB financial education programme. TopSafeB is an educational platform, not a bank.</p><div class="actions"><button onclick="window.print()">Print / Save as PDF</button></div></body></html>`);
+ reportWindow.document.close();
+}
 function showCustomerDetails(customer,record,formatDate){
  const completed=Array.isArray(record?.completed_lessons)?record.completed_lessons.filter(id=>Object.hasOwn(lessonNames,id)):[];
  document.getElementById("detail-heading").textContent="Learning details for "+(customer.full_name||"customer");
@@ -130,7 +141,7 @@ function showCustomerDetails(customer,record,formatDate){
  document.getElementById("detail-updated").textContent=formatDate(record?.updated_at);
  const list=document.getElementById("detail-lessons");list.replaceChildren();
  for(const [id,label] of Object.entries(lessonNames)){const item=document.createElement("li");item.textContent=label+" — "+(completed.includes(id)?"Completed":"Not completed");list.append(item);}
- detailsPanel.hidden=false;detailsPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
+ document.getElementById("print-customer-report").onclick=()=>printCustomerReport(customer,record,formatDate);\n detailsPanel.hidden=false;detailsPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].includes(text[0]))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
 customerSearch.addEventListener("input",filterCustomers);

@@ -82,7 +82,7 @@ function setMode(nextMode){
   resetButton.hidden=signingUp;
   setMessage(signingUp?"Enter your name, email and a password to register.":"Enter your email and password to sign in.");
 }
-if(window.supabase && SUPABASE_PUBLISHABLE_KEY !== "sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6"){
+if(window.supabase && SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_")){
   supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 }else{
   setMessage("One setup step remains: add your Supabase publishable key before customer login can work.");

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="TopSafeB owner administration area.">
+<title>Owner Dashboard | TopSafeB</title>
+<style>
+:root{--navy:#102b50;--blue:#194875;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--ink);background:var(--pale)}
+header{background:var(--navy);color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}
+main{max-width:1000px;margin:36px auto;padding:0 18px 55px}h1,h2{color:var(--navy)}h1{font-size:clamp(30px,5vw,42px);line-height:1.2;margin:8px 0}
+.muted{color:var(--muted)}.panel{background:white;padding:22px;border-radius:14px;box-shadow:0 8px 30px #102b5010;margin:18px 0}
+button,.button{display:inline-block;background:var(--gold);color:var(--navy);padding:12px 18px;border:0;border-radius:8px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer}
+button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);background:#fff9e9;padding:15px;border-radius:8px;margin:20px 0}
+#status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
+table{width:100%;border-collapse:collapse;margin-top:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e4eaf1;overflow-wrap:anywhere}th{background:#f3f6fa}
+.table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy)}
+footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
+@media(max-width:600px){main{margin-top:24px}th,td{padding:9px;font-size:14px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
+<main>
+<p class="muted">RESTRICTED OWNER AREA</p>
+<h1>Owner / Admin Dashboard</h1>
+<section class="panel">
+<p class="muted">SIGNED-IN OWNER</p>
+<h2 id="owner-name">Checking access…</h2>
+<p id="owner-email" class="muted"></p>
+<p id="status" role="status" aria-live="polite">Verifying administrator access…</p>
+<button id="signout" class="secondary" type="button">Sign out</button>
+</section>
+<section class="panel">
+<h2>Registered customers</h2>
+<p class="stat" id="customer-count">—</p>
+<p class="muted">Customer profiles available to this admin account.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Full name</th><th>Email</th></tr></thead>
+<tbody id="customer-rows"><tr><td colspan="2">Loading customer list…</td></tr></tbody>
+</table>
+</div>
+</section>
+<div class="notice"><strong>Privacy:</strong> This page displays only customer names and email addresses available in the TopSafeB profiles table. Do not share this information. TopSafeB is an educational platform, not a bank; this dashboard cannot access deposits, bank accounts or payments.</div>
+</main>
+<footer><strong>TopSafeB</strong><p>Restricted owner administration area.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabase=createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
+const nameEl=document.getElementById("owner-name");
+const emailEl=document.getElementById("owner-email");
+const statusEl=document.getElementById("status");
+const countEl=document.getElementById("customer-count");
+const rowsEl=document.getElementById("customer-rows");
+const signoutButton=document.getElementById("signout");
+async function loadAdmin(){
+ const {data:{session},error:sessionError}=await supabase.auth.getSession();
+ if(sessionError)throw sessionError;
+ if(!session){window.location.replace("login.html");return;}
+ const user=session.user;
+ nameEl.textContent=user.user_metadata?.full_name||"TopSafeB owner";
+ emailEl.textContent=user.email||"";
+ const {data:adminRecord,error:adminError}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
+ if(adminError)throw adminError;
+ if(!adminRecord){statusEl.textContent="Access denied. This account is not registered as a TopSafeB administrator.";return;}
+ statusEl.textContent="Administrator access confirmed.";
+ const {data:customers,error:customerError}=await supabase.from("profiles").select("full_name,email").order("full_name",{ascending:true});
+ if(customerError)throw customerError;
+ const list=customers||[];
+ countEl.textContent=String(list.length);
+ rowsEl.replaceChildren();
+ if(!list.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=2;td.textContent="No customer profiles are available yet.";tr.append(td);rowsEl.append(tr);}
+ for(const customer of list){
+  const tr=document.createElement("tr");
+  const name=document.createElement("td");name.textContent=customer.full_name||"—";
+  const email=document.createElement("td");email.textContent=customer.email||"—";
+  tr.append(name,email);rowsEl.append(tr);
+ }
+}
+signoutButton.addEventListener("click",async()=>{
+ signoutButton.disabled=true;statusEl.textContent="Signing out…";
+ const {error}=await supabase.auth.signOut();
+ if(error){statusEl.textContent=error.message;signoutButton.disabled=false;return;}
+ window.location.replace("login.html");
+});
+supabase.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace("login.html");});
+loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='2'>Customer list could not be loaded.</td></tr>";});
+</script>
+</body>
+</html>

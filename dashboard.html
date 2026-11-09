@@ -41,6 +41,27 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <article class="tile"><h2>Banking Demonstration</h2><p>Explore a fictional account and sample activity.</p><a href="online-banking-demo.html">Open demo</a></article>
 <article class="tile"><h2>Contact TopSafeB</h2><p>Find the website contact information.</p><a href="contact.html">Contact page</a></article>
 </div>
+<section class="panel" style="margin-top:22px">
+<h2>Your learning progress</h2>
+<p class="muted">Tick each lesson when you finish it. Your progress is saved in this browser on this device.</p>
+<div id="progress-summary" role="status" aria-live="polite">0 of 4 lessons completed</div>
+<div style="height:10px;background:#e9eef5;border-radius:99px;overflow:hidden;margin:12px 0 20px"><div id="progress-bar" style="height:100%;width:0%;background:#194875;transition:width .2s"></div></div>
+<div style="display:grid;gap:12px">
+<label><input class="lesson-check" type="checkbox" data-lesson="investing"> Investment Basics — risk, return and diversification</label>
+<label><input class="lesson-check" type="checkbox" data-lesson="safety"> Financial Safety — scams and protecting information</label>
+<label><input class="lesson-check" type="checkbox" data-lesson="banking"> Banking Demonstration — understanding a sample account</label>
+<label><input class="lesson-check" type="checkbox" data-lesson="research"> Research and fees — checking products before investing</label>
+</div>
+<button id="reset-progress" class="secondary" type="button" style="margin-top:18px">Reset progress</button>
+</section>
+<section class="panel" style="margin-top:22px">
+<h2>Learning topics</h2>
+<div class="grid">
+<article class="tile"><h2>Saving and budgeting</h2><p>Understand spending plans, emergency savings and financial goals.</p></article>
+<article class="tile"><h2>Understanding credit</h2><p>Learn about borrowing, interest, repayments and responsible credit use.</p></article>
+<article class="tile"><h2>Fraud prevention</h2><p>Recognise suspicious messages, impersonation and pressure tactics.</p></article>
+</div>
+</section>
 </main>
 <footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
 <script type="module">
@@ -50,6 +71,26 @@ const nameEl=document.getElementById("customer-name");
 const emailEl=document.getElementById("customer-email");
 const statusEl=document.getElementById("status");
 const signoutButton=document.getElementById("signout");
+const lessonChecks=[...document.querySelectorAll(".lesson-check")];
+const progressSummary=document.getElementById("progress-summary");
+const progressBar=document.getElementById("progress-bar");
+const progressKey="topsafeb-learning-progress-v1";
+function readProgress(){try{return JSON.parse(localStorage.getItem(progressKey)||"{}");}catch{return {};}}
+function updateProgress(){
+  const saved=readProgress();
+  lessonChecks.forEach(box=>{box.checked=!!saved[box.dataset.lesson];});
+  const completed=lessonChecks.filter(box=>box.checked).length;
+  progressSummary.textContent=completed+" of "+lessonChecks.length+" lessons completed";
+  progressBar.style.width=(completed/lessonChecks.length*100)+"%";
+}
+lessonChecks.forEach(box=>box.addEventListener("change",()=>{
+  const saved=readProgress();saved[box.dataset.lesson]=box.checked;
+  localStorage.setItem(progressKey,JSON.stringify(saved));updateProgress();
+}));
+document.getElementById("reset-progress").addEventListener("click",()=>{
+  localStorage.removeItem(progressKey);updateProgress();
+});
+updateProgress();
 async function loadSession(){
   const {data:{session},error}=await supabase.auth.getSession();
   if(error) throw error;

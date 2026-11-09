@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="TopSafeB customer sign-in and account registration.">
+<title>Customer Login | TopSafeB</title>
+<style>
+:root{--navy:#102b50;--blue:#194875;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--ink);background:var(--pale)}
+header{background:var(--navy);color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}
+main{max-width:520px;margin:42px auto;padding:0 18px 55px}
+.panel{background:white;padding:28px;border-radius:16px;box-shadow:0 8px 30px #102b5012}
+h1{color:var(--navy);font-size:34px;line-height:1.2;margin:8px 0}
+.muted{color:var(--muted)}label{display:block;font-weight:700;margin:16px 0 6px}
+input{width:100%;padding:13px;border:1px solid #cbd4df;border-radius:8px;font-size:16px}
+button{width:100%;padding:13px;background:var(--gold);color:var(--navy);border:0;border-radius:8px;font-size:16px;font-weight:800;cursor:pointer;margin-top:16px}
+button.secondary{background:#edf1f6;margin-top:10px}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}.actions button{width:auto;flex:1}
+#message{padding:12px;border-radius:8px;background:#f3f6fa;min-height:44px;margin-top:16px;overflow-wrap:anywhere}
+.small{font-size:13px}.notice{border-left:4px solid var(--gold);background:#fff9e9;padding:13px;border-radius:7px;margin-top:20px;font-size:14px}
+footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}footer a{color:var(--gold)}
+@media(max-width:600px){main{margin-top:25px}.panel{padding:22px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="index.html">Home</a><a href="online-banking-demo.html">Demo</a></nav></header>
+<main>
+<section class="panel">
+<p class="muted">CUSTOMER ACCESS</p>
+<h1>Welcome to TopSafeB</h1>
+<p class="muted">Sign in to your learning account, or create an account to get started.</p>
+<form id="auth-form">
+<label for="full-name" id="name-label" hidden>Full name</label>
+<input id="full-name" type="text" autocomplete="name" placeholder="Full name" hidden>
+<label for="email">Email address</label>
+<input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+<label for="password">Password</label>
+<input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required>
+<div class="actions">
+<button type="submit" id="submit-button">Sign in</button>
+<button type="button" class="secondary" id="signup-button">Create account</button>
+</div>
+<button type="button" class="secondary" id="reset-button">Forgot password?</button>
+</form>
+<div id="message" role="status" aria-live="polite">Authentication setup is not complete yet.</div>
+<div class="notice"><strong>Important:</strong> This is customer access for the TopSafeB educational website only. It is not a bank account and does not store deposits, balances or payment details. Never enter your bank password, PIN, card details or OTP here.</div>
+<p class="small muted">Use an email address you control. Keep your password private.</p>
+</section>
+</main>
+<footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/*
+  SETUP REQUIRED:
+  1. Replace the placeholder below with your Supabase project's publishable/anon key.
+  2. The project URL is already filled in.
+  Never put a service_role or secret key in this browser file.
+*/
+const SUPABASE_URL = "https://wivxqaratjrrhpeeeboc.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
+const message = document.getElementById("message");
+const form = document.getElementById("auth-form");
+const nameInput = document.getElementById("full-name");
+const nameLabel = document.getElementById("name-label");
+const submitButton = document.getElementById("submit-button");
+const signupButton = document.getElementById("signup-button");
+const resetButton = document.getElementById("reset-button");
+let mode = "login";
+let supabaseClient = null;
+
+function setMessage(text){message.textContent=text;}
+function setMode(nextMode){
+  mode=nextMode;
+  const signingUp=mode==="signup";
+  nameInput.hidden=!signingUp;
+  nameLabel.hidden=!signingUp;
+  nameInput.required=signingUp;
+  submitButton.textContent=signingUp?"Create account":"Sign in";
+  signupButton.hidden=signingUp;
+  resetButton.hidden=signingUp;
+  setMessage(signingUp?"Enter your name, email and a password to register.":"Enter your email and password to sign in.");
+}
+if(window.supabase && SUPABASE_PUBLISHABLE_KEY !== "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"){
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+}else{
+  setMessage("One setup step remains: add your Supabase publishable key before customer login can work.");
+}
+signupButton.addEventListener("click",()=>setMode("signup"));
+form.addEventListener("submit",async(event)=>{
+  event.preventDefault();
+  if(!supabaseClient){setMessage("Login is not connected yet. The Supabase publishable key still needs to be added.");return;}
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  submitButton.disabled=true;
+  try{
+    if(mode==="signup"){
+      const fullName=nameInput.value.trim();
+      const {error}=await supabaseClient.auth.signUp({
+        email,password,
+        options:{data:{full_name:fullName},emailRedirectTo:window.location.href}
+      });
+      if(error) throw error;
+      setMessage("Registration request received. Check your email for a confirmation link before signing in.");
+    }else{
+      const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+      if(error) throw error;
+      setMessage("You are signed in. Your customer dashboard will be added in the next step.");
+    }
+  }catch(error){setMessage(error.message||"Something went wrong. Please try again.");}
+  finally{submitButton.disabled=false;}
+});
+resetButton.addEventListener("click",async()=>{
+  if(!supabaseClient){setMessage("Password reset is not connected yet. The Supabase publishable key still needs to be added.");return;}
+  const email=document.getElementById("email").value.trim();
+  if(!email){setMessage("Enter your email address first, then choose Forgot password.");return;}
+  try{
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+    if(error) throw error;
+    setMessage("If an account exists for that email, a password reset link will be sent.");
+  }catch(error){setMessage(error.message||"Unable to request a password reset.");}
+});
+</script>
+</body>
+</html>

@@ -37,6 +37,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <h2>Registered customers</h2>
 <p class="stat" id="customer-count">—</p>
 <p class="muted">Customer profiles available to this admin account.</p>
+<p><button id="export-csv" class="secondary" type="button" hidden disabled>Export customer records (CSV)</button></p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th><th>Completed on</th><th>Last progress update</th></tr></thead>
@@ -56,6 +57,8 @@ const statusEl=document.getElementById("status");
 const countEl=document.getElementById("customer-count");
 const rowsEl=document.getElementById("customer-rows");
 const signoutButton=document.getElementById("signout");
+const exportButton=document.getElementById("export-csv");
+let exportRows=[];
 async function loadAdmin(){
  const {data:{session},error:sessionError}=await supabase.auth.getSession();
  if(sessionError)throw sessionError;
@@ -75,6 +78,8 @@ async function loadAdmin(){
  const progressByUser=new Map((progressRows||[]).map(item=>[item.user_id,item]));
  const formatDate=value=>{if(!value)return "—";const date=new Date(value);return Number.isNaN(date.getTime())?"—":date.toLocaleString(undefined,{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});};
  countEl.textContent=String(list.length);
+ exportRows=list.map(customer=>{const record=progressByUser.get(customer.user_id);const completed=Array.isArray(record?.completed_lessons)?Math.min(record.completed_lessons.length,4):0;return [customer.full_name||"",customer.email||"",completed+" of 4",formatDate(record?.completed_at),formatDate(record?.updated_at)];});
+ exportButton.hidden=false;exportButton.disabled=false;
  rowsEl.replaceChildren();
  if(!list.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="No customer profiles are available yet.";tr.append(td);rowsEl.append(tr);}
  for(const customer of list){
@@ -89,6 +94,15 @@ async function loadAdmin(){
   tr.append(name,email,progress,completedOn,updatedOn);rowsEl.append(tr);
  }
 }
+const csvCell=value=>{let text=String(value??"");if(/^[=+\\-@\\t\\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
+exportButton.addEventListener("click",()=>{
+ const headers=["Full name","Email","Lessons completed","Completed on","Last progress update"];
+ const csv="\\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\\r\\n");
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+ const url=URL.createObjectURL(blob);const link=document.createElement("a");
+ link.href=url;link.download="topsafeb-customer-records-"+new Date().toISOString().slice(0,10)+".csv";
+ document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
+});
 signoutButton.addEventListener("click",async()=>{
  signoutButton.disabled=true;statusEl.textContent="Signing out…";
  const {error}=await supabase.auth.signOut();

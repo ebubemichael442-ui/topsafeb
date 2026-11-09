@@ -49,7 +49,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </div>
 <section class="panel" style="margin-top:22px">
 <h2>Your learning progress</h2>
-<p class="muted">Tick each lesson when you finish it. Your progress is saved in this browser on this device.</p>
+<p class="muted">Tick each lesson when you finish it. Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>
 <div id="progress-summary" role="status" aria-live="polite">0 of 4 lessons completed</div>
 <div style="height:10px;background:#e9eef5;border-radius:99px;overflow:hidden;margin:12px 0 20px"><div id="progress-bar" style="height:100%;width:0%;background:#194875;transition:width .2s"></div></div>
 <div style="display:grid;gap:12px">
@@ -96,24 +96,48 @@ const certificate=document.getElementById("certificate");
 const certificateName=document.getElementById("certificate-name");
 const certificateDate=document.getElementById("certificate-date");
 const progressKey="topsafeb-learning-progress-v1";
-function readProgress(){try{return JSON.parse(localStorage.getItem(progressKey)||"{}");}catch{return {};}}
-function updateProgress(){
-  const saved=readProgress();
-  lessonChecks.forEach(box=>{box.checked=!!saved[box.dataset.lesson];});
-  const completed=lessonChecks.filter(box=>box.checked).length;
+const lessonIds=lessonChecks.map(box=>box.dataset.lesson);
+let currentUserId=null;
+let progressReady=false;
+function readLocalProgress(){try{return JSON.parse(localStorage.getItem(progressKey)||"{}");}catch{return {};}}
+function completedIdsFromLocal(){const saved=readLocalProgress();return lessonIds.filter(id=>!!saved[id]);}
+function renderProgress(completedIds){
+  const completedSet=new Set(completedIds);
+  lessonChecks.forEach(box=>{box.checked=completedSet.has(box.dataset.lesson);});
+  const completed=completedSet.size;
   progressSummary.textContent=completed+" of "+lessonChecks.length+" lessons completed";
   progressBar.style.width=(completed/lessonChecks.length*100)+"%";
   certificate.hidden=completed!==lessonChecks.length;
   if(completed===lessonChecks.length){certificateName.textContent=nameEl.textContent==="Loading your profile…"?"TopSafeB Customer":nameEl.textContent;certificateDate.textContent="Completed on "+new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});}
 }
+function saveLocalProgress(ids){const saved={};lessonIds.forEach(id=>saved[id]=ids.includes(id));localStorage.setItem(progressKey,JSON.stringify(saved));}
+async function saveProgress(ids){
+  saveLocalProgress(ids);renderProgress(ids);
+  if(!currentUserId||!progressReady)return;
+  const {error}=await supabase.from("learning_progress").upsert({user_id:currentUserId,completed_lessons:ids,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+  if(error){statusEl.textContent="Your change is saved on this device, but account sync failed: "+error.message;}
+  else{statusEl.textContent="Your learning progress is saved to your TopSafeB account.";}
+}
+async function loadProgress(userId){
+  currentUserId=userId;
+  const {data,error}=await supabase.from("learning_progress").select("completed_lessons").eq("user_id",userId).maybeSingle();
+  if(error)throw error;
+  let ids;
+  if(data&&Array.isArray(data.completed_lessons)){ids=data.completed_lessons.filter(id=>lessonIds.includes(id));}
+  else{
+    ids=completedIdsFromLocal();
+    if(ids.length){
+      const {error:saveError}=await supabase.from("learning_progress").upsert({user_id:userId,completed_lessons:ids},{onConflict:"user_id"});
+      if(saveError)throw saveError;
+    }
+  }
+  saveLocalProgress(ids);renderProgress(ids);progressReady=true;
+}
 lessonChecks.forEach(box=>box.addEventListener("change",()=>{
-  const saved=readProgress();saved[box.dataset.lesson]=box.checked;
-  localStorage.setItem(progressKey,JSON.stringify(saved));updateProgress();
+  const ids=lessonChecks.filter(item=>item.checked).map(item=>item.dataset.lesson);
+  saveProgress(ids);
 }));
-document.getElementById("reset-progress").addEventListener("click",()=>{
-  localStorage.removeItem(progressKey);updateProgress();
-});
-updateProgress();
+document.getElementById("reset-progress").addEventListener("click",()=>saveProgress([]));
 document.getElementById("print-certificate").addEventListener("click",()=>window.print());
 document.getElementById("download-certificate").addEventListener("click",async()=>{
   const button=document.getElementById("download-certificate");
@@ -158,9 +182,10 @@ async function loadSession(){
   if(!session){window.location.replace("login.html");return;}
   const user=session.user;
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
-  updateProgress();
   emailEl.textContent=user.email || "";
-  statusEl.textContent="You are signed in. This is your educational customer dashboard.";
+  statusEl.textContent="You are signed in. Loading your saved learning progress…";
+  await loadProgress(user.id);
+  statusEl.textContent="You are signed in. Your learning progress is synced to your account.";
   const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
   if(adminRecord) document.getElementById("admin-entry").hidden=false;
 }

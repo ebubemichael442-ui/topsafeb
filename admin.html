@@ -141,7 +141,8 @@ function showCustomerDetails(customer,record,formatDate){
  document.getElementById("detail-updated").textContent=formatDate(record?.updated_at);
  const list=document.getElementById("detail-lessons");list.replaceChildren();
  for(const [id,label] of Object.entries(lessonNames)){const item=document.createElement("li");item.textContent=label+" — "+(completed.includes(id)?"Completed":"Not completed");list.append(item);}
- document.getElementById("print-customer-report").onclick=()=>printCustomerReport(customer,record,formatDate);\n detailsPanel.hidden=false;detailsPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
+ document.getElementById("print-customer-report").onclick=()=>printCustomerReport(customer,record,formatDate);
+ detailsPanel.hidden=false;detailsPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].includes(text[0]))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
 customerSearch.addEventListener("input",filterCustomers);

@@ -19,6 +19,12 @@ button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);ba
 #status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 @media(max-width:600px){main{margin-top:24px}}
+@media print{
+  body{background:white}
+  body>*{display:none!important}
+  #certificate{display:block!important;max-width:850px;margin:30px auto;padding:50px;border:8px double #102b50;box-shadow:none;text-align:center}
+  #certificate button{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -54,6 +60,18 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </div>
 <button id="reset-progress" class="secondary" type="button" style="margin-top:18px">Reset progress</button>
 </section>
+<section class="panel" id="certificate" style="margin-top:22px;text-align:center" hidden>
+<p class="muted" style="letter-spacing:3px;font-weight:bold">TOPSAFEB • CERTIFICATE OF COMPLETION</p>
+<h2 style="font-size:30px">Certificate of Achievement</h2>
+<p>This certificate is proudly presented to</p>
+<h2 id="certificate-name" style="font-size:28px;border-bottom:2px solid var(--gold);display:inline-block;padding:0 18px 8px">TopSafeB Customer</h2>
+<p>for completing all four lessons in the TopSafeB financial education programme.</p>
+<p><strong>Topics completed:</strong> Investment Basics, Financial Safety, Banking Demonstration, and Research and Fees.</p>
+<p id="certificate-date" class="muted"></p>
+<p style="margin-top:28px;font-weight:bold;color:var(--navy)">TopSafeB Learning Programme</p>
+<button id="print-certificate" type="button">Print / Save Certificate</button>
+<p class="muted" style="font-size:12px">Educational recognition only. This is not a professional qualification, licence or financial accreditation.</p>
+</section>
 <section class="panel" style="margin-top:22px">
 <h2>Learning topics</h2>
 <div class="grid">
@@ -74,6 +92,9 @@ const signoutButton=document.getElementById("signout");
 const lessonChecks=[...document.querySelectorAll(".lesson-check")];
 const progressSummary=document.getElementById("progress-summary");
 const progressBar=document.getElementById("progress-bar");
+const certificate=document.getElementById("certificate");
+const certificateName=document.getElementById("certificate-name");
+const certificateDate=document.getElementById("certificate-date");
 const progressKey="topsafeb-learning-progress-v1";
 function readProgress(){try{return JSON.parse(localStorage.getItem(progressKey)||"{}");}catch{return {};}}
 function updateProgress(){
@@ -82,6 +103,8 @@ function updateProgress(){
   const completed=lessonChecks.filter(box=>box.checked).length;
   progressSummary.textContent=completed+" of "+lessonChecks.length+" lessons completed";
   progressBar.style.width=(completed/lessonChecks.length*100)+"%";
+  certificate.hidden=completed!==lessonChecks.length;
+  if(completed===lessonChecks.length){certificateName.textContent=nameEl.textContent==="Loading your profile…"?"TopSafeB Customer":nameEl.textContent;certificateDate.textContent="Completed on "+new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});}
 }
 lessonChecks.forEach(box=>box.addEventListener("change",()=>{
   const saved=readProgress();saved[box.dataset.lesson]=box.checked;
@@ -91,12 +114,14 @@ document.getElementById("reset-progress").addEventListener("click",()=>{
   localStorage.removeItem(progressKey);updateProgress();
 });
 updateProgress();
+document.getElementById("print-certificate").addEventListener("click",()=>window.print());
 async function loadSession(){
   const {data:{session},error}=await supabase.auth.getSession();
   if(error) throw error;
   if(!session){window.location.replace("login.html");return;}
   const user=session.user;
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
+  updateProgress();
   emailEl.textContent=user.email || "";
   statusEl.textContent="You are signed in. This is your educational customer dashboard.";
   const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();

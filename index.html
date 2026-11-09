@@ -7,7 +7,7 @@
   <title>TopSafeB | Financial Knowledge for Everyday Life</title>
   <style>
     :root{--navy:#102b50;--blue:#173d69;--gold:#dfbd70;--ink:#183252;--muted:#657286;--paper:#fff;--pale:#f3f6fa}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.65;background:#fff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.65;background:#fff}a:focus-visible{outline:3px solid #dfbd70;outline-offset:4px}.button:hover{filter:brightness(1.06);transform:translateY(-1px)}.button{transition:transform .18s ease,filter .18s ease}.card{transition:transform .18s ease,box-shadow .18s ease}.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(16,43,80,.09)}
     header{background:var(--navy);color:#fff;padding:18px 5%;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .brand{font-size:25px;font-weight:800;letter-spacing:.2px}.brand-mark{display:inline-grid;place-items:center;width:42px;height:42px;border:2px solid var(--gold);border-radius:12px;color:var(--gold);margin-right:9px}
     nav a{color:#fff;text-decoration:none;margin-left:20px;font-weight:700}
@@ -29,19 +29,20 @@
     .notice{border-left:4px solid var(--gold);background:#f7f8fa;padding:20px;border-radius:8px}
     footer{background:var(--navy);color:#e4ebf3;padding:35px 6%;font-size:14px}
     footer a{color:var(--gold)}
-    @media(max-width:600px){header{align-items:flex-start}nav a{margin:0 14px 0 0}.hero{padding-top:55px}main{padding-top:35px}}
+    @media(max-width:600px){header{align-items:flex-start;flex-direction:column}nav{display:flex;flex-wrap:wrap;gap:10px}nav a{margin:0}.hero{padding:55px 6% 60px}main{padding-top:35px}.button{margin-right:6px}}
   </style>
 </head>
 <body>
 <header>
   <div class="brand"><span class="brand-mark">T</span>TopSafeB</div>
-  <nav><a href="#topics">Explore resources</a><a href="#about">About</a><a href="login.html">Customer Login</a></nav>
+  <nav aria-label="Main navigation"><a href="#topics">Learning topics</a><a href="#how-it-works">How it works</a><a href="#about">About</a><a href="login.html">Login / Sign Up</a></nav>
 </header>
 <section class="hero">
   <div class="eyebrow">Financial knowledge for everyday life</div>
   <h1>Make informed decisions about your financial future.</h1>
   <p>TopSafeB is an independent educational platform sharing practical information about saving, budgeting and understanding investment concepts.</p>
-  <a class="button" href="#topics">Explore learning topics</a>
+  <a class="button" href="login.html">Start Learning</a>
+  <a class="button secondary" href="#topics">Explore learning topics</a>
   <a class="button secondary" href="login.html">Customer Login / Sign Up</a>
   <a class="button secondary" href="#about">About TopSafeB</a>
 </section>
@@ -56,9 +57,20 @@
     <p class="muted">Learn at your own pace. These resources are general education, not personal financial recommendations.</p>
     <div class="cards">
       <article class="card"><div class="number">01</div><h3>Saving habits</h3><p class="muted">Learn about setting goals, making a budget and building an emergency fund.</p></article>
-      <article class="card"><div class="number">02</div><h3>Investment basics</h3><p class="muted">Understand risk, return, diversification and why investments can rise or fall in value.</p></article>
-      <article class="card"><div class="number">03</div><h3>Financial safety</h3><p class="muted">Recognise warning signs, protect personal information and be cautious of promises of guaranteed returns.</p></article>
+      <article class="card"><div class="number">02</div><h3>Investment basics</h3><p class="muted">Understand risk, return, diversification and why investments can rise or fall in value.</p><a href="investment-basics.html">Explore investment basics →</a></article>
+      <article class="card"><div class="number">03</div><h3>Financial safety</h3><p class="muted">Recognise warning signs, protect personal information and be cautious of promises of guaranteed returns.</p><a href="financial-safety.html">Explore financial safety →</a></article>
+      <article class="card"><div class="number">04</div><h3>Banking demonstration</h3><p class="muted">Explore a fictional banking example and learn how to read basic account information safely.</p><a href="online-banking-demo.html">View the demonstration →</a></article>
+      <article class="card"><div class="number">05</div><h3>Research and fees</h3><p class="muted">Learn to compare financial information, understand common fees and ask useful questions before making decisions.</p><a href="login.html">Access the learning programme →</a></article>
     </div>
+  </section>
+  <section id="how-it-works">
+    <h2>How learning works</h2>
+    <div class="cards">
+      <article class="card"><div class="number">STEP 01</div><h3>Create an account</h3><p class="muted">Sign up to access the learning programme and your personal progress dashboard.</p></article>
+      <article class="card"><div class="number">STEP 02</div><h3>Learn at your pace</h3><p class="muted">Read the educational lessons and mark your learning progress as you go.</p></article>
+      <article class="card"><div class="number">STEP 03</div><h3>Complete the programme</h3><p class="muted">Review your completed topics and access your certificate of achievement when eligible.</p></article>
+    </div>
+    <p><a class="button" href="login.html">Join the learning programme</a></p>
   </section>
   <section id="about">
     <h2>About TopSafeB</h2>

@@ -84,6 +84,15 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p id="owner-replies-status" class="muted" role="status" aria-live="polite">Checking for replies…</p>
 <div id="owner-replies-list" style="display:grid;gap:12px"></div>
 </section>
+<section class="panel" id="customer-demo-funds" style="margin-top:22px">
+<h2>Your Demo Business Account</h2>
+<p class="notice"><strong>DEMO FUNDS — NOT REAL MONEY.</strong> This fictional USD balance is provided only for learning and demonstration. It is not a bank deposit and cannot be withdrawn or transferred.</p>
+<p id="demo-account-status" class="muted" role="status" aria-live="polite">Loading your demo balance…</p>
+<p style="font-size:14px;color:#657286;margin-bottom:4px">Available demo balance</p>
+<p id="customer-demo-balance" style="font-size:clamp(30px,6vw,42px);font-weight:800;color:#102b50;margin:0">$0.00</p>
+<h3>Recent demo activity</h3>
+<div id="customer-demo-history" style="display:grid;gap:8px"></div>
+</section>
 <section class="panel" style="margin-top:22px">
 <h2>Your learning progress</h2>
 <p class="muted">Tick each lesson when you finish it. Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>
@@ -215,6 +224,29 @@ document.getElementById("download-certificate").addEventListener("click",async()
     button.disabled=false;button.textContent="Download Certificate PDF";
   }
 });
+
+async function loadCustomerDemoFunds(userId){
+ const status=document.getElementById("demo-account-status");
+ const balanceEl=document.getElementById("customer-demo-balance");
+ const historyEl=document.getElementById("customer-demo-history");
+ const {data:account,error}=await supabase.from("demo_accounts").select("balance,currency,updated_at").eq("user_id",userId).maybeSingle();
+ if(error){status.textContent="Your demo account is not ready yet. Please check back later.";return;}
+ if(!account){status.textContent="Your demo account is being prepared. Refresh this page in a moment.";return;}
+ balanceEl.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(account.balance||0));
+ status.textContent="Demo account updated "+new Date(account.updated_at).toLocaleString()+". These are simulated funds only.";
+ const {data:items,error:historyError}=await supabase.from("demo_transactions").select("action,amount,balance_after,note,created_at").eq("user_id",userId).order("created_at",{ascending:false}).limit(10);
+ historyEl.replaceChildren();
+ if(historyError){const p=document.createElement("p");p.className="muted";p.textContent="Recent activity is temporarily unavailable.";historyEl.append(p);return;}
+ for(const item of items||[]){
+  const card=document.createElement("article");card.style.cssText="padding:12px;border:1px solid #dbe3ed;border-radius:8px;background:#f8fafc";
+  const title=document.createElement("strong");title.textContent=({add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted"})[item.action]||"Demo account update";
+  const amount=document.createElement("p");amount.style.margin="4px 0";amount.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount))+" • Balance after: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.balance_after));
+  const date=document.createElement("p");date.className="muted";date.style.margin="0";date.textContent=new Date(item.created_at).toLocaleString()+(item.note?" — "+item.note:"");
+  card.append(title,amount,date);historyEl.append(card);
+ }
+ if(!(items||[]).length){const p=document.createElement("p");p.className="muted";p.textContent="No demo account activity yet.";historyEl.append(p);}
+}
+
 async function loadSession(){
   const {data:{session},error}=await supabase.auth.getSession();
   if(error) throw error;
@@ -226,6 +258,7 @@ async function loadSession(){
   await loadProgress(user.id);
   statusEl.textContent="You are signed in. Your learning progress is synced to your account.";
   await loadCustomerReplies(user.id);
+  await loadCustomerDemoFunds(user.id);
   const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
   if(adminRecord) document.getElementById("admin-entry").hidden=false;
 }

@@ -90,9 +90,21 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p id="demo-account-status" class="muted" role="status" aria-live="polite">Loading your demo balance…</p>
 <p style="font-size:14px;color:#657286;margin-bottom:4px">Available demo balance</p>
 <p id="customer-demo-balance" style="font-size:clamp(30px,6vw,42px);font-weight:800;color:#102b50;margin:0">$0.00</p>
-<h3>Simulated transfer to Oso Local Bank</h3>
-<p><strong>Fictional bank only:</strong> Oso Local Bank is not a real bank. This practice transfer only changes your TopSafeB demo balance; it sends no money to any bank.</p>
+<h3>Transfer to a fictional local bank</h3>
+<p><strong>SIMULATION ONLY:</strong> Every bank below is fictional. These practice transfers only update your TopSafeB demo balance and history. They do not send money to any real bank.</p>
 <form id="oso-transfer-form" style="display:grid;gap:10px;max-width:520px">
+<label for="oso-bank">Choose fictional bank</label>
+<select id="oso-bank" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<option value="">Select a demo bank</option>
+<option>Oso Local Bank</option>
+<option>Rivergate Community Bank</option>
+<option>Maple Street Savings Bank</option>
+<option>Harborlight Local Bank</option>
+<option>Pioneer Town Bank</option>
+<option>Greenfield Neighbourhood Bank</option>
+<option>Unity Corner Bank</option>
+<option>Westbridge Local Bank</option>
+</select>
 <label for="oso-recipient">Recipient name</label>
 <input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
 <label for="oso-account">Fictional account number (8–16 digits)</label>
@@ -244,11 +256,12 @@ async function submitOsoLocalTransfer(event){
  const form=document.getElementById("oso-transfer-form");
  const button=document.getElementById("oso-transfer-submit");
  const status=document.getElementById("oso-transfer-status");
+ const bank=document.getElementById("oso-bank").value;
  const recipient=document.getElementById("oso-recipient").value.trim();
  const accountNumber=document.getElementById("oso-account").value.trim();
  const amount=Number(document.getElementById("oso-amount").value);
  const description=document.getElementById("oso-description").value.trim();
- if(!recipient||!/^[0-9]{8,16}$/.test(accountNumber)||!Number.isFinite(amount)||amount<=0){
+ if(!bank||!recipient||!/^[0-9]{8,16}$/.test(accountNumber)||!Number.isFinite(amount)||amount<=0){
   status.textContent="Enter a recipient, an 8–16 digit fictional account number and a valid amount.";
   return;
  }
@@ -256,10 +269,10 @@ async function submitOsoLocalTransfer(event){
  if(!window.confirm("This is only a simulation to the fictional Oso Local Bank. No real money will move. Continue?"))return;
  button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated transfer…";
  try{
-  const {data,error}=await supabase.rpc("customer_demo_transfer_oso_local",{p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
+  const {data,error}=await supabase.rpc("customer_demo_transfer_fictional_bank",{p_bank_name:bank,p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
   if(error)throw error;
   const result=Array.isArray(data)?data[0]:data;
-  status.textContent="Simulated transfer completed to Oso Local Bank. Demo balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result?.new_balance||0))+". No real money was sent.";
+  status.textContent="Simulated transfer to "+bank+" completed. Reference: DEMO-"+String(result?.transaction_id||"").slice(0,8).toUpperCase()+". New demo balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result?.new_balance||0))+". No real money was sent.";
   form.reset();
   await loadCustomerDemoFunds(currentUserId);
  }catch(error){

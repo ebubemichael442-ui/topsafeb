@@ -76,7 +76,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <tbody id="customer-rows"><tr><td colspan="5">Loading customer list…</td></tr></tbody>
 </table>
 </div>
-<section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Practice account overview</h4><p id="detail-account-status" class="muted" role="status">Loading illustrative practice account…</p><div class="detail-grid"><div class="detail-item"><strong>Illustrative practice balance</strong><span id="detail-account-balance">—</span></div><div class="detail-item"><strong>Currency</strong><span id="detail-account-currency">—</span></div><div class="detail-item"><strong>Last account update</strong><span id="detail-account-updated">—</span></div></div><h4>Recent practice transactions</h4><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody id="detail-account-transactions"><tr><td colspan="5">Loading practice history…</td></tr></tbody></table></div><p class="muted">All balances and entries shown here are fictional learning records. No real funds are held or transferred.</p></div><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Customer activity timeline</h4><p class="muted">A chronological view of practice account changes, simulated transfers, support messages and learning progress.</p><p id="customer-timeline-status" class="muted" role="status">Loading activity…</p><ol id="customer-activity-timeline" style="display:grid;gap:12px;padding-left:22px;margin:12px 0"></ol><p class="muted">This timeline records educational activity only. No real funds or external banking services are involved.</p></div><button id="open-customer-support" class="secondary" type="button">Open customer support conversation</button> <button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="print-full-activity-report" class="secondary" type="button">Print full activity report</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
+<section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Customer Management Centre</h4><p class="muted">Update the customer display name and review access information. Sign-in permissions remain protected by the authentication service.</p><label for="manage-customer-name"><strong>Customer display name</strong></label><input id="manage-customer-name" maxlength="100" autocomplete="off" style="display:block;width:100%;max-width:420px;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin:7px 0 12px"><button id="save-customer-name" type="button">Save profile name</button><p id="manage-customer-status" class="muted" role="status" aria-live="polite">Select a customer to manage their profile.</p><div class="detail-grid"><div class="detail-item"><strong>Sign-in access</strong><span>Managed by secure account authentication</span></div><div class="detail-item"><strong>Learning access</strong><span>Available; progress shown below</span></div></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Practice account overview</h4><p id="detail-account-status" class="muted" role="status">Loading illustrative practice account…</p><div class="detail-grid"><div class="detail-item"><strong>Illustrative practice balance</strong><span id="detail-account-balance">—</span></div><div class="detail-item"><strong>Currency</strong><span id="detail-account-currency">—</span></div><div class="detail-item"><strong>Last account update</strong><span id="detail-account-updated">—</span></div></div><h4>Recent practice transactions</h4><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody id="detail-account-transactions"><tr><td colspan="5">Loading practice history…</td></tr></tbody></table></div><p class="muted">All balances and entries shown here are fictional learning records. No real funds are held or transferred.</p></div><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Customer activity timeline</h4><p class="muted">A chronological view of practice account changes, simulated transfers, support messages and learning progress.</p><p id="customer-timeline-status" class="muted" role="status">Loading activity…</p><ol id="customer-activity-timeline" style="display:grid;gap:12px;padding-left:22px;margin:12px 0"></ol><p class="muted">This timeline records educational activity only. No real funds or external banking services are involved.</p></div><button id="open-customer-support" class="secondary" type="button">Open customer support conversation</button> <button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="print-full-activity-report" class="secondary" type="button">Print full activity report</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
 </section>
 <section class="panel" id="topup-requests">
 <h2>Customer demo top-up requests</h2>
@@ -201,7 +201,7 @@ async function loadFeedback(){
 document.getElementById("close-details").addEventListener("click",()=>{detailsPanel.hidden=true;});
 const menuToggle=document.getElementById("menu-toggle");const ownerNav=document.getElementById("owner-nav");menuToggle.addEventListener("click",()=>{const opened=ownerNav.classList.toggle("open");menuToggle.setAttribute("aria-expanded",String(opened));});ownerNav.addEventListener("click",event=>{if(event.target.closest("a")){ownerNav.classList.remove("open");menuToggle.setAttribute("aria-expanded","false");}});
 let exportRows=[];
-let customerTableRows=[];
+let customerTableRows=[];\nlet customerProfiles=[];\nlet activeManagedCustomer=null;
 const noSearchResults=document.createElement("tr");
 const noSearchResultsCell=document.createElement("td");
 noSearchResultsCell.colSpan=6;noSearchResultsCell.textContent="No customers match your search.";
@@ -375,7 +375,7 @@ async function loadAdmin(){
  statusEl.textContent="Administrator access confirmed.";
  const {data:customers,error:customerError}=await supabase.from("profiles").select("user_id,full_name,email").order("full_name",{ascending:true});
  if(customerError)throw customerError;
- const list=customers||[];
+ const list=customers||[];\n customerProfiles=list;
  const {data:progressRows,error:progressError}=await supabase.from("learning_progress").select("user_id,completed_lessons,completed_at,updated_at");
  if(progressError)throw progressError;
  const progressByUser=new Map((progressRows||[]).map(item=>[item.user_id,item]));
@@ -399,7 +399,7 @@ async function loadAdmin(){
   const action=document.createElement("td");const viewButton=document.createElement("button");viewButton.type="button";viewButton.className="secondary";viewButton.textContent="View details";
   viewButton.addEventListener("click",()=>showCustomerDetails(customer,record,formatDate));action.append(viewButton);
   tr.append(name,email,progress,completedOn,updatedOn,action);
-  tr.dataset.search=((customer.full_name||"")+" "+(customer.email||"")).toLocaleLowerCase();
+  tr.dataset.search=((customer.full_name||"")+" "+(customer.email||"")).toLocaleLowerCase();\n  tr.dataset.userId=customer.user_id;
   customerTableRows.push(tr);rowsEl.append(tr);
  }
  rowsEl.append(noSearchResults);filterCustomers();
@@ -518,6 +518,28 @@ async function loadCustomerActivityTimeline(customer,formatDate){
   item.append(heading,detail,date);timeline.append(item);
  }
 }
+async function saveManagedCustomerName(){
+ const input=document.getElementById("manage-customer-name");
+ const status=document.getElementById("manage-customer-status");
+ const button=document.getElementById("save-customer-name");
+ if(!activeManagedCustomer){status.textContent="Select a customer first.";return;}
+ const fullName=input.value.trim();
+ if(!fullName){status.textContent="Enter a customer display name.";return;}
+ if(fullName.length>100){status.textContent="Name must be 100 characters or fewer.";return;}
+ button.disabled=true;status.textContent="Saving customer profile…";
+ const {error}=await supabase.from("profiles").update({full_name:fullName}).eq("user_id",activeManagedCustomer.user_id);
+ button.disabled=false;
+ if(error){status.textContent="Could not update the profile: "+error.message;return;}
+ activeManagedCustomer.full_name=fullName;
+ const row=customerTableRows.find(item=>item.dataset.userId===activeManagedCustomer.user_id);
+ if(row){row.cells[0].textContent=fullName;row.dataset.search=(fullName+" "+(activeManagedCustomer.email||"")).toLocaleLowerCase();filterCustomers();}
+ const cached=customerProfiles.find(item=>item.user_id===activeManagedCustomer.user_id);
+ if(cached)cached.full_name=fullName;
+ document.getElementById("detail-name").textContent=fullName;
+ document.getElementById("detail-heading").textContent="Customer profile: "+fullName;
+ status.textContent="Customer display name updated.";
+}
+document.getElementById("save-customer-name").addEventListener("click",saveManagedCustomerName);
 function showCustomerDetails(customer,record,formatDate){
  const completed=Array.isArray(record?.completed_lessons)?record.completed_lessons.filter(id=>Object.hasOwn(lessonNames,id)):[];
  document.getElementById("detail-heading").textContent="Customer profile: "+(customer.full_name||"customer");

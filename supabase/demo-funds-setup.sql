@@ -322,6 +322,35 @@ begin
   elsif p_country = 'India' then v_currency := 'INR'; v_rate := 83;
   elsif p_country = 'Nigeria' then v_currency := 'NGN'; v_rate := 1500;
   elsif p_country = 'Eurozone' then v_currency := 'EUR'; v_rate := 0.95;
+  elsif p_country = 'Uganda' then v_currency := 'UGX'; v_rate := 3700;
+  elsif p_country = 'Tanzania' then v_currency := 'TZS'; v_rate := 2550;
+  elsif p_country = 'Rwanda' then v_currency := 'RWF'; v_rate := 1300;
+  elsif p_country = 'Zambia' then v_currency := 'ZMW'; v_rate := 27;
+  elsif p_country = 'Botswana' then v_currency := 'BWP'; v_rate := 13.5;
+  elsif p_country = 'Egypt' then v_currency := 'EGP'; v_rate := 49;
+  elsif p_country = 'Morocco' then v_currency := 'MAD'; v_rate := 10;
+  elsif p_country = 'Ethiopia' then v_currency := 'ETB'; v_rate := 57;
+  elsif p_country in ('Senegal','Ivory Coast') then v_currency := 'XOF'; v_rate := 600;
+  elsif p_country = 'Cameroon' then v_currency := 'XAF'; v_rate := 600;
+  elsif p_country = 'Switzerland' then v_currency := 'CHF'; v_rate := 0.9;
+  elsif p_country = 'Sweden' then v_currency := 'SEK'; v_rate := 10.5;
+  elsif p_country = 'Norway' then v_currency := 'NOK'; v_rate := 10.7;
+  elsif p_country = 'Denmark' then v_currency := 'DKK'; v_rate := 7.1;
+  elsif p_country = 'Poland' then v_currency := 'PLN'; v_rate := 4;
+  elsif p_country = 'Turkey' then v_currency := 'TRY'; v_rate := 32;
+  elsif p_country = 'Mexico' then v_currency := 'MXN'; v_rate := 17;
+  elsif p_country = 'Brazil' then v_currency := 'BRL'; v_rate := 5;
+  elsif p_country = 'China' then v_currency := 'CNY'; v_rate := 7.2;
+  elsif p_country = 'Japan' then v_currency := 'JPY'; v_rate := 150;
+  elsif p_country = 'Singapore' then v_currency := 'SGD'; v_rate := 1.35;
+  elsif p_country = 'Malaysia' then v_currency := 'MYR'; v_rate := 4.7;
+  elsif p_country = 'Indonesia' then v_currency := 'IDR'; v_rate := 15600;
+  elsif p_country = 'Philippines' then v_currency := 'PHP'; v_rate := 56;
+  elsif p_country = 'Thailand' then v_currency := 'THB'; v_rate := 36;
+  elsif p_country = 'United Arab Emirates' then v_currency := 'AED'; v_rate := 3.67;
+  elsif p_country = 'Saudi Arabia' then v_currency := 'SAR'; v_rate := 3.75;
+  elsif p_country = 'Australia' then v_currency := 'AUD'; v_rate := 1.52;
+  elsif p_country = 'New Zealand' then v_currency := 'NZD'; v_rate := 1.65;
   else raise exception 'Choose a supported demo destination country'; end if;
 
   if p_bank_name is null or p_bank_name not in (

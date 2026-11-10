@@ -76,7 +76,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <tbody id="customer-rows"><tr><td colspan="5">Loading customer list…</td></tr></tbody>
 </table>
 </div>
-<section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Practice account overview</h4><p id="detail-account-status" class="muted" role="status">Loading illustrative practice account…</p><div class="detail-grid"><div class="detail-item"><strong>Illustrative practice balance</strong><span id="detail-account-balance">—</span></div><div class="detail-item"><strong>Currency</strong><span id="detail-account-currency">—</span></div><div class="detail-item"><strong>Last account update</strong><span id="detail-account-updated">—</span></div></div><h4>Recent practice transactions</h4><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody id="detail-account-transactions"><tr><td colspan="5">Loading practice history…</td></tr></tbody></table></div><p class="muted">All balances and entries shown here are fictional learning records. No real funds are held or transferred.</p></div><button id="open-customer-support" class="secondary" type="button">Open customer support conversation</button> <button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
+<section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Practice account overview</h4><p id="detail-account-status" class="muted" role="status">Loading illustrative practice account…</p><div class="detail-grid"><div class="detail-item"><strong>Illustrative practice balance</strong><span id="detail-account-balance">—</span></div><div class="detail-item"><strong>Currency</strong><span id="detail-account-currency">—</span></div><div class="detail-item"><strong>Last account update</strong><span id="detail-account-updated">—</span></div></div><h4>Recent practice transactions</h4><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody id="detail-account-transactions"><tr><td colspan="5">Loading practice history…</td></tr></tbody></table></div><p class="muted">All balances and entries shown here are fictional learning records. No real funds are held or transferred.</p></div><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Customer activity timeline</h4><p class="muted">A chronological view of practice account changes, simulated transfers, support messages and learning progress.</p><p id="customer-timeline-status" class="muted" role="status">Loading activity…</p><ol id="customer-activity-timeline" style="display:grid;gap:12px;padding-left:22px;margin:12px 0"></ol><p class="muted">This timeline records educational activity only. No real funds or external banking services are involved.</p></div><button id="open-customer-support" class="secondary" type="button">Open customer support conversation</button> <button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
 </section>
 <section class="panel" id="topup-requests">
 <h2>Customer demo top-up requests</h2>
@@ -453,6 +453,40 @@ async function loadCustomerAccountDetails(customer,formatDate){
  }
  if(!(transactions||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="No practice transactions recorded.";tr.append(td);transactionsEl.append(tr);}
 }
+async function loadCustomerActivityTimeline(customer,formatDate){
+ const status=document.getElementById("customer-timeline-status");
+ const timeline=document.getElementById("customer-activity-timeline");
+ status.textContent="Loading customer activity…";timeline.replaceChildren();
+ const [{data:transactions,error:txError},{data:messages,error:msgError},{data:progress,error:progressError}]=await Promise.all([
+  supabase.from("demo_transactions").select("action,amount,note,created_at").eq("user_id",customer.user_id).order("created_at",{ascending:false}).limit(30),
+  supabase.from("support_messages").select("sender_role,message,created_at").eq("user_id",customer.user_id).order("created_at",{ascending:false}).limit(30),
+  supabase.from("learning_progress").select("completed_lessons,completed_at,updated_at").eq("user_id",customer.user_id).maybeSingle()
+ ]);
+ const events=[];
+ const money=value=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(value)||0);
+ if(!txError)for(const item of transactions||[]){
+  const labels={add:"Practice funds added",deduct:"Practice funds deducted",set:"Practice balance adjusted",transfer:"Simulated transfer"};
+  events.push({date:item.created_at,kind:"Practice account",detail:(labels[item.action]||"Practice account activity")+" · "+money(item.amount)+(item.note?" · "+item.note:"")});
+ }
+ if(!msgError)for(const item of messages||[]){
+  events.push({date:item.created_at,kind:"Support message",detail:(item.sender_role==="owner"?"Owner reply: ":"Customer message: ")+item.message});
+ }
+ if(!progressError&&progress){
+  const completed=Array.isArray(progress.completed_lessons)?progress.completed_lessons:[];
+  if(progress.completed_at&&completed.length>=4)events.push({date:progress.completed_at,kind:"Learning milestone",detail:"Completed all four TopSafeB learning lessons"});
+  else if(progress.updated_at&&completed.length)events.push({date:progress.updated_at,kind:"Learning progress",detail:completed.length+" of 4 lessons marked complete"});
+ }
+ events.sort((a,b)=>new Date(b.date)-new Date(a.date));
+ if(txError&&msgError&&progressError){status.textContent="Activity could not be loaded. Check the admin database permissions.";return;}
+ status.textContent=events.length?events.length+" recent activity item(s), newest first.":"No recorded activity for this customer yet.";
+ for(const event of events.slice(0,60)){
+  const item=document.createElement("li");item.style.cssText="padding:10px 12px;background:#f7f9fc;border:1px solid #e3eaf2;border-radius:9px";
+  const heading=document.createElement("strong");heading.textContent=event.kind;heading.style.display="block";
+  const detail=document.createElement("div");detail.textContent=event.detail;detail.style.cssText="white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0";
+  const date=document.createElement("small");date.className="muted";date.textContent=formatDate(event.date);
+  item.append(heading,detail,date);timeline.append(item);
+ }
+}
 function showCustomerDetails(customer,record,formatDate){
  const completed=Array.isArray(record?.completed_lessons)?record.completed_lessons.filter(id=>Object.hasOwn(lessonNames,id)):[];
  document.getElementById("detail-heading").textContent="Customer profile: "+(customer.full_name||"customer");
@@ -476,6 +510,7 @@ function showCustomerDetails(customer,record,formatDate){
  };
  detailsPanel.hidden=false;
  loadCustomerAccountDetails(customer,formatDate);
+ loadCustomerActivityTimeline(customer,formatDate);
  detailsPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].includes(text[0]))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};

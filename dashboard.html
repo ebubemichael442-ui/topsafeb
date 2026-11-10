@@ -305,7 +305,7 @@ button,.button{border-radius:9px}
 <div class="menu-brand">TopSafeB <span>Practice menu</span></div>
 <a class="menu-link active" href="#customer-home">Dashboard</a>
 <a class="menu-link" href="#customer-demo-history">Account Statement</a>
-<a class="menu-link" href="#oso-transfer-form">Fund Transfer</a>
+<a class="menu-link" href="#transfer-centre">Transfer Centre</a>
 <a class="menu-link" href="#blockchain-learning">Blockchain Transfer <small>Learning demo</small></a>
 <a class="menu-link" href="#blockchain-history">Blockchain History <small>Sample ledger</small></a>
 <a class="menu-link" href="#demo-deposit-info">Make Deposit <small>Demo explanation only</small></a>
@@ -343,8 +343,30 @@ button,.button{border-radius:9px}
 <div class="topup-history"><strong>Your top-up requests</strong><div id="demo-topup-history" aria-live="polite"><p class="muted">Loading requests…</p></div></div>
 <p class="topup-disclaimer">SIMULATION ONLY — no payment is collected and no real funds are added.</p>
 </section>
-<div class="quick-actions"><a class="quick-action primary-action" href="#oso-transfer-form"><span aria-hidden="true">↗</span> Make Demo Transfer</a><a class="quick-action" href="#customer-demo-history"><span aria-hidden="true">▤</span> View Activity</a><a class="quick-action" href="#learning-progress"><span aria-hidden="true">◎</span> Learning</a></div>
+<div class="quick-actions"><a class="quick-action primary-action" href="#transfer-centre"><span aria-hidden="true">↗</span> Make Demo Transfer</a><a class="quick-action" href="#customer-demo-history"><span aria-hidden="true">▤</span> View Activity</a><a class="quick-action" href="#learning-progress"><span aria-hidden="true">◎</span> Learning</a></div>
 <div class="demo-warning"><strong>Demo funds — not real money.</strong> This fictional balance is only for education. It cannot be withdrawn, redeemed, or transferred outside TopSafeB. No real bank is connected.</div>
+<div id="transfer-centre">
+<h3 class="bank-section-title">Transfer Centre</h3>
+<p>Choose a practice transfer type. These options use fictional banks and sample account details only.</p>
+<h3 class="bank-section-title">Local bank transfer</h3>
+<p>Practise a domestic USD transfer between fictional banks in the TopSafeB learning environment.</p>
+<form id="local-demo-transfer-form" class="transfer-form">
+<label for="local-demo-bank">Receiving fictional bank</label>
+<select id="local-demo-bank" required>
+<option value="">Choose a practice bank</option>
+<option>Oso Local Bank</option><option>Rivergate Community Bank</option><option>Maple Street Savings Bank</option><option>Harborlight Local Bank</option><option>Pioneer Town Bank</option><option>Greenfield Neighbourhood Bank</option><option>Unity Corner Bank</option><option>Westbridge Local Bank</option>
+</select>
+<label for="local-demo-recipient">Recipient name</label>
+<input id="local-demo-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample">
+<label for="local-demo-account">Fictional account number (8–16 digits)</label>
+<input id="local-demo-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678">
+<label for="local-demo-amount">Amount to practise sending (USD)</label>
+<input id="local-demo-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00">
+<label for="local-demo-description">Transfer description (optional)</label>
+<input id="local-demo-description" maxlength="120" autocomplete="off" placeholder="Practice local transfer">
+<button id="local-demo-transfer-submit" type="submit">Make local practice transfer</button>
+<p id="local-demo-transfer-status" class="muted" role="status" aria-live="polite"></p>
+</form>
 <h3 class="bank-section-title">International demo transfer</h3>
 <p>Practise sending simulated USD to a fictional receiving bank in another country. Exchange rates are fixed teaching examples, not live rates.</p>
 <form id="oso-transfer-form" class="transfer-form">
@@ -384,7 +406,8 @@ button,.button{border-radius:9px}
   <div class="receipt-head"><div><p class="receipt-brand">◆ TOPSAFEB</p><p class="receipt-kicker">TRANSFER CONFIRMATION</p></div><span class="receipt-status">SUCCESSFUL</span></div>
   <h2 id="receipt-title">Transfer completed</h2>
   <p class="receipt-amount" id="receipt-amount">$0.00</p>
-  <p class="receipt-caption">Amount sent · USD demo balance</p>
+  <p class="receipt-caption">Amount sent · USD practice balance</p>
+  <div class="receipt-demo-notice"><strong>TOPSAFEB PRACTICE TRANSACTION</strong><span>No real funds transferred. No external bank or payment network was contacted.</span></div>
   <div class="receipt-details">
     <div><span>Recipient</span><strong id="receipt-recipient">—</strong></div>
     <div><span>Receiving bank</span><strong id="receipt-bank">—</strong></div>
@@ -395,7 +418,7 @@ button,.button{border-radius:9px}
     <div><span>Transaction reference</span><strong id="receipt-reference">—</strong></div>
     <div><span>Description</span><strong id="receipt-description">—</strong></div>
   </div>
-  <p class="receipt-footer-note">TopSafeB practice confirmation · Simulated transaction only; no real funds moved.</p>
+  <p class="receipt-footer-note">TopSafeB practice confirmation · No real funds transferred.</p>
   <div class="receipt-actions"><button type="button" id="print-demo-receipt">Print confirmation</button><button type="button" class="secondary" id="close-demo-receipt">Close</button></div>
 </section>
 
@@ -585,6 +608,51 @@ function updateDemoConversion(){
 }
 countrySelect.addEventListener("change",updateDemoConversion);
 amountInput.addEventListener("input",updateDemoConversion);
+async function submitLocalDemoTransfer(event){
+ event.preventDefault();
+ const form=document.getElementById("local-demo-transfer-form");
+ const button=document.getElementById("local-demo-transfer-submit");
+ const status=document.getElementById("local-demo-transfer-status");
+ const bank=document.getElementById("local-demo-bank").value;
+ const recipient=document.getElementById("local-demo-recipient").value.trim();
+ const accountNumber=document.getElementById("local-demo-account").value.trim();
+ const amount=Number(document.getElementById("local-demo-amount").value);
+ const description=document.getElementById("local-demo-description").value.trim();
+ if(!bank||!recipient||!/^[0-9]{8,16}$/.test(accountNumber)||!Number.isFinite(amount)||amount<=0){
+  status.textContent="Choose a fictional bank, enter a recipient, an 8–16 digit fictional account number and a valid USD amount.";
+  return;
+ }
+ if(!currentUserId){status.textContent="Please sign in again before making a practice transfer.";return;}
+ if(!window.confirm("TopSafeB practice transaction: no real funds will be transferred and no bank will be contacted. Continue?"))return;
+ button.disabled=true;button.textContent="Processing practice transfer…";status.textContent="Recording your practice transfer…";
+ try{
+  const {data,error}=await supabase.rpc("customer_demo_transfer_fictional_bank",{p_bank_name:bank,p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
+  if(error)throw error;
+  const result=Array.isArray(data)?data[0]:data;
+  const reference="DEMO-"+String(result.transaction_id||"").slice(0,8).toUpperCase();
+  const receipt=document.getElementById("demo-transfer-receipt");
+  document.getElementById("receipt-amount").textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(amount);
+  document.getElementById("receipt-recipient").textContent=recipient;
+  document.getElementById("receipt-bank").textContent=bank+" (fictional practice bank)";
+  document.getElementById("receipt-country").textContent="Domestic practice transfer";
+  document.getElementById("receipt-account").textContent="•••• "+accountNumber.slice(-4);
+  document.getElementById("receipt-converted").textContent="Not applicable — USD practice transfer";
+  document.getElementById("receipt-date").textContent=new Date().toLocaleString();
+  document.getElementById("receipt-reference").textContent=reference;
+  document.getElementById("receipt-description").textContent=description||"Local practice transfer";
+  receipt.hidden=false;
+  status.textContent="Practice transfer recorded. Reference: "+reference+". No real funds transferred.";
+  receipt.scrollIntoView({behavior:"smooth",block:"center"});
+  form.reset();
+  await loadCustomerDemoFunds(currentUserId);
+ }catch(error){
+  status.textContent="Practice transfer not completed: "+(error.message||"Please try again.");
+ }finally{
+  button.disabled=false;button.textContent="Make local practice transfer";
+ }
+}
+document.getElementById("local-demo-transfer-form").addEventListener("submit",submitLocalDemoTransfer);
+
 async function submitOsoLocalTransfer(event){
  event.preventDefault();
  const form=document.getElementById("oso-transfer-form");
@@ -601,7 +669,7 @@ async function submitOsoLocalTransfer(event){
   return;
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
- if(!window.confirm("SIMULATED INTERNATIONAL TRANSFER: no real money will move and no bank will be contacted. Continue?"))return;
+ if(!window.confirm("TopSafeB practice transaction: no real funds will be transferred and no bank will be contacted. Continue?"))return;
  button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated international transfer…";
  try{
   const {data,error}=await supabase.rpc("customer_demo_transfer_international",{p_country:country,p_bank_name:bank,p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
@@ -620,7 +688,7 @@ async function submitOsoLocalTransfer(event){
   document.getElementById("receipt-reference").textContent=reference;
   document.getElementById("receipt-description").textContent=description||"International demo transfer";
   receipt.hidden=false;
-  status.textContent="Your simulated transfer confirmation is ready. Reference: "+reference+". No real funds moved.";
+  status.textContent="Practice transfer recorded. Reference: "+reference+". No real funds transferred.";
   receipt.scrollIntoView({behavior:"smooth",block:"center"});
   form.reset();updateDemoConversion();
   await loadCustomerDemoFunds(currentUserId);

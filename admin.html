@@ -26,7 +26,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </style>
 </head>
 <body>
-<header><div class="brand"><span>◆</span> TopSafeB</div><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
+<header><div class="brand"><span>◆</span> TopSafeB</div><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
 <main>
 <p class="muted">RESTRICTED OWNER AREA</p>
 <h1>Dashboard</h1>
@@ -50,6 +50,12 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </table>
 </div>
 <section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
+</section>
+<section class="panel" id="topup-requests">
+<h2>Customer demo top-up requests</h2>
+<p class="notice"><strong>SIMULATION ONLY:</strong> Approving a request adds fictional practice funds to the customer's TopSafeB demo balance. It does not confirm or collect a payment.</p>
+<p id="topup-admin-status" class="muted" role="status" aria-live="polite">Loading requests…</p>
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Amount (USD)</th><th>Customer note</th><th>Status</th><th>Owner note</th><th>Decision</th></tr></thead><tbody id="topup-admin-rows"><tr><td colspan="7">Loading requests…</td></tr></tbody></table></div>
 </section>
 <section class="panel" id="demo-funds-manager">
 <h2>Demo Funds Manager</h2>
@@ -163,6 +169,38 @@ function filterCustomers(){
  noSearchResults.hidden=visible!==0;searchSummary.textContent=query?`Showing ${visible} of ${customerTableRows.length} customers.`:`Showing all ${customerTableRows.length} customers.`;
 }
 
+async function loadTopupRequests(customers){
+ const status=document.getElementById("topup-admin-status"),body=document.getElementById("topup-admin-rows");
+ const {data:requests,error}=await supabase.from("demo_topup_requests").select("id,user_id,amount,note,status,owner_note,created_at").order("created_at",{ascending:false}).limit(100);
+ if(error){status.textContent="Top-up request setup is not complete. Run the updated demo-funds SQL file in Supabase, then refresh.";body.replaceChildren();return;}
+ const names=new Map(customers.map(c=>[c.user_id,(c.full_name||"Customer")+" · "+(c.email||"")]));
+ body.replaceChildren();
+ if(!(requests||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=7;td.textContent="No customer top-up requests yet.";tr.append(td);body.append(tr);status.textContent="No pending requests.";return;}
+ for(const item of requests){
+  const tr=document.createElement("tr");
+  const vals=[new Date(item.created_at).toLocaleString(),names.get(item.user_id)||"Customer",new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount)),item.note||"—",item.status];
+  for(const value of vals){const td=document.createElement("td");td.textContent=value;tr.append(td);}
+  const ownerNoteCell=document.createElement("td"),ownerNote=document.createElement("input");ownerNote.maxLength=250;ownerNote.placeholder="Optional note";ownerNote.value=item.owner_note||"";ownerNote.style.cssText="width:150px;padding:8px";ownerNoteCell.append(ownerNote);tr.append(ownerNoteCell);
+  const decision=document.createElement("td");
+  if(item.status==="pending"){
+   for(const [choice,label] of [["approve","Approve"],["reject","Reject"]]){
+    const btn=document.createElement("button");btn.type="button";btn.textContent=label;btn.style.margin="3px";if(choice==="reject")btn.className="secondary";
+    btn.addEventListener("click",async()=>{
+     if(choice==="approve"&&!window.confirm("Approve this simulated top-up and add "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount))+" in fictional demo funds? No payment will be collected."))return;
+     btn.disabled=true;status.textContent="Saving owner decision…";
+     const {error:decisionError}=await supabase.rpc("admin_review_demo_topup",{p_request_id:item.id,p_decision:choice,p_owner_note:ownerNote.value.trim()});
+     if(decisionError){status.textContent="Could not save decision: "+decisionError.message;btn.disabled=false;return;}
+     status.textContent=choice==="approve"?"Request approved. Simulated funds were added to the customer's practice balance.":"Request rejected. No demo funds were added.";
+     await loadTopupRequests(customers);await loadDemoFunds(customers);
+    });
+    decision.append(btn);
+   }
+  }else{decision.textContent="Reviewed";}
+  tr.append(decision);body.append(tr);
+ }
+ const pending=requests.filter(r=>r.status==="pending").length;
+ status.textContent=requests.length+" request(s) shown · "+pending+" awaiting your decision.";
+}
 async function loadDemoFunds(customers){
  const status=document.getElementById("demo-funds-status");
  const body=document.getElementById("demo-funds-rows");
@@ -250,6 +288,7 @@ async function loadAdmin(){
  }
  rowsEl.append(noSearchResults);filterCustomers();
  await loadDemoFunds(list);
+ await loadTopupRequests(list);
  await loadFeedback();
 }
 function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));}

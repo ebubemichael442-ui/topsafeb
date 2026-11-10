@@ -6,30 +6,31 @@
 <meta name="description" content="TopSafeB owner administration area.">
 <title>Owner Dashboard | TopSafeB</title>
 <style>
-:root{--navy:#102b50;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f5f8;--purple:#7650a8}
+:root{--navy:#102744;--gold:#d7b56d;--ink:#1d3048;--muted:#68788d;--pale:#f2f5f9;--purple:#6e59a5;--line:#e5ebf2;--surface:#fff;--green:#197451;--red:#a13d42}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--ink);background:var(--pale)}
-header{background:#fff;color:var(--navy);padding:15px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 2px 12px #102b5010;position:sticky;top:0;z-index:20}
-.brand{font-size:24px;font-weight:800}.brand span{color:var(--purple)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:var(--navy);text-decoration:none;font-weight:bold}
+header{background:var(--navy);color:#fff;padding:15px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 4px 18px #10274424;position:sticky;top:0;z-index:20}
+.brand{font-size:24px;font-weight:800;letter-spacing:.2px;color:#fff}.brand span{color:var(--gold)}nav{display:flex;gap:18px;flex-wrap:wrap}nav a{color:#edf3fb;text-decoration:none;font-size:14px;font-weight:700;opacity:.92}nav a:hover{color:var(--gold);opacity:1}
 .menu-toggle{display:none;background:transparent;color:var(--navy);font-size:25px;padding:3px 10px}
 a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #b18a3e;outline-offset:3px}
-main{max-width:1080px;margin:28px auto;padding:0 18px 55px}h1,h2{color:var(--navy)}h1{font-size:clamp(30px,5vw,40px);line-height:1.2;margin:8px 0}
-.muted{color:var(--muted)}.panel{background:white;padding:22px;border-radius:10px;box-shadow:0 5px 22px #102b500d;margin:18px 0}
+main{max-width:1180px;margin:32px auto;padding:0 22px 64px}h1,h2{color:var(--navy)}h1{font-size:clamp(32px,5vw,42px);line-height:1.15;margin:8px 0 10px}main>p.muted:first-child{font-size:11px;font-weight:800;letter-spacing:1.8px;color:var(--purple);margin:0 0 8px}
+.muted{color:var(--muted)}.panel{background:var(--surface);padding:26px;border:1px solid var(--line);border-radius:15px;box-shadow:0 8px 28px #1027440a;margin:22px 0}.panel h2{font-size:21px;letter-spacing:-.25px;margin:0 0 8px}.panel>p.muted{margin-top:4px}
 button,.button{display:inline-block;background:var(--gold);color:var(--navy);padding:12px 18px;border:0;border-radius:8px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer}
-button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);background:#fff9e9;padding:15px;border-radius:8px;margin:20px 0}
+button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);background:#fff9e9;padding:15px 17px;border-radius:9px;margin:20px 0;color:#5c4b2d}.notice strong{color:#4d3b1b}
 #status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
-table{width:100%;border-collapse:collapse;margin-top:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e4eaf1;overflow-wrap:anywhere}th{background:#f3f6fa}
+table{width:100%;border-collapse:separate;border-spacing:0;margin-top:14px;font-size:14px}th,td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);overflow-wrap:anywhere;vertical-align:top}th{background:#f4f7fb;color:#53657c;font-size:11px;text-transform:uppercase;letter-spacing:.65px;font-weight:800;white-space:nowrap}tbody tr:hover{background:#fafcff}tbody tr:last-child td{border-bottom:0}
 .table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy);margin:4px 0}
 .search-tools{margin:18px 0}.search-tools label{display:block;font-weight:700;margin-bottom:6px}.search-tools input{width:100%;max-width:480px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.search-summary{font-size:14px;color:var(--muted);margin:6px 0}.detail-panel{margin-top:18px;border:1px solid #dbe3ed;border-radius:10px;padding:18px;background:#f8fafc}.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.detail-item{background:white;padding:12px;border-radius:8px}.detail-item strong{display:block;color:var(--muted);font-size:13px}.lesson-list{margin:8px 0 0;padding-left:22px}
-.dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:24px 0}.summary-card{background:#fff;border-left:5px solid var(--purple);border-radius:8px;padding:20px;box-shadow:0 5px 22px #102b500d}.summary-card h2{font-size:18px;margin:0 0 8px}.summary-card p{margin:5px 0;color:var(--muted)}.summary-card .stat{font-size:32px}
-footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
-@media(max-width:700px){header{padding:13px 5%}.menu-toggle{display:block}nav{display:none;position:absolute;top:100%;left:0;right:0;background:white;padding:14px 5%;box-shadow:0 8px 14px #102b5020;flex-direction:column;gap:12px}nav.open{display:flex}main{margin-top:22px}.dashboard-grid{grid-template-columns:1fr;gap:14px}.summary-card{padding:18px}th,td{padding:9px;font-size:13px}.panel{padding:16px}}
+.dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:26px 0}.summary-card{background:#fff;border:1px solid var(--line);border-top:3px solid var(--purple);border-radius:14px;padding:22px;box-shadow:0 8px 24px #1027440a}.summary-card h2{font-size:14px;margin:0 0 7px;letter-spacing:.1px}.summary-card p{margin:5px 0;color:var(--muted);font-size:13px}.summary-card .stat{font-size:36px;letter-spacing:-1.2px;color:var(--navy)}.summary-card:nth-child(2){border-top-color:#c29b50}.summary-card:nth-child(3){border-top-color:#3d8a78}
+footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}footer p{color:#c6d2e1}
+@media(max-width:700px){header{padding:13px 5%}.menu-toggle{display:block;color:#fff;border:1px solid #ffffff40;border-radius:8px}nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--navy);padding:16px 5%;box-shadow:0 8px 14px #102b5020;flex-direction:column;gap:14px}nav.open{display:flex}main{margin-top:22px;padding-left:14px;padding-right:14px}.dashboard-grid{grid-template-columns:1fr;gap:12px;margin:18px 0}.summary-card{padding:18px}.summary-card .stat{font-size:32px}th,td{padding:10px;font-size:12px}.panel{padding:17px;border-radius:12px}.panel h2{font-size:19px}}
 </style>
 </head>
 <body>
 <header><div class="brand"><span>◆</span> TopSafeB</div><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
 <main>
 <p class="muted">RESTRICTED OWNER AREA</p>
-<h1>Dashboard</h1>
+<h1>Owner Control Centre</h1>
+<p class="muted">A clear overview of customers, learning activity, support and simulated account tools.</p>
 <div class="dashboard-grid" aria-label="Dashboard summary"><article class="summary-card"><h2>Users</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p></article><article class="summary-card"><h2>Customer Feedback</h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p></article><article class="summary-card"><h2>Learning Progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p></article></div>
 <section class="panel">
 <p class="muted">SIGNED-IN OWNER</p>

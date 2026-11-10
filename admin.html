@@ -54,8 +54,8 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p id="feedback-count" class="stat">—</p>
 <p id="feedback-admin-status" class="muted" role="status" aria-live="polite">Loading customer feedback…</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Date</th><th>Customer</th><th>Rating</th><th>Feedback</th><th>Status</th><th>Action</th></tr></thead>
-<tbody id="feedback-rows"><tr><td colspan="6">Loading feedback…</td></tr></tbody>
+<thead><tr><th>Date</th><th>Customer</th><th>Rating</th><th>Feedback</th><th>Status</th><th>Owner reply</th><th>Action</th></tr></thead>
+<tbody id="feedback-rows"><tr><td colspan="7">Loading feedback…</td></tr></tbody>
 </table></div>
 </section>
 <div class="notice"><strong>Privacy:</strong> This page displays customer names, email addresses and learning progress dates available to the administrator. Do not share this information. TopSafeB is an educational platform, not a bank; this dashboard cannot access deposits, bank accounts or payments.</div>
@@ -80,8 +80,8 @@ async function loadFeedback(){
  const feedbackStatus=document.getElementById("feedback-admin-status");
  const feedbackRows=document.getElementById("feedback-rows");
  const feedbackCount=document.getElementById("feedback-count");
- const {data,error}=await supabase.from("customer_feedback").select("id,customer_name,customer_email,rating,message,status,created_at").order("created_at",{ascending:false});
- if(error){feedbackStatus.textContent="Feedback storage is not ready yet. Run the customer feedback SQL setup in Supabase, then refresh this page.";feedbackRows.innerHTML="<tr><td colspan='6'>No feedback can be displayed until the database setup is complete.</td></tr>";feedbackCount.textContent="—";return;}
+ const {data,error}=await supabase.from("customer_feedback").select("id,customer_name,customer_email,rating,message,status,created_at,owner_reply,replied_at").order("created_at",{ascending:false});
+ if(error){feedbackStatus.textContent="Feedback storage is not ready yet. Run the customer feedback SQL setup in Supabase, then refresh this page.";feedbackRows.innerHTML="<tr><td colspan='7'>No feedback can be displayed until the database setup is complete.</td></tr>";feedbackCount.textContent="—";return;}
  const items=data||[];
  feedbackCount.textContent=String(items.length);
  feedbackStatus.textContent=items.length? "Feedback submissions are shown below.":"No customer feedback has been submitted yet.";
@@ -94,6 +94,19 @@ async function loadFeedback(){
   const rating=document.createElement("td");rating.textContent=item.rating;
   const message=document.createElement("td");message.textContent=item.message;message.style.whiteSpace="pre-wrap";message.style.minWidth="220px";
   const status=document.createElement("td");status.textContent=item.status;
+  const replyCell=document.createElement("td");replyCell.style.minWidth="240px";
+  const replyInput=document.createElement("textarea");replyInput.rows=3;replyInput.maxLength=3000;replyInput.placeholder="Write a private reply to this customer";replyInput.value=item.owner_reply||"";replyInput.style.width="100%";replyInput.style.minWidth="210px";replyInput.style.padding="9px";replyInput.style.font="inherit";
+  const saveReply=document.createElement("button");saveReply.type="button";saveReply.textContent=item.owner_reply?"Update reply":"Send reply";saveReply.style.marginTop="7px";
+  const replyNote=document.createElement("p");replyNote.className="muted";replyNote.style.fontSize="12px";replyNote.textContent=item.replied_at?"Last replied: "+new Date(item.replied_at).toLocaleString():"No reply sent yet";
+  saveReply.addEventListener("click",async()=>{
+   const reply=replyInput.value.trim();
+   if(!reply){replyNote.textContent="Enter a reply before saving.";return;}
+   saveReply.disabled=true;saveReply.textContent="Saving…";
+   const {error:updateError}=await supabase.from("customer_feedback").update({owner_reply:reply,replied_at:new Date().toISOString(),status:"Reviewed"}).eq("id",item.id);
+   if(updateError){replyNote.textContent="Could not save reply: "+updateError.message;saveReply.disabled=false;saveReply.textContent=item.owner_reply?"Update reply":"Send reply";return;}
+   item.owner_reply=reply;item.replied_at=new Date().toISOString();item.status="Reviewed";status.textContent="Reviewed";replyNote.textContent="Reply saved: "+new Date(item.replied_at).toLocaleString();saveReply.textContent="Update reply";saveReply.disabled=false;feedbackStatus.textContent="Your reply has been saved. The customer can see it in their dashboard.";
+  });
+  replyCell.append(replyInput,saveReply,replyNote);
   const action=document.createElement("td");
   if(item.status==="New"){
    const button=document.createElement("button");button.type="button";button.className="secondary";button.textContent="Mark reviewed";
@@ -104,8 +117,8 @@ async function loadFeedback(){
     status.textContent="Reviewed";button.remove();feedbackStatus.textContent="Feedback marked as reviewed.";
    });
    action.append(button);
-  }else{action.textContent="—";}
-  tr.append(date,customer,rating,message,status,action);feedbackRows.append(tr);
+  }else{action.textContent="Reviewed";}
+  tr.append(date,customer,rating,message,status,replyCell,action);feedbackRows.append(tr);
  }
 }
 document.getElementById("close-details").addEventListener("click",()=>{detailsPanel.hidden=true;});
@@ -204,7 +217,7 @@ signoutButton.addEventListener("click",async()=>{
  window.location.replace("login.html");
 });
 supabase.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace("login.html");});
-loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='6'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
+loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='7'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
 </script>
 </body>
 </html>

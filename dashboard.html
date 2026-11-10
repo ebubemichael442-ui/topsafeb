@@ -37,6 +37,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 .bank-balance{font-size:clamp(32px,7vw,46px);font-weight:900;letter-spacing:-1.5px;color:#20804c;margin:4px 0 16px;overflow-wrap:anywhere}
 .account-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:10px;margin-top:8px;border-top:1px solid #e5e9f1;color:#6c7890;font-size:12px}.account-meta strong{color:#24395f}
 .bank-account-status{font-size:12px;color:#68748b;margin:14px 0 0}
+.topup-card{margin:18px 26px;padding:20px;border:1px solid #e1e8f0;border-radius:15px;background:#f8fafc}.topup-card h3{margin:0;color:#153c60}.topup-card>p{margin:5px 0 12px!important}.topup-card .transfer-form{margin:12px 0;padding:15px}.topup-history{margin-top:14px}.topup-history article{padding:11px;border:1px solid #e3eaf1;border-radius:9px;background:#fff;margin-top:8px;font-size:13px}.topup-disclaimer{font-size:11px!important;color:#7b5b20!important;background:#fff7e6;border-radius:8px;padding:10px;margin:12px 0 0!important}
 .quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 20px}
 .quick-action{display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;text-decoration:none;padding:14px 8px;border:1px solid #e3e7f0;border-radius:12px;color:#253b77;font-size:13px;font-weight:800;background:#fff}
 .quick-action span{font-size:19px}.quick-action.primary-action{background:#e91e63;color:#fff;border-color:#e91e63}
@@ -111,7 +112,7 @@ button,.button{transition:filter .15s,transform .15s}button:hover,.button:hover{
  .bank-dashboard-top{padding:22px 19px}
  .market-strip{margin:14px 12px}
  .account-card{margin:0 12px;padding:20px}
- .quick-actions{margin:15px 12px}
+ .topup-card{margin:14px 12px;padding:14px}.topup-card .transfer-form{margin:10px 0;padding:12px}.quick-actions{margin:15px 12px}
  .demo-warning{margin:15px 12px}
  .bank-section-title{margin-left:12px;margin-right:12px}
  .bank-dashboard>p:not(.bank-section-title){margin-left:12px;margin-right:12px}
@@ -267,6 +268,20 @@ input,select,textarea{font-size:16px}
 <div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB • PRACTICE ACCOUNT</p><h2>Bank Dashboard</h2><p class="bank-subtitle">Welcome back, <span id="bank-customer-name">Customer</span></p></div><span class="demo-pill">SIMULATION ONLY</span></div>
 <div class="market-strip" aria-label="Financial learning indicators"><div><span>Market learning</span><strong>Risk &amp; return</strong><small>Understand market movement</small></div><div><span>Money skills</span><strong>Budgeting</strong><small>Plan and track spending</small></div><div><span>Account safety</span><strong>Protected practice</strong><small>Never enter real bank details</small></div></div>
 <div class="account-card"><div class="account-card-head"><div><span class="account-label">DEMO CHECKING ACCOUNT</span><h3>Available Demo Balance</h3></div><span class="account-symbol" aria-hidden="true">◆</span></div><p id="customer-demo-balance" class="bank-balance">$0.00</p><div class="account-meta"><span>Account holder: <strong id="bank-account-holder">TopSafeB Customer</strong></span><span>Currency: <strong>USD</strong></span></div><div class="account-meta"><span>Account status: <strong>Practice account</strong></span><span>Account number: <strong>DEMO •••• 0000</strong></span></div><p id="demo-account-status" class="bank-account-status" role="status" aria-live="polite">Loading your simulated balance…</p></div>
+<section class="topup-card" id="demo-add-money">
+<h3>＋ Add demo money</h3>
+<p>Request an illustrative USD balance top-up. Your owner must approve it before your practice balance changes.</p>
+<form id="demo-topup-form" class="transfer-form">
+<label for="demo-topup-amount">Amount to request (USD)</label>
+<input id="demo-topup-amount" type="number" min="1" max="1000000000" step="0.01" inputmode="decimal" placeholder="Enter amount" required>
+<label for="demo-topup-note">Reason (optional)</label>
+<input id="demo-topup-note" maxlength="200" placeholder="e.g. Practice account funding">
+<button type="submit" id="demo-topup-submit">Submit top-up request</button>
+<p id="demo-topup-status" role="status" aria-live="polite"></p>
+</form>
+<div class="topup-history"><strong>Your top-up requests</strong><div id="demo-topup-history" aria-live="polite"><p class="muted">Loading requests…</p></div></div>
+<p class="topup-disclaimer">SIMULATION ONLY — no payment is collected and no real funds are added.</p>
+</section>
 <div class="quick-actions"><a class="quick-action primary-action" href="#oso-transfer-form"><span aria-hidden="true">↗</span> Make Demo Transfer</a><a class="quick-action" href="#customer-demo-history"><span aria-hidden="true">▤</span> View Activity</a><a class="quick-action" href="#learning-progress"><span aria-hidden="true">◎</span> Learning</a></div>
 <div class="demo-warning"><strong>Demo funds — not real money.</strong> This fictional balance is only for education. It cannot be withdrawn, redeemed, or transferred outside TopSafeB. No real bank is connected.</div>
 <h3 class="bank-section-title">International demo transfer</h3>
@@ -558,6 +573,32 @@ document.getElementById("oso-transfer-form").addEventListener("submit",submitOso
 document.getElementById("print-demo-receipt").addEventListener("click",()=>window.print());
 document.getElementById("close-demo-receipt").addEventListener("click",()=>{document.getElementById("demo-transfer-receipt").hidden=true;});
 
+async function loadCustomerTopupRequests(userId){
+ const history=document.getElementById("demo-topup-history");
+ const {data,error}=await supabase.from("demo_topup_requests").select("id,amount,note,status,owner_note,created_at,reviewed_at").eq("user_id",userId).order("created_at",{ascending:false}).limit(10);
+ history.replaceChildren();
+ if(error){const p=document.createElement("p");p.className="muted";p.textContent="Top-up requests are unavailable until the owner enables this feature.";history.append(p);return;}
+ if(!(data||[]).length){const p=document.createElement("p");p.className="muted";p.textContent="You have not submitted any top-up requests.";history.append(p);return;}
+ for(const item of data){const card=document.createElement("article");const title=document.createElement("strong");title.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount))+" — "+({pending:"Awaiting owner approval",approved:"Approved and added to demo balance",rejected:"Not approved"}[item.status]||item.status);const date=document.createElement("p");date.className="muted";date.textContent="Submitted "+new Date(item.created_at).toLocaleString()+(item.reviewed_at?" · Reviewed "+new Date(item.reviewed_at).toLocaleString():"");const note=document.createElement("p");note.textContent=(item.note||"No reason provided")+(item.owner_note?" · Owner: "+item.owner_note:"");card.append(title,date,note);history.append(card);}
+}
+document.getElementById("demo-topup-form").addEventListener("submit",async event=>{
+ event.preventDefault();
+ const amount=Number(document.getElementById("demo-topup-amount").value);
+ const note=document.getElementById("demo-topup-note").value.trim();
+ const status=document.getElementById("demo-topup-status");
+ const button=document.getElementById("demo-topup-submit");
+ if(!currentUserId){status.textContent="Please sign in again before requesting demo funds.";return;}
+ if(!Number.isFinite(amount)||amount<1||amount>1000000000){status.textContent="Enter an amount from $1 to $1,000,000,000.";return;}
+ button.disabled=true;button.textContent="Submitting…";status.textContent="Sending your request to the TopSafeB owner…";
+ try{
+  const {error}=await supabase.from("demo_topup_requests").insert({user_id:currentUserId,amount:Math.round(amount*100)/100,note,status:"pending"});
+  if(error)throw error;
+  status.textContent="Request submitted. Your demo balance will change only if the owner approves it.";
+  document.getElementById("demo-topup-form").reset();
+  await loadCustomerTopupRequests(currentUserId);
+ }catch(error){status.textContent="Request not submitted: "+(error.message||"Please try again.");}
+ finally{button.disabled=false;button.textContent="Submit top-up request";}
+});
 async function loadCustomerDemoFunds(userId){
  const status=document.getElementById("demo-account-status");
  const balanceEl=document.getElementById("customer-demo-balance");
@@ -566,6 +607,7 @@ async function loadCustomerDemoFunds(userId){
  if(error){status.textContent="Your demo account is not ready yet. Please check back later.";return;}
  if(!account){status.textContent="Your demo account is being prepared. Refresh this page in a moment.";return;}
  balanceEl.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(account.balance||0));
+ await loadCustomerTopupRequests(userId);
  status.textContent="Demo account updated "+new Date(account.updated_at).toLocaleString()+". These are simulated funds only.";
  const {data:items,error:historyError}=await supabase.from("demo_transactions").select("action,amount,balance_after,note,created_at").eq("user_id",userId).order("created_at",{ascending:false}).limit(10);
  historyEl.replaceChildren();

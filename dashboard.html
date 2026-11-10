@@ -442,6 +442,17 @@ button,.button{border-radius:9px}
 <h2>Support and feedback</h2>
 <p class="muted">Send a message or rating to the TopSafeB owner. Private replies will appear below.</p>
 <div class="support-contact-card"><strong>Contact TopSafeB support</strong><p class="muted">Send a private message to the owner. Your signed-in name and email are attached automatically, and the message appears in the Owner Dashboard.</p></div>
+<div class="support-contact-card" id="live-chat-panel">
+<strong>Live private messages</strong>
+<p class="muted">Chat directly with the TopSafeB owner. Messages are private to your account. New messages appear automatically while this page is open.</p>
+<div id="customer-chat-thread" aria-live="polite" style="display:grid;gap:10px;max-height:360px;overflow:auto;padding:12px;background:#f5f8fb;border-radius:12px;margin:12px 0"><p class="muted">Your conversation will appear here.</p></div>
+<form id="customer-chat-form" class="support-form" style="max-width:none">
+<label for="customer-chat-input">Your message</label>
+<textarea id="customer-chat-input" rows="3" maxlength="2000" required placeholder="Type a message to TopSafeB support…"></textarea>
+<button type="submit" id="customer-chat-send">Send message</button>
+<p id="customer-chat-status" class="muted" role="status" aria-live="polite">Messages refresh automatically.</p>
+</form>
+</div>
 <form id="feedback-form" class="support-form">
 <label for="support-topic">What do you need help with?</label>
 <select id="support-topic" required><option value="">Choose a topic</option><option>Account access</option><option>Demo balance or activity</option><option>Simulated transfer</option><option>Learning progress or certificate</option><option>Website problem</option><option>Other question</option></select>
@@ -778,6 +789,9 @@ async function loadSession(){
   await loadProgress(user.id);
   statusEl.textContent="You are signed in. Your learning progress is synced to your account.";
   await loadCustomerReplies(user.id);
+  await loadCustomerLiveChat();
+  if(customerChatTimer)clearInterval(customerChatTimer);
+  customerChatTimer=setInterval(loadCustomerLiveChat,5000);
   await loadCustomerDemoFunds(user.id);
   const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
   if(adminRecord) document.getElementById("admin-entry").hidden=false;
@@ -832,6 +846,41 @@ async function loadCustomerReplies(userId){
   }
   updateReplySummary();
 }
+
+const customerChatThread=document.getElementById("customer-chat-thread");
+const customerChatForm=document.getElementById("customer-chat-form");
+const customerChatInput=document.getElementById("customer-chat-input");
+const customerChatStatus=document.getElementById("customer-chat-status");
+let customerChatTimer=null;
+function appendChatBubble(container,item,own){
+ const bubble=document.createElement("article");
+ bubble.style.cssText="max-width:88%;justify-self:"+(own?"end":"start")+";padding:11px 13px;border-radius:13px;background:"+(own?"#e6f0fb":"#fff")+";border:1px solid #dce5ef;overflow-wrap:anywhere";
+ const who=document.createElement("strong");who.textContent=own?"You":"TopSafeB support";who.style.display="block";
+ const body=document.createElement("p");body.textContent=item.message;body.style.cssText="white-space:pre-wrap;margin:6px 0";
+ const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();
+ bubble.append(who,body,when);container.append(bubble);
+}
+async function loadCustomerLiveChat(){
+ if(!currentUserId)return;
+ const {data,error}=await supabase.from("support_messages").select("id,sender_id,sender_role,message,created_at").eq("user_id",currentUserId).order("created_at",{ascending:true}).limit(100);
+ if(error){customerChatStatus.textContent=error.message.includes("support_messages")?"Live chat database setup is required. Please contact the TopSafeB owner.":"Could not refresh messages: "+error.message;return;}
+ customerChatThread.replaceChildren();
+ if(!(data||[]).length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No messages yet. Send a message to start your private conversation.";customerChatThread.append(empty);}
+ for(const item of data||[])appendChatBubble(customerChatThread,item,item.sender_role==="customer");
+ customerChatThread.scrollTop=customerChatThread.scrollHeight;
+ customerChatStatus.textContent="Conversation updated "+new Date().toLocaleTimeString();
+}
+customerChatForm.addEventListener("submit",async event=>{
+ event.preventDefault();
+ const message=customerChatInput.value.trim();
+ if(!message)return;
+ if(!currentUserId){customerChatStatus.textContent="Please sign in again to send a message.";return;}
+ const button=document.getElementById("customer-chat-send");button.disabled=true;button.textContent="Sending…";
+ const {error}=await supabase.from("support_messages").insert({user_id:currentUserId,sender_id:currentUserId,sender_role:"customer",message});
+ if(error){customerChatStatus.textContent="Message not sent: "+error.message;button.disabled=false;button.textContent="Send message";return;}
+ customerChatInput.value="";customerChatStatus.textContent="Message sent.";await loadCustomerLiveChat();button.disabled=false;button.textContent="Send message";
+});
+
 const feedbackForm=document.getElementById("feedback-form");
 const feedbackRating=document.getElementById("feedback-rating");
 const feedbackMessage=document.getElementById("feedback-message");

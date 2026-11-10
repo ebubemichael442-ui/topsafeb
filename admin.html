@@ -541,6 +541,9 @@ async function saveManagedCustomerName(){
 }
 document.getElementById("save-customer-name").addEventListener("click",saveManagedCustomerName);
 function showCustomerDetails(customer,record,formatDate){
+ activeManagedCustomer=customer;
+ document.getElementById("manage-customer-name").value=customer.full_name||"";
+ document.getElementById("manage-customer-status").textContent="You can update this customer’s display name here.";
  const completed=Array.isArray(record?.completed_lessons)?record.completed_lessons.filter(id=>Object.hasOwn(lessonNames,id)):[];
  document.getElementById("detail-heading").textContent="Customer profile: "+(customer.full_name||"customer");
  document.getElementById("detail-name").textContent=customer.full_name||"—";

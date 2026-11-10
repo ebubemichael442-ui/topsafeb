@@ -147,48 +147,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p id="owner-replies-status" class="muted" role="status" aria-live="polite">Checking for replies…</p>
 <div id="owner-replies-list" style="display:grid;gap:12px"></div>
 </section>
-<section class="panel" id="customer-demo-funds" style="margin-top:22px">
-<h2>Your Demo Business Account</h2>
-<p class="notice"><strong>DEMO FUNDS — NOT REAL MONEY.</strong> This fictional USD balance is provided only for learning and demonstration. It is not a bank deposit and cannot be withdrawn or transferred as real money.</p>
-<p id="demo-account-status" class="muted" role="status" aria-live="polite">Loading your demo balance…</p>
-<p style="font-size:14px;color:#657286;margin-bottom:4px">Available demo balance</p>
-<p id="customer-demo-balance" style="font-size:clamp(30px,6vw,42px);font-weight:800;color:#102b50;margin:0">$0.00</p>
-<h3>International demo transfer</h3>
-<p><strong>SIMULATION ONLY:</strong> Choose a destination country and fictional receiving bank. Exchange rates are fixed teaching examples, not live market rates. No real money is sent and no real bank is contacted.</p>
-<form id="oso-transfer-form" style="display:grid;gap:10px;max-width:520px">
-<label for="oso-country">Destination country</label>
-<select id="oso-country" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<option value="">Choose a country</option>
-<option value="United Kingdom">United Kingdom (GBP)</option>
-<option value="United States">United States (USD)</option>
-<option value="Canada">Canada (CAD)</option>
-<option value="Ghana">Ghana (GHS)</option>
-<option value="South Africa">South Africa (ZAR)</option>
-<option value="Kenya">Kenya (KES)</option>
-<option value="India">India (INR)</option>
-<option value="Nigeria">Nigeria (NGN)</option>
-<option value="Eurozone">Eurozone (EUR)</option>
-</select>
-<label for="oso-bank">Choose fictional receiving bank</label>
-<select id="oso-bank" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<option value="">Select a demo bank</option>
-<option>Oso Local Bank</option><option>Rivergate Community Bank</option><option>Maple Street Savings Bank</option><option>Harborlight Local Bank</option><option>Pioneer Town Bank</option><option>Greenfield Neighbourhood Bank</option><option>Unity Corner Bank</option><option>Westbridge Local Bank</option>
-</select>
-<label for="oso-recipient">Recipient name</label>
-<input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<label for="oso-account">Fictional account number (8–16 digits)</label>
-<input id="oso-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<label for="oso-amount">Amount to practise sending (USD)</label>
-<input id="oso-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<p id="oso-conversion-preview" class="notice" aria-live="polite">Choose a country and enter an amount to see the illustrative conversion.</p>
-<label for="oso-description">Transfer description (optional)</label>
-<input id="oso-description" maxlength="120" autocomplete="off" placeholder="Practice international transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<button id="oso-transfer-submit" type="submit">Make simulated international transfer</button>
-<p id="oso-transfer-status" class="muted" role="status" aria-live="polite"></p>
-</form>
-<h3>Recent demo activity</h3>
-<div id="customer-demo-history" style="display:grid;gap:8px"></div>
-</section>
+
 <section class="panel" id="learning-progress" style="margin-top:22px">
 <h2>Your learning progress</h2>
 <p class="muted">Tick each lesson when you finish it. Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>

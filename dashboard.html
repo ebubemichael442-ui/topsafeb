@@ -61,6 +61,64 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 .feature-learning{margin:20px 0;scroll-margin-top:85px}.feature-learning h2{margin-top:0}.sample-ledger{padding:13px;background:#f2f4fa;border-radius:9px;font-size:13px}
 #customer-demo-funds,#customer-demo-history,#oso-transfer-form,#learning-progress,#customer-support{scroll-margin-top:85px}
 @media(max-width:600px){.customer-header{padding:12px 5%;flex-direction:row;align-items:center}.header-user{gap:10px}.customer-menu{left:auto}}
+
+/* Premium banking-inspired visual refresh — demo simulator only */
+:root{--navy:#081d36;--blue:#123c68;--gold:#d8b56d;--ink:#152b45;--muted:#718096;--pale:#eef2f7}
+body{background:#eef2f7;color:#172b43;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.customer-header{background:#071b33;border-bottom:1px solid #ffffff18;box-shadow:0 5px 22px #071b3320;padding:16px max(5%,calc((100% - 1120px)/2))}
+.customer-header .brand{font-size:25px;letter-spacing:-.6px}.customer-header .brand span{color:#e0bd73}
+#customer-menu-toggle{border-color:#ffffff35;background:#ffffff0c}
+main{max-width:1120px;margin:30px auto;padding:0 22px 60px}
+main>p.muted:first-child{font-size:11px;letter-spacing:1.8px;font-weight:800;color:#7b8798}
+main>h1{font-size:clamp(29px,4vw,39px);letter-spacing:-1.2px;color:#102a48;margin:5px 0 22px}
+.panel{border:1px solid #e4eaf1;box-shadow:0 8px 28px #142b4510;border-radius:16px}
+#customer-home>.panel:first-of-type{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:18px;padding:20px 24px}
+#customer-home>.panel:first-of-type>p:first-child{grid-column:1/-1;font-size:10px;letter-spacing:1.4px;font-weight:800;margin:0;color:#8491a2}
+#customer-home>.panel:first-of-type h2{margin:2px 0;font-size:20px}
+#customer-home>.panel:first-of-type #customer-email{margin:0;font-size:13px}
+#status{grid-column:1/-1;margin:12px 0 0;background:#f3f6fa;border:1px solid #e7edf4;font-size:13px}
+#admin-entry{grid-column:1/-1;margin:10px 0 0}
+.bank-dashboard{margin:22px 0 28px;border:1px solid #e0e7ef;border-radius:20px;background:#fff;box-shadow:0 16px 40px #102b5012;padding-bottom:26px}
+.bank-dashboard-top{background:linear-gradient(115deg,#071b33 0%,#123c68 62%,#1c527b 100%);padding:27px 30px;position:relative;overflow:hidden}
+.bank-dashboard-top:after{content:"";position:absolute;width:240px;height:240px;border:1px solid #ffffff18;border-radius:50%;right:-60px;top:-125px;box-shadow:0 0 0 28px #ffffff08,0 0 0 58px #ffffff06}
+.bank-dashboard-top h2{font-size:30px;letter-spacing:-.7px}.bank-dashboard-top .eyebrow{letter-spacing:2px;color:#e2c783}
+.demo-pill{background:#f5e8c9;color:#5e481f;padding:8px 12px;position:relative;z-index:1}
+.market-strip{margin:20px 26px;border:1px solid #e7ecf2;background:#fbfcfe}
+.market-strip>div{padding:15px 16px}.market-strip strong{color:#153c62;font-size:15px}
+.account-card{margin:0 26px;padding:25px 27px;border:1px solid #d7e0ea;background:linear-gradient(125deg,#102d4d,#174a72 70%,#1a587d);color:#fff;position:relative;overflow:hidden;box-shadow:0 12px 28px #102d4d25}
+.account-card:after{content:"";position:absolute;width:190px;height:190px;border:1px solid #ffffff20;border-radius:50%;right:-55px;bottom:-125px;box-shadow:0 0 0 22px #ffffff08,0 0 0 48px #ffffff06}
+.account-label,.account-card h3{color:#d9e4f0}.account-card h3{font-weight:500}.account-symbol{background:#ffffff1b;border:1px solid #ffffff30;color:#f2d38e}
+.bank-balance{color:#fff;font-size:clamp(35px,7vw,49px);letter-spacing:-1.4px}
+.account-meta{border-color:#ffffff2b;color:#d4e0ec}.account-meta strong{color:#fff}
+.bank-account-status{color:#e0e9f2}
+.quick-actions{margin:20px 26px}.quick-action{border-color:#e0e7ef;color:#183d60;box-shadow:0 3px 10px #102b5008;transition:transform .15s,box-shadow .15s}.quick-action:hover{transform:translateY(-2px);box-shadow:0 8px 18px #102b5015}.quick-action.primary-action{background:#c49a4e;border-color:#c49a4e;color:#102b4a}
+.demo-warning{margin:18px 26px;background:#fff8e9;border:1px solid #f0dfb9;border-left:4px solid #c79d4f;color:#70521d}
+.bank-section-title{margin:27px 26px 6px;color:#102d4e;font-size:21px;letter-spacing:-.3px}
+.bank-dashboard>p:not(.bank-section-title){margin-left:26px;margin-right:26px}
+.transfer-form{margin:16px 26px 22px;max-width:720px;background:#fbfcfe;border-color:#e1e8f0;padding:22px}
+.transfer-form label{color:#243f5d;font-size:13px}.transfer-form input,.transfer-form select{border-color:#d5dee8;background:#fff}
+.transfer-form input:focus,.transfer-form select:focus{border-color:#2a6795;outline:3px solid #2a67951a}
+.transfer-form button{background:#123f68;color:#fff}.conversion-preview{background:#edf4fa;color:#244a6c;border:1px solid #dce8f2}
+.activity-list{margin:14px 26px 0}
+.activity-list>*{border:1px solid #e4eaf1;border-radius:10px;background:#fbfcfe;padding:13px 15px}
+.feature-learning{border:1px solid #e2e9f0;box-shadow:0 8px 24px #102b5009}
+.feature-learning h2{color:#153c60}
+#customer-support,#learning-progress{border:1px solid #e2e9f0}
+button,.button{transition:filter .15s,transform .15s}button:hover,.button:hover{filter:brightness(.97);transform:translateY(-1px)}
+@media(max-width:650px){
+ main{padding-left:13px;padding-right:13px;margin-top:22px}
+ #customer-home>.panel:first-of-type{padding:17px;grid-template-columns:1fr}
+ .bank-dashboard-top{padding:22px 19px}
+ .market-strip{margin:14px 12px}
+ .account-card{margin:0 12px;padding:20px}
+ .quick-actions{margin:15px 12px}
+ .demo-warning{margin:15px 12px}
+ .bank-section-title{margin-left:12px;margin-right:12px}
+ .bank-dashboard>p:not(.bank-section-title){margin-left:12px;margin-right:12px}
+ .transfer-form{margin-left:12px;margin-right:12px;padding:15px}
+ .activity-list{margin-left:12px;margin-right:12px}
+}
+
 </style>
 </head>
 <body>

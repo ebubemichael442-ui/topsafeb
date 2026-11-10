@@ -441,10 +441,12 @@ button,.button{border-radius:9px}
 <section class="panel" id="customer-support" style="margin-top:22px">
 <h2>Support and feedback</h2>
 <p class="muted">Send a message or rating to the TopSafeB owner. Private replies will appear below.</p>
-<div class="support-contact-card"><strong>Contact TopSafeB support</strong><p class="muted">Send a private message to the owner. Your signed-in name and email are attached automatically, and the message appears in the Owner Dashboard.</p></div>
 <div class="support-contact-card" id="live-chat-panel">
-<strong>Live private messages</strong>
-<p class="muted">Chat directly with the TopSafeB owner. Messages are private to your account. New messages appear automatically while this page is open.</p>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+<span aria-hidden="true" style="display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:15px;background:#123f68;color:#e2c783;font-size:23px;font-weight:900">TS</span>
+<div><strong>TopSafeB Message Support</strong><p class="muted" style="margin:2px 0">Private customer-to-owner chat</p></div>
+</div>
+<p class="muted">Send a message directly to the TopSafeB owner here. No email app or file attachment is needed. Your signed-in account identifies the conversation.</p>
 <div id="customer-chat-thread" aria-live="polite" style="display:grid;gap:10px;max-height:360px;overflow:auto;padding:12px;background:#f5f8fb;border-radius:12px;margin:12px 0"><p class="muted">Your conversation will appear here.</p></div>
 <form id="customer-chat-form" class="support-form" style="max-width:none">
 <label for="customer-chat-input">Your message</label>
@@ -453,18 +455,7 @@ button,.button{border-radius:9px}
 <p id="customer-chat-status" class="muted" role="status" aria-live="polite">Messages refresh automatically.</p>
 </form>
 </div>
-<form id="feedback-form" class="support-form">
-<label for="support-topic">What do you need help with?</label>
-<select id="support-topic" required><option value="">Choose a topic</option><option>Account access</option><option>Demo balance or activity</option><option>Simulated transfer</option><option>Learning progress or certificate</option><option>Website problem</option><option>Other question</option></select>
-<label for="support-subject">Subject</label>
-<input id="support-subject" type="text" maxlength="100" required placeholder="Briefly describe your request">
-<label for="feedback-rating">How would you rate your experience?</label>
-<select id="feedback-rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Needs improvement</option><option value="1">1 — Poor</option></select>
-<label for="feedback-message">Your message</label>
-<textarea id="feedback-message" required maxlength="1800" rows="5" placeholder="Tell us how we can help…"></textarea>
-<button type="submit">Send message to support</button>
-<p id="feedback-status" class="muted" role="status" aria-live="polite"></p>
-</form>
+
 <h3>Private replies from the owner</h3>
 <p class="muted">Replies are private to your TopSafeB account. Refresh here to check for a new response.</p>
 <button id="refresh-owner-replies" class="secondary" type="button">Refresh replies</button>
@@ -881,58 +872,6 @@ customerChatForm.addEventListener("submit",async event=>{
  customerChatInput.value="";customerChatStatus.textContent="Message sent.";await loadCustomerLiveChat();button.disabled=false;button.textContent="Send message";
 });
 
-const feedbackForm=document.getElementById("feedback-form");
-const feedbackRating=document.getElementById("feedback-rating");
-const feedbackMessage=document.getElementById("feedback-message");
-const feedbackStatus=document.getElementById("feedback-status");
-const supportTopic=document.getElementById("support-topic");
-const supportSubject=document.getElementById("support-subject");
-const feedbackSubmitButton=feedbackForm.querySelector('button[type="submit"]');
-let lastSubmittedFeedback="";
-let feedbackIsSubmitting=false;
-function updateFeedbackSubmitState(){
-  const currentFeedback=[supportTopic.value,supportSubject.value.trim(),feedbackRating.value,feedbackMessage.value.trim()].join("\\n");
-  const alreadySubmitted=lastSubmittedFeedback!==""&&currentFeedback===lastSubmittedFeedback;
-  feedbackSubmitButton.disabled=feedbackIsSubmitting||alreadySubmitted;
-  feedbackSubmitButton.textContent=feedbackIsSubmitting?"Sending securely…":alreadySubmitted?"Message sent":"Send message to support";
-  if(lastSubmittedFeedback&&!alreadySubmitted&&feedbackStatus.textContent==="Your message has been saved and is visible to the TopSafeB owner. You can edit it to send an update."){
-    feedbackStatus.textContent="You have edited your message. You can send this update.";
-  }
-}
-[supportTopic,supportSubject,feedbackRating,feedbackMessage].forEach(field=>field.addEventListener(field.tagName==="SELECT"?"change":"input",updateFeedbackSubmitState));
-feedbackForm.addEventListener("submit",async event=>{
-  event.preventDefault();
-  const topic=supportTopic.value;
-  const subject=supportSubject.value.trim();
-  const rating=feedbackRating.value;
-  const body=feedbackMessage.value.trim();
-  const message="Support topic: "+topic+"\\nSubject: "+subject+"\\n\\n"+body;
-  const feedbackKey=[topic,subject,rating,body].join("\\n");
-  if(!topic||!subject||!rating||!body){feedbackStatus.textContent="Please complete the topic, subject, rating and message.";return;}
-  if(feedbackKey===lastSubmittedFeedback){feedbackStatus.textContent="This message has already been sent. Edit it if you need to send an update.";return;}
-  if(!currentUserId){feedbackStatus.textContent="Your sign-in session is not ready. Refresh the page and sign in again.";return;}
-  feedbackIsSubmitting=true;updateFeedbackSubmitState();
-  feedbackStatus.textContent="Sending your message securely…";
-  try{
-    const insertRequest=supabase.from("customer_feedback").insert({
-      user_id:currentUserId,
-      customer_name:nameEl.textContent||"",
-      customer_email:emailEl.textContent||"",
-      rating,
-      message
-    });
-    const result=await Promise.race([insertRequest,new Promise((_,reject)=>setTimeout(()=>reject(new Error("The database did not respond within 20 seconds.")),20000))]);
-    if(result.error)throw result.error;
-    lastSubmittedFeedback=feedbackKey;
-    feedbackStatus.textContent="Your message has been saved and is visible to the TopSafeB owner. You can edit it to send an update.";
-    updateFeedbackSubmitState();
-  }catch(error){
-    console.error("TopSafeB support message failed:",error);
-    feedbackStatus.textContent="Your message was not sent: "+(error.message||"Please try again.");
-  }finally{
-    feedbackIsSubmitting=false;updateFeedbackSubmitState();
-  }
-});
 document.getElementById("refresh-owner-replies").addEventListener("click",async()=>{
   const button=document.getElementById("refresh-owner-replies");
   if(!currentUserId){document.getElementById("owner-replies-status").textContent="Please sign in again to check replies.";return;}
@@ -960,6 +899,6 @@ supabase.auth.onAuthStateChange((_event,session)=>{
 });
 loadSession().catch(error=>{console.error("TopSafeB session loading failed:",error);statusEl.textContent="Could not finish sign-in check: "+(error.message||"Please refresh the page or sign in again.");});
 </script>
-<a class="support-chat-fab" href="#customer-support" aria-label="Open private TopSafeB customer support messages" title="Message TopSafeB support"><span class="support-chat-icon" aria-hidden="true">✉</span><span>Message support</span></a>
+<a class="support-chat-fab" href="#live-chat-panel" aria-label="Open TopSafeB private message chat" title="Message TopSafeB support"><span class="support-chat-icon" aria-hidden="true">TS</span><span>Message support</span></a>
 </body>
 </html>

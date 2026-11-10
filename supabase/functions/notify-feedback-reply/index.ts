@@ -15,6 +15,7 @@ Deno.serve(async (req: Request) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const brevoKey = Deno.env.get("BREVO_API_KEY");
     const fromEmail = Deno.env.get("TOPSAFEB_FROM_EMAIL");
+    const testRecipient = Deno.env.get("TEST_RECIPIENT_EMAIL");
     if (!serviceKey || !brevoKey || !fromEmail) return Response.json({ error: "Email service not configured" }, { status: 503, headers: corsHeaders });
     const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
@@ -31,8 +32,8 @@ Deno.serve(async (req: Request) => {
     const greeting = "Hello,";
     const emailPayload = {
       sender: { name: "TopSafeB", email: fromEmail },
-      to: [{ email: feedback.customer_email }],
-      subject: "You have a new private reply from TopSafeB",
+      to: [{ email: testRecipient || feedback.customer_email }],
+      subject: testRecipient ? "[TEST] TopSafeB private reply notification" : "You have a new private reply from TopSafeB",
       textContent: [greeting, "", "TopSafeB has sent you a private reply. Sign in to your account to read it:", dashboardUrl, "", "For your privacy, the reply is not included in this email.", "", "TopSafeB — Independent financial education"].join(String.fromCharCode(10)),
       htmlContent: "<p>" + greeting + "</p><p>TopSafeB has sent you a private reply. Sign in to your account to read it:</p><p><a href=\"" + dashboardUrl + "\">Open your TopSafeB dashboard</a></p><p>For your privacy, the reply is not included in this email.</p><p>TopSafeB — Independent financial education</p>"
     };
@@ -45,7 +46,7 @@ Deno.serve(async (req: Request) => {
       console.error("Brevo send failed", emailResponse.status, await emailResponse.text());
       return Response.json({ error: "Email provider could not send notification" }, { status: 502, headers: corsHeaders });
     }
-    return Response.json({ success: true }, { headers: corsHeaders });
+    return Response.json({ success: true, testMode: Boolean(testRecipient) }, { headers: corsHeaders });
   } catch (error) {
     console.error("Feedback notification error", error);
     return Response.json({ error: "Unexpected notification error" }, { status: 500, headers: corsHeaders });

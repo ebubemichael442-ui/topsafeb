@@ -199,7 +199,7 @@ async function loadDemoFunds(customers){
  const customerNames=new Map(customers.map(c=>[c.user_id,(c.full_name||"Customer")+" ("+(c.email||"")+")"]));
  for(const item of history||[]){
   const tr=document.createElement("tr");
-  const values=[new Date(item.created_at).toLocaleString(),customerNames.get(item.user_id)||"Customer",({add:"Added",deduct:"Deducted",set:"Balance set",transfer:"Transfer to Oso Local Bank"})[item.action]||item.action,new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount)),new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.balance_after)),item.note||"—"];
+  const values=[new Date(item.created_at).toLocaleString(),customerNames.get(item.user_id)||"Customer",({add:"Added",deduct:"Deducted",set:"Balance set",transfer:"Fictional bank transfer"})[item.action]||item.action,new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount)),new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.balance_after)),item.note||"—"];
   for(const value of values){const td=document.createElement("td");td.textContent=value;tr.append(td);}historyBody.append(tr);
  }
  if(!(history||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No demo balance changes yet.";tr.append(td);historyBody.append(tr);}

@@ -9,7 +9,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   try {
-    const token = (req.headers.get("Authorization") || "").replace(/^Bearer\\s+/i, "");
+    const authHeader = req.headers.get("Authorization") || ""; const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
     if (!token) return Response.json({ error: "Sign-in required" }, { status: 401, headers: corsHeaders });
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
       sender: { name: "TopSafeB", email: fromEmail },
       to: [{ email: feedback.customer_email }],
       subject: "You have a new private reply from TopSafeB",
-      textContent: greeting + "\\n\\nTopSafeB has sent you a private reply. Sign in to your account to read it:\\n" + dashboardUrl + "\\n\\nFor your privacy, the reply is not included in this email.\\n\\nTopSafeB — Independent financial education",
+      textContent: [greeting, "", "TopSafeB has sent you a private reply. Sign in to your account to read it:", dashboardUrl, "", "For your privacy, the reply is not included in this email.", "", "TopSafeB — Independent financial education"].join(String.fromCharCode(10)),
       htmlContent: "<p>" + greeting + "</p><p>TopSafeB has sent you a private reply. Sign in to your account to read it:</p><p><a href=\"" + dashboardUrl + "\">Open your TopSafeB dashboard</a></p><p>For your privacy, the reply is not included in this email.</p><p>TopSafeB — Independent financial education</p>"
     };
     const emailResponse = await fetch("https://api.brevo.com/v3/smtp/email", {

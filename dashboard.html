@@ -223,6 +223,17 @@ input,select,textarea{font-size:16px}
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
 
+
+.support-contact-card{padding:16px 18px;margin:14px 0;background:#f2f6fa;border:1px solid #dfe8f0;border-radius:12px}
+.support-contact-card p{margin:5px 0 0;font-size:13px;line-height:1.55}
+.support-form{display:grid;gap:10px;max-width:680px;padding:18px;border:1px solid #e1e8f0;border-radius:14px;background:#fbfcfe}
+.support-form label{font-size:13px;font-weight:750;color:#243f5d}
+.support-form input,.support-form select,.support-form textarea{width:100%;min-height:46px;padding:12px;border:1px solid #d5dee8;border-radius:9px;background:#fff;font:inherit;font-size:16px}
+.support-form textarea{min-height:125px;resize:vertical}
+.support-form button{margin-top:4px;background:#123f68;color:#fff}
+#refresh-owner-replies{margin:8px 0}
+@media(max-width:650px){.support-form{padding:14px}.support-form button,#refresh-owner-replies{width:100%}}
+
 </style>
 </head>
 <body>
@@ -323,18 +334,25 @@ input,select,textarea{font-size:16px}
 <section class="panel" id="customer-support" style="margin-top:22px">
 <h2>Support and feedback</h2>
 <p class="muted">Send a message or rating to the TopSafeB owner. Private replies will appear below.</p>
-<form id="feedback-form" style="display:grid;gap:12px;max-width:620px">
-<label for="feedback-rating">Your rating</label>
-<select id="feedback-rating" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit"><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Needs improvement</option><option value="1">1 — Poor</option></select>
-<label for="feedback-message">Your feedback</label>
-<textarea id="feedback-message" required maxlength="2000" rows="4" placeholder="Write your message…" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit"></textarea>
-<button type="submit">Submit feedback</button>
+<div class="support-contact-card"><strong>Contact TopSafeB support</strong><p class="muted">Send a private message to the owner. Your signed-in name and email are attached automatically, and the message appears in the Owner Dashboard.</p></div>
+<form id="feedback-form" class="support-form">
+<label for="support-topic">What do you need help with?</label>
+<select id="support-topic" required><option value="">Choose a topic</option><option>Account access</option><option>Demo balance or activity</option><option>Simulated transfer</option><option>Learning progress or certificate</option><option>Website problem</option><option>Other question</option></select>
+<label for="support-subject">Subject</label>
+<input id="support-subject" type="text" maxlength="100" required placeholder="Briefly describe your request">
+<label for="feedback-rating">How would you rate your experience?</label>
+<select id="feedback-rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Needs improvement</option><option value="1">1 — Poor</option></select>
+<label for="feedback-message">Your message</label>
+<textarea id="feedback-message" required maxlength="1800" rows="5" placeholder="Tell us how we can help…"></textarea>
+<button type="submit">Send message to support</button>
 <p id="feedback-status" class="muted" role="status" aria-live="polite"></p>
 </form>
-<h3>Private replies</h3>
+<h3>Private replies from the owner</h3>
+<p class="muted">Replies are private to your TopSafeB account. Refresh here to check for a new response.</p>
+<button id="refresh-owner-replies" class="secondary" type="button">Refresh replies</button>
 <div id="reply-notification" class="notice" role="status" aria-live="polite" hidden><strong>New private reply:</strong> TopSafeB has responded to your feedback. Read your reply below.</div>
 <p id="owner-replies-status" class="muted" role="status" aria-live="polite">Checking for replies…</p>
-<div id="owner-replies-list" style="display:grid;gap:12px"></div>
+<div id="owner-replies-list" style="display:grid;gap:12px;margin-top:12px"></div>
 </section>
 
 <section class="panel" id="learning-progress" style="margin-top:22px">
@@ -639,36 +657,34 @@ const feedbackForm=document.getElementById("feedback-form");
 const feedbackRating=document.getElementById("feedback-rating");
 const feedbackMessage=document.getElementById("feedback-message");
 const feedbackStatus=document.getElementById("feedback-status");
+const supportTopic=document.getElementById("support-topic");
+const supportSubject=document.getElementById("support-subject");
 const feedbackSubmitButton=feedbackForm.querySelector('button[type="submit"]');
 let lastSubmittedFeedback="";
 let feedbackIsSubmitting=false;
 function updateFeedbackSubmitState(){
-  const currentFeedback=feedbackRating.value+"\\n"+feedbackMessage.value.trim();
+  const currentFeedback=[supportTopic.value,supportSubject.value.trim(),feedbackRating.value,feedbackMessage.value.trim()].join("\\n");
   const alreadySubmitted=lastSubmittedFeedback!==""&&currentFeedback===lastSubmittedFeedback;
   feedbackSubmitButton.disabled=feedbackIsSubmitting||alreadySubmitted;
-  feedbackSubmitButton.textContent=feedbackIsSubmitting?"Submitting…":alreadySubmitted?"Feedback submitted":"Submit feedback";
-  if(lastSubmittedFeedback&& !alreadySubmitted && feedbackStatus.textContent==="Your feedback has been saved securely. Edit your rating or message to submit an update."){
-    feedbackStatus.textContent="You have edited your feedback. You can submit this update.";
+  feedbackSubmitButton.textContent=feedbackIsSubmitting?"Sending securely…":alreadySubmitted?"Message sent":"Send message to support";
+  if(lastSubmittedFeedback&&!alreadySubmitted&&feedbackStatus.textContent==="Your message has been saved and is visible to the TopSafeB owner. You can edit it to send an update."){
+    feedbackStatus.textContent="You have edited your message. You can send this update.";
   }
 }
-feedbackRating.addEventListener("change",updateFeedbackSubmitState);
-feedbackMessage.addEventListener("input",updateFeedbackSubmitState);
+[supportTopic,supportSubject,feedbackRating,feedbackMessage].forEach(field=>field.addEventListener(field.tagName==="SELECT"?"change":"input",updateFeedbackSubmitState));
 feedbackForm.addEventListener("submit",async event=>{
   event.preventDefault();
-  const form=event.currentTarget;
+  const topic=supportTopic.value;
+  const subject=supportSubject.value.trim();
   const rating=feedbackRating.value;
-  const message=feedbackMessage.value.trim();
-  const feedbackKey=rating+"\\n"+message;
-  if(!rating||!message){feedbackStatus.textContent="Please choose a rating and enter your feedback.";return;}
-  if(feedbackKey===lastSubmittedFeedback){
-    feedbackStatus.textContent="This feedback has already been submitted. Edit your rating or message if you want to send an update.";
-    updateFeedbackSubmitState();
-    return;
-  }
+  const body=feedbackMessage.value.trim();
+  const message="Support topic: "+topic+"\\nSubject: "+subject+"\\n\\n"+body;
+  const feedbackKey=[topic,subject,rating,body].join("\\n");
+  if(!topic||!subject||!rating||!body){feedbackStatus.textContent="Please complete the topic, subject, rating and message.";return;}
+  if(feedbackKey===lastSubmittedFeedback){feedbackStatus.textContent="This message has already been sent. Edit it if you need to send an update.";return;}
   if(!currentUserId){feedbackStatus.textContent="Your sign-in session is not ready. Refresh the page and sign in again.";return;}
-  feedbackIsSubmitting=true;
-  updateFeedbackSubmitState();
-  feedbackStatus.textContent="Submitting your feedback securely…";
+  feedbackIsSubmitting=true;updateFeedbackSubmitState();
+  feedbackStatus.textContent="Sending your message securely…";
   try{
     const insertRequest=supabase.from("customer_feedback").insert({
       user_id:currentUserId,
@@ -677,20 +693,24 @@ feedbackForm.addEventListener("submit",async event=>{
       rating,
       message
     });
-    const result=await Promise.race([
-      insertRequest,
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error("The database did not respond within 20 seconds.")),20000))
-    ]);
-    if(result.error) throw result.error;
+    const result=await Promise.race([insertRequest,new Promise((_,reject)=>setTimeout(()=>reject(new Error("The database did not respond within 20 seconds.")),20000))]);
+    if(result.error)throw result.error;
     lastSubmittedFeedback=feedbackKey;
-    feedbackStatus.textContent="Your feedback has been saved securely. Edit your rating or message to submit an update.";
-  }catch(error){
-    console.error("TopSafeB feedback submission failed:",error);
-    feedbackStatus.textContent="Feedback was not saved: "+(error.message||"Please refresh and try again.");
-  }finally{
-    feedbackIsSubmitting=false;
+    feedbackStatus.textContent="Your message has been saved and is visible to the TopSafeB owner. You can edit it to send an update.";
     updateFeedbackSubmitState();
+  }catch(error){
+    console.error("TopSafeB support message failed:",error);
+    feedbackStatus.textContent="Your message was not sent: "+(error.message||"Please try again.");
+  }finally{
+    feedbackIsSubmitting=false;updateFeedbackSubmitState();
   }
+});
+document.getElementById("refresh-owner-replies").addEventListener("click",async()=>{
+  const button=document.getElementById("refresh-owner-replies");
+  if(!currentUserId){document.getElementById("owner-replies-status").textContent="Please sign in again to check replies.";return;}
+  button.disabled=true;button.textContent="Checking…";
+  try{await loadCustomerReplies(currentUserId);}
+  finally{button.disabled=false;button.textContent="Refresh replies";}
 });
 document.getElementById("menu-logout").addEventListener("click",()=>signoutButton.click());
 const menuToggle=document.getElementById("customer-menu-toggle");

@@ -21,6 +21,32 @@ table{width:100%;border-collapse:separate;border-spacing:0;margin-top:14px;font-
 .table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy);margin:4px 0}
 .search-tools{margin:18px 0}.search-tools label{display:block;font-weight:700;margin-bottom:6px}.search-tools input{width:100%;max-width:480px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.search-summary{font-size:14px;color:var(--muted);margin:6px 0}.detail-panel{margin-top:18px;border:1px solid #dbe3ed;border-radius:10px;padding:18px;background:#f8fafc}.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.detail-item{background:white;padding:12px;border-radius:8px}.detail-item strong{display:block;color:var(--muted);font-size:13px}.lesson-list{margin:8px 0 0;padding-left:22px}
 .dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:26px 0}.summary-card{background:#fff;border:1px solid var(--line);border-top:3px solid var(--purple);border-radius:14px;padding:22px;box-shadow:0 8px 24px #1027440a}.summary-card h2{font-size:14px;margin:0 0 7px;letter-spacing:.1px}.summary-card p{margin:5px 0;color:var(--muted);font-size:13px}.summary-card .stat{font-size:36px;letter-spacing:-1.2px;color:var(--navy)}.summary-card:nth-child(2){border-top-color:#c29b50}.summary-card:nth-child(3){border-top-color:#3d8a78}
+
+main{max-width:1320px}
+main>h1{letter-spacing:-1.2px}
+.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.summary-card{position:relative;overflow:hidden;border-top:0;border:1px solid #dfe7f0;background:linear-gradient(145deg,#fff 0%,#f8fafc 100%);padding:20px 21px}
+.summary-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#6e59a5}
+.summary-card:nth-child(2):before{background:#c29b50}.summary-card:nth-child(3):before{background:#3d8a78}.summary-card:nth-child(4):before{background:#527ca9}
+.summary-card .stat{font-size:clamp(24px,2.5vw,32px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.metric-foot{font-size:11px;color:#738197;font-weight:700;letter-spacing:.25px}
+.panel{border-radius:13px;border-color:#dce5ef;box-shadow:0 5px 20px #1027440a}
+.panel h2{display:flex;align-items:center;gap:9px}
+.panel h2:before{content:"";display:inline-block;width:4px;height:19px;border-radius:4px;background:var(--gold)}
+table{border:1px solid #e2e9f1;border-radius:10px;overflow:hidden;background:#fff}
+th{background:#edf2f7;color:#43566f}
+tbody tr:nth-child(even){background:#fbfcfe}
+tbody tr:hover{background:#f2f7fc}
+td{font-variant-numeric:tabular-nums}
+button{transition:filter .15s ease,transform .15s ease}
+button:hover{filter:brightness(.97);transform:translateY(-1px)}
+#status{border:1px solid #dce7df;background:#f0f7f2;color:#246044;font-weight:700}
+#live-chat-customer-list button{width:100%;border:1px solid #d9e2ed;background:#fff;color:var(--navy);border-radius:10px}
+#live-chat-customer-list button:hover{background:#f2f6fb}
+#owner-chat-thread{border:1px solid #e0e7ef}
+@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.dashboard-grid{grid-template-columns:1fr}.summary-card{padding:16px}}
+
 footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}footer p{color:#c6d2e1}
 @media(max-width:700px){header{padding:13px 5%}.menu-toggle{display:block;color:#fff;border:1px solid #ffffff40;border-radius:8px}nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--navy);padding:16px 5%;box-shadow:0 8px 14px #102b5020;flex-direction:column;gap:14px}nav.open{display:flex}main{margin-top:22px;padding-left:14px;padding-right:14px}.dashboard-grid{grid-template-columns:1fr;gap:12px;margin:18px 0}.summary-card{padding:18px}.summary-card .stat{font-size:32px}th,td{padding:10px;font-size:12px}.panel{padding:17px;border-radius:12px}.panel h2{font-size:19px}}
 </style>
@@ -31,7 +57,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <p class="muted">RESTRICTED OWNER AREA</p>
 <h1>Owner Control Centre</h1>
 <p class="muted">A clear overview of customers, learning activity, support and simulated account tools.</p>
-<div class="dashboard-grid" aria-label="Dashboard summary"><article class="summary-card"><h2>Users</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p></article><article class="summary-card"><h2>Customer Feedback</h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p></article><article class="summary-card"><h2>Learning Progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p></article></div>
+<div class="dashboard-grid" aria-label="Practice operations overview"><article class="summary-card"><h2>Customer portfolio</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p><span class="metric-foot">Customer profiles</span></article><article class="summary-card"><h2>Total practice funds</h2><p class="muted">Illustrative USD balances</p><p class="stat" id="total-demo-funds">—</p><span class="metric-foot">Not real deposits or cash</span></article><article class="summary-card"><h2>Customer feedback</h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p><span class="metric-foot">Private support records</span></article><article class="summary-card"><h2>Learning progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p><span class="metric-foot">Across customer accounts</span></article></div>
 <section class="panel">
 <p class="muted">SIGNED-IN OWNER</p>
 <h2 id="owner-name">Checking access…</h2>
@@ -226,6 +252,9 @@ async function loadDemoFunds(customers){
  const {data:accounts,error}=await supabase.from("demo_accounts").select("user_id,balance,currency,updated_at");
  if(error){status.textContent="Demo Funds setup is not complete yet. Run supabase/demo-funds-setup.sql in Supabase SQL Editor, then refresh this page.";body.replaceChildren();return;}
  const byUser=new Map((accounts||[]).map(row=>[row.user_id,row]));
+ const totalPracticeFunds=(accounts||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.balance)||0),0);
+ const totalFundsEl=document.getElementById("total-demo-funds");
+ if(totalFundsEl)totalFundsEl.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(totalPracticeFunds);
  body.replaceChildren();
  for(const customer of customers){
   const account=byUser.get(customer.user_id);
@@ -251,7 +280,7 @@ async function loadDemoFunds(customers){
   applyCell.append(apply);actionCell.append(action);tr.append(name,balanceCell,actionCell,amountCell,noteCell,applyCell);body.append(tr);
  }
  if(!customers.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No customer profiles found.";tr.append(td);body.append(tr);}
- status.textContent="Demo accounts loaded. Changes are recorded in the history below.";
+ status.textContent="Practice account ledger loaded · "+(accounts||[]).length+" account(s) · USD.";
  const {data:history,error:historyError}=await supabase.from("demo_transactions").select("user_id,action,amount,balance_after,note,created_at").order("created_at",{ascending:false}).limit(20);
  historyBody.replaceChildren();
  if(historyError){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="History is unavailable until the demo funds setup is complete.";tr.append(td);historyBody.append(tr);return;}

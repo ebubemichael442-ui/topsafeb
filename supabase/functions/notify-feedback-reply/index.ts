@@ -20,15 +20,15 @@ Deno.serve(async (req: Request) => {
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     const user = userData?.user;
     if (userError || !user) return Response.json({ error: "Invalid sign-in" }, { status: 401, headers: corsHeaders });
-    const { data: admin } = await supabase.from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
-    if (!admin) return Response.json({ error: "Administrator access required" }, { status: 403, headers: corsHeaders });
+    const { data: admin, error: adminError } = await supabase.from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
+    if (adminError || !admin) return Response.json({ error: "Administrator access required" }, { status: 403, headers: corsHeaders });
     const body = await req.json().catch(() => ({}));
     const feedbackId = typeof body.feedbackId === "string" ? body.feedbackId : "";
     if (!feedbackId) return Response.json({ error: "Feedback ID required" }, { status: 400, headers: corsHeaders });
     const { data: feedback, error: feedbackError } = await supabase.from("customer_feedback").select("customer_email,customer_name,owner_reply").eq("id", feedbackId).maybeSingle();
     if (feedbackError || !feedback?.customer_email || !feedback.owner_reply) return Response.json({ error: "Saved reply or customer email not found" }, { status: 404, headers: corsHeaders });
     const dashboardUrl = "https://ebubemichael442-ui.github.io/topsafeb/dashboard.html";
-    const greeting = feedback.customer_name ? "Hello " + feedback.customer_name + "," : "Hello,";
+    const greeting = "Hello,";
     const emailPayload = {
       sender: { name: "TopSafeB", email: fromEmail },
       to: [{ email: feedback.customer_email }],

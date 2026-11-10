@@ -211,3 +211,77 @@ $$;
 
 revoke all on function public.customer_demo_transfer_oso_local(numeric,text,text,text) from public;
 grant execute on function public.customer_demo_transfer_oso_local(numeric,text,text,text) to authenticated;
+
+
+-- Replace the single-bank simulation with a selectable list of fictional banks.
+drop function if exists public.customer_demo_transfer_oso_local(numeric,text,text,text);
+
+create or replace function public.customer_demo_transfer_fictional_bank(
+  p_bank_name text,
+  p_amount numeric,
+  p_recipient_name text,
+  p_account_number text,
+  p_description text default ''
+)
+returns table(new_balance numeric, transaction_id uuid)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_balance numeric(14,2);
+  v_new_balance numeric(14,2);
+  v_transaction_id uuid;
+  v_note text;
+begin
+  if v_user_id is null then raise exception 'Please sign in to make a demo transfer'; end if;
+  if p_bank_name is null or p_bank_name not in (
+    'Oso Local Bank',
+    'Rivergate Community Bank',
+    'Maple Street Savings Bank',
+    'Harborlight Local Bank',
+    'Pioneer Town Bank',
+    'Greenfield Neighbourhood Bank',
+    'Unity Corner Bank',
+    'Westbridge Local Bank'
+  ) then raise exception 'Choose one of the listed fictional demo banks'; end if;
+  if p_recipient_name is null or length(trim(p_recipient_name)) < 2 or length(p_recipient_name) > 100 then
+    raise exception 'Enter a valid recipient name';
+  end if;
+  if p_account_number is null or p_account_number !~ '^[0-9]{8,16}$' then
+    raise exception 'Use an 8 to 16 digit fictional account number';
+  end if;
+  if p_amount is null or p_amount <= 0 or p_amount > 1000000000 then
+    raise exception 'Enter a valid transfer amount';
+  end if;
+
+  insert into public.demo_accounts(user_id,balance) values(v_user_id,0)
+  on conflict(user_id) do nothing;
+
+  select balance into v_balance from public.demo_accounts
+  where user_id=v_user_id for update;
+
+  if v_balance < round(p_amount,2) then
+    raise exception 'Insufficient demo funds. Your available balance is % USD',v_balance;
+  end if;
+
+  v_new_balance := v_balance - round(p_amount,2);
+  v_note := 'Fictional bank: ' || p_bank_name
+    || ' | Recipient: ' || trim(p_recipient_name)
+    || ' | Account ending ' || right(p_account_number,4)
+    || case when coalesce(trim(p_description),'') <> '' then ' | Description: ' || left(trim(p_description),120) else '' end;
+
+  update public.demo_accounts set balance=v_new_balance,updated_at=now()
+  where user_id=v_user_id;
+
+  insert into public.demo_transactions(user_id,action,amount,balance_after,note,created_by)
+  values(v_user_id,'transfer',round(p_amount,2),v_new_balance,v_note,v_user_id)
+  returning id into v_transaction_id;
+
+  return query select v_new_balance,v_transaction_id;
+end;
+$$;
+
+revoke all on function public.customer_demo_transfer_fictional_bank(text,numeric,text,text,text) from public;
+grant execute on function public.customer_demo_transfer_fictional_bank(text,numeric,text,text,text) to authenticated;

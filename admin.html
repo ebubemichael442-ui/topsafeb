@@ -78,6 +78,23 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <tbody id="feedback-rows"><tr><td colspan="7">Loading feedback…</td></tr></tbody>
 </table></div>
 </section>
+<section class="panel" id="live-support-inbox">
+<h2>Live customer messages</h2>
+<p class="muted">Private conversations with signed-in customers. Select a customer conversation to read and reply. New messages refresh automatically while this page is open.</p>
+<p id="live-chat-admin-status" class="muted" role="status" aria-live="polite">Loading conversations…</p>
+<div style="display:grid;grid-template-columns:minmax(180px,0.8fr) minmax(0,2fr);gap:16px;align-items:start">
+<div id="live-chat-customer-list" style="display:grid;gap:8px"></div>
+<div>
+<h3 id="live-chat-heading">Select a conversation</h3>
+<div id="owner-chat-thread" aria-live="polite" style="display:grid;gap:10px;max-height:440px;overflow:auto;padding:12px;background:#f5f8fb;border-radius:12px;margin:12px 0"><p class="muted">Choose a customer to view messages.</p></div>
+<form id="owner-chat-form" style="display:grid;gap:10px">
+<label for="owner-chat-input">Reply to customer</label>
+<textarea id="owner-chat-input" rows="3" maxlength="2000" required placeholder="Write a private reply…" style="width:100%;padding:12px;border:1px solid #d5dee8;border-radius:9px;font:inherit"></textarea>
+<button type="submit" id="owner-chat-send" disabled>Send reply</button>
+</form>
+</div>
+</div>
+</section>
 <div class="notice"><strong>Privacy:</strong> This page displays customer names, email addresses and learning progress dates available to the administrator. Do not share this information. TopSafeB is an educational platform, not a bank; this dashboard cannot access deposits, bank accounts or payments.</div>
 </main>
 <footer><strong>TopSafeB</strong><p>Restricted owner administration area.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
@@ -247,6 +264,67 @@ async function loadDemoFunds(customers){
  if(!(history||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No demo balance changes yet.";tr.append(td);historyBody.append(tr);}
 }
 
+
+let activeSupportUserId=null;
+let supportChatTimer=null;
+const supportCustomerList=document.getElementById("live-chat-customer-list");
+const supportOwnerThread=document.getElementById("owner-chat-thread");
+const supportOwnerForm=document.getElementById("owner-chat-form");
+const supportOwnerInput=document.getElementById("owner-chat-input");
+const supportOwnerStatus=document.getElementById("live-chat-admin-status");
+const supportOwnerHeading=document.getElementById("live-chat-heading");
+const supportOwnerSend=document.getElementById("owner-chat-send");
+let supportProfiles=new Map();
+function renderOwnerChatBubble(item){
+ const own=item.sender_role==="owner";
+ const bubble=document.createElement("article");
+ bubble.style.cssText="max-width:88%;justify-self:"+(own?"end":"start")+";padding:11px 13px;border-radius:13px;background:"+(own?"#e6f0fb":"#fff")+";border:1px solid #dce5ef;overflow-wrap:anywhere";
+ const who=document.createElement("strong");who.textContent=own?"You (owner)":(supportProfiles.get(item.user_id)?.full_name||"Customer");who.style.display="block";
+ const body=document.createElement("p");body.textContent=item.message;body.style.cssText="white-space:pre-wrap;margin:6px 0";
+ const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();
+ bubble.append(who,body,when);supportOwnerThread.append(bubble);
+}
+async function loadOwnerLiveChats(){
+ const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,created_at").order("created_at",{ascending:false}).limit(300);
+ if(error){supportOwnerStatus.textContent="Live chat setup is not complete. Run supabase/live-support-chat.sql in Supabase SQL Editor, then refresh.";return;}
+ const messages=data||[];
+ const latestByUser=new Map();
+ for(const item of messages){if(!latestByUser.has(item.user_id))latestByUser.set(item.user_id,item);}
+ const ids=[...latestByUser.keys()];
+ supportCustomerList.replaceChildren();
+ if(!ids.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No customer conversations yet.";supportCustomerList.append(empty);}
+ const {data:profiles}=ids.length?await supabase.from("profiles").select("user_id,full_name,email").in("user_id",ids):{data:[]};
+ supportProfiles=new Map((profiles||[]).map(p=>[p.user_id,p]));
+ for(const [uid,last] of latestByUser){
+  const profile=supportProfiles.get(uid)||{};
+  const button=document.createElement("button");button.type="button";button.className="secondary";button.style.cssText="text-align:left;white-space:normal";
+  button.textContent=(profile.full_name||profile.email||"Customer")+" — "+last.message.slice(0,65);
+  button.addEventListener("click",()=>{activeSupportUserId=uid;supportOwnerHeading.textContent="Conversation with "+(profile.full_name||profile.email||"customer");supportOwnerSend.disabled=false;loadSelectedOwnerChat();});
+  supportCustomerList.append(button);
+ }
+ supportOwnerStatus.textContent=ids.length+" customer "+(ids.length===1?"conversation":"conversations")+". Updated "+new Date().toLocaleTimeString();
+ if(activeSupportUserId)await loadSelectedOwnerChat();
+}
+async function loadSelectedOwnerChat(){
+ if(!activeSupportUserId)return;
+ const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,created_at").eq("user_id",activeSupportUserId).order("created_at",{ascending:true}).limit(150);
+ if(error){supportOwnerStatus.textContent="Could not load this conversation: "+error.message;return;}
+ supportOwnerThread.replaceChildren();
+ if(!(data||[]).length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No messages in this conversation.";supportOwnerThread.append(empty);}
+ for(const item of data||[])renderOwnerChatBubble(item);
+ supportOwnerThread.scrollTop=supportOwnerThread.scrollHeight;
+}
+supportOwnerForm.addEventListener("submit",async event=>{
+ event.preventDefault();const message=supportOwnerInput.value.trim();
+ if(!message||!activeSupportUserId)return;
+ supportOwnerSend.disabled=true;supportOwnerSend.textContent="Sending…";
+ const {data:{user}}=await supabase.auth.getUser();
+ const {error}=await supabase.from("support_messages").insert({user_id:activeSupportUserId,sender_id:user.id,sender_role:"owner",message});
+ if(error){supportOwnerStatus.textContent="Reply not sent: "+error.message;}
+ else{supportOwnerInput.value="";supportOwnerStatus.textContent="Reply sent.";await loadSelectedOwnerChat();}
+ supportOwnerSend.disabled=false;supportOwnerSend.textContent="Send reply";
+});
+
 async function loadAdmin(){
  const {data:{session},error:sessionError}=await supabase.auth.getSession();
  if(sessionError)throw sessionError;
@@ -291,6 +369,9 @@ async function loadAdmin(){
  await loadDemoFunds(list);
  await loadTopupRequests(list);
  await loadFeedback();
+ await loadOwnerLiveChats();
+ if(supportChatTimer)clearInterval(supportChatTimer);
+ supportChatTimer=setInterval(loadOwnerLiveChats,5000);
 }
 function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));}
 function printCustomerReport(customer,record,formatDate){

@@ -365,13 +365,17 @@ supportOwnerForm.addEventListener("submit",async event=>{
 });
 
 async function loadAdmin(){
- const {data:{session},error:sessionError}=await supabase.auth.getSession();
+ nameEl.textContent="Checking signed-in owner…";
+ statusEl.textContent="Connecting securely to your TopSafeB account…";
+ const timeout=(promise,label,ms=12000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your internet connection and reload the page.")),ms))]);
+ const {data:{session},error:sessionError}=await timeout(supabase.auth.getSession(),"Account session check");
  if(sessionError)throw sessionError;
- if(!session){window.location.replace("login.html");return;}
+ if(!session){statusEl.textContent="Your session has expired. Please sign in again.";setTimeout(()=>window.location.replace("login.html"),1800);return;}
  const user=session.user;
  nameEl.textContent=user.user_metadata?.full_name||"TopSafeB owner";
  emailEl.textContent=user.email||"";
- const {data:adminRecord,error:adminError}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
+ statusEl.textContent="Checking administrator permissions…";
+ const {data:adminRecord,error:adminError}=await timeout(supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle(),"Administrator permission check");
  if(adminError)throw adminError;
  if(!adminRecord){statusEl.textContent="Access denied. This account is not registered as a TopSafeB administrator.";return;}
  statusEl.textContent="Administrator access confirmed.";
@@ -591,7 +595,7 @@ signoutButton.addEventListener("click",async()=>{
  window.location.replace("login.html");
 });
 supabase.auth.onAuthStateChange((_event,session)=>{if(!session)window.location.replace("login.html");});
-loadAdmin().catch(error=>{statusEl.textContent="Could not load the admin area: "+error.message;rowsEl.innerHTML="<tr><td colspan='7'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
+loadAdmin().catch(error=>{nameEl.textContent="Owner access could not be verified";statusEl.textContent="Owner dashboard error: "+(error?.message||String(error));rowsEl.innerHTML="<tr><td colspan='7'>Customer list or learning progress could not be loaded. Check that the learning_progress SQL setup has been completed.</td></tr>";});
 </script>
 </body>
 </html>

@@ -153,8 +153,7 @@ async function loadFeedback(){
  for(const item of items){
   const tr=document.createElement("tr");
   const date=document.createElement("td");date.textContent=new Date(item.created_at).toLocaleString();
-  const customer=document.createElement("td");customer.textContent=(item.customer_name||"Customer")+"\
-"+(item.customer_email||"");
+  const customer=document.createElement("td");customer.textContent=(item.customer_name||"Customer")+" · "+(item.customer_email||"");
   const rating=document.createElement("td");rating.textContent=item.rating;
   const message=document.createElement("td");message.textContent=item.message;message.style.whiteSpace="pre-wrap";message.style.minWidth="220px";
   const status=document.createElement("td");status.textContent=item.status;
@@ -579,8 +578,7 @@ const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].
 customerSearch.addEventListener("input",filterCustomers);
 exportButton.addEventListener("click",()=>{
  const headers=["Full name","Email","Lessons completed","Completed on","Last progress update"];
- const csv="\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\r
-");
+ const csv="\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\r\n");
  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
  const url=URL.createObjectURL(blob);const link=document.createElement("a");
  link.href=url;link.download="topsafeb-customer-records-"+new Date().toISOString().slice(0,10)+".csv";

@@ -153,7 +153,8 @@ async function loadFeedback(){
  for(const item of items){
   const tr=document.createElement("tr");
   const date=document.createElement("td");date.textContent=new Date(item.created_at).toLocaleString();
-  const customer=document.createElement("td");customer.textContent=(item.customer_name||"Customer")+"\\n"+(item.customer_email||"");
+  const customer=document.createElement("td");customer.textContent=(item.customer_name||"Customer")+"\
+"+(item.customer_email||"");
   const rating=document.createElement("td");rating.textContent=item.rating;
   const message=document.createElement("td");message.textContent=item.message;message.style.whiteSpace="pre-wrap";message.style.minWidth="220px";
   const status=document.createElement("td");status.textContent=item.status;
@@ -201,7 +202,9 @@ async function loadFeedback(){
 document.getElementById("close-details").addEventListener("click",()=>{detailsPanel.hidden=true;});
 const menuToggle=document.getElementById("menu-toggle");const ownerNav=document.getElementById("owner-nav");menuToggle.addEventListener("click",()=>{const opened=ownerNav.classList.toggle("open");menuToggle.setAttribute("aria-expanded",String(opened));});ownerNav.addEventListener("click",event=>{if(event.target.closest("a")){ownerNav.classList.remove("open");menuToggle.setAttribute("aria-expanded","false");}});
 let exportRows=[];
-let customerTableRows=[];\nlet customerProfiles=[];\nlet activeManagedCustomer=null;
+let customerTableRows=[];
+let customerProfiles=[];
+let activeManagedCustomer=null;
 const noSearchResults=document.createElement("tr");
 const noSearchResultsCell=document.createElement("td");
 noSearchResultsCell.colSpan=6;noSearchResultsCell.textContent="No customers match your search.";
@@ -375,7 +378,8 @@ async function loadAdmin(){
  statusEl.textContent="Administrator access confirmed.";
  const {data:customers,error:customerError}=await supabase.from("profiles").select("user_id,full_name,email").order("full_name",{ascending:true});
  if(customerError)throw customerError;
- const list=customers||[];\n customerProfiles=list;
+ const list=customers||[];
+ customerProfiles=list;
  const {data:progressRows,error:progressError}=await supabase.from("learning_progress").select("user_id,completed_lessons,completed_at,updated_at");
  if(progressError)throw progressError;
  const progressByUser=new Map((progressRows||[]).map(item=>[item.user_id,item]));
@@ -399,7 +403,8 @@ async function loadAdmin(){
   const action=document.createElement("td");const viewButton=document.createElement("button");viewButton.type="button";viewButton.className="secondary";viewButton.textContent="View details";
   viewButton.addEventListener("click",()=>showCustomerDetails(customer,record,formatDate));action.append(viewButton);
   tr.append(name,email,progress,completedOn,updatedOn,action);
-  tr.dataset.search=((customer.full_name||"")+" "+(customer.email||"")).toLocaleLowerCase();\n  tr.dataset.userId=customer.user_id;
+  tr.dataset.search=((customer.full_name||"")+" "+(customer.email||"")).toLocaleLowerCase();
+  tr.dataset.userId=customer.user_id;
   customerTableRows.push(tr);rowsEl.append(tr);
  }
  rowsEl.append(noSearchResults);filterCustomers();
@@ -574,7 +579,8 @@ const csvCell=value=>{let text=String(value??"");if(["=","+","-","@","\t","\r"].
 customerSearch.addEventListener("input",filterCustomers);
 exportButton.addEventListener("click",()=>{
  const headers=["Full name","Email","Lessons completed","Completed on","Last progress update"];
- const csv="\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\r\n");
+ const csv="\uFEFF"+[headers,...exportRows].map(row=>row.map(csvCell).join(",")).join("\r
+");
  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
  const url=URL.createObjectURL(blob);const link=document.createElement("a");
  link.href=url;link.download="topsafeb-customer-records-"+new Date().toISOString().slice(0,10)+".csv";

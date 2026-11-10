@@ -104,7 +104,10 @@ async function loadFeedback(){
    saveReply.disabled=true;saveReply.textContent="Saving…";
    const {error:updateError}=await supabase.from("customer_feedback").update({owner_reply:reply,replied_at:new Date().toISOString(),status:"Reviewed"}).eq("id",item.id);
    if(updateError){replyNote.textContent="Could not save reply: "+updateError.message;saveReply.disabled=false;saveReply.textContent=item.owner_reply?"Update reply":"Send reply";return;}
-   item.owner_reply=reply;item.replied_at=new Date().toISOString();item.status="Reviewed";status.textContent="Reviewed";replyNote.textContent="Reply saved: "+new Date(item.replied_at).toLocaleString();saveReply.textContent="Update reply";saveReply.disabled=false;feedbackStatus.textContent="Your reply has been saved. The customer can see it in their dashboard.";
+   item.owner_reply=reply;item.replied_at=new Date().toISOString();item.status="Reviewed";status.textContent="Reviewed";replyNote.textContent="Reply saved: "+new Date(item.replied_at).toLocaleString();saveReply.textContent="Update reply";saveReply.disabled=false;feedbackStatus.textContent="Your reply is saved in the customer dashboard. Sending email notification…";
+   const {error:notifyError}=await supabase.functions.invoke("notify-feedback-reply",{body:{feedbackId:item.id}});
+   if(notifyError){feedbackStatus.textContent="Reply saved successfully, but the email notification is not set up yet. The customer can still read the reply in their dashboard.";replyNote.textContent+=" — email notification pending setup";}
+   else{feedbackStatus.textContent="Reply saved and email notification sent to the customer.";replyNote.textContent+=" — email notification sent";}
   });
   replyCell.append(replyInput,saveReply,replyNote);
   const action=document.createElement("td");

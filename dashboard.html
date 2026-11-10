@@ -132,7 +132,11 @@ button,.button{transition:filter .15s,transform .15s}button:hover,.button:hover{
 @media(max-width:650px){#demo-transfer-receipt{margin:15px 12px;padding:17px}.receipt-details{grid-template-columns:1fr}}
 @media print{
  body>*{display:none!important}
- #demo-transfer-receipt{display:block!important;position:absolute;left:0;top:0;width:100%;max-width:none;margin:0;padding:28px;border:1px solid #9ba9b8;box-shadow:none;background:#fff}
+ main{display:block!important;max-width:none;margin:0;padding:0}
+ main>*{display:none!important}
+ #customer-demo-funds{display:block!important;margin:0;border:0;box-shadow:none}
+ #customer-demo-funds>*{display:none!important}
+ #demo-transfer-receipt{display:block!important;position:static;width:100%;max-width:none;margin:0;padding:28px;border:1px solid #9ba9b8;box-shadow:none;background:#fff}
  #demo-transfer-receipt[hidden]{display:block!important}
  #demo-transfer-receipt .receipt-actions{display:none!important}
 }

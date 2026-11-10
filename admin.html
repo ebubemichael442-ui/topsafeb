@@ -106,8 +106,19 @@ async function loadFeedback(){
    if(updateError){replyNote.textContent="Could not save reply: "+updateError.message;saveReply.disabled=false;saveReply.textContent=item.owner_reply?"Update reply":"Send reply";return;}
    item.owner_reply=reply;item.replied_at=new Date().toISOString();item.status="Reviewed";status.textContent="Reviewed";replyNote.textContent="Reply saved: "+new Date(item.replied_at).toLocaleString();saveReply.textContent="Update reply";saveReply.disabled=false;feedbackStatus.textContent="Your reply is saved in the customer dashboard. Sending email notification…";
    const {error:notifyError}=await supabase.functions.invoke("clever-processor",{body:{feedbackId:item.id}});
-   if(notifyError){feedbackStatus.textContent="Reply saved successfully, but the email notification is not set up yet. The customer can still read the reply in their dashboard.";replyNote.textContent+=" — email notification pending setup";}
-   else{feedbackStatus.textContent="Reply saved and email notification sent to the customer.";replyNote.textContent+=" — email notification sent";}
+   if(notifyError){
+    let notifyMessage=notifyError.message||"Unknown notification error";
+    try{
+     const details=await notifyError.context?.clone?.().json();
+     notifyMessage=details?.providerMessage||details?.error||notifyMessage;
+     if(details?.providerStatus)notifyMessage+=" (provider status "+details.providerStatus+")";
+    }catch{}
+    feedbackStatus.textContent="Reply saved, but test email failed: "+notifyMessage+". The customer can still read the private reply in their dashboard.";
+    replyNote.textContent+=" — test email failed";
+   }else{
+    feedbackStatus.textContent="Reply saved and test notification sent to the owner's test inbox.";
+    replyNote.textContent+=" — test email sent";
+   }
   });
   replyCell.append(replyInput,saveReply,replyNote);
   const action=document.createElement("td");

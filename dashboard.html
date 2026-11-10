@@ -86,10 +86,24 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </section>
 <section class="panel" id="customer-demo-funds" style="margin-top:22px">
 <h2>Your Demo Business Account</h2>
-<p class="notice"><strong>DEMO FUNDS — NOT REAL MONEY.</strong> This fictional USD balance is provided only for learning and demonstration. It is not a bank deposit and cannot be withdrawn or transferred.</p>
+<p class="notice"><strong>DEMO FUNDS — NOT REAL MONEY.</strong> This fictional USD balance is provided only for learning and demonstration. It is not a bank deposit and cannot be withdrawn or transferred as real money.</p>
 <p id="demo-account-status" class="muted" role="status" aria-live="polite">Loading your demo balance…</p>
 <p style="font-size:14px;color:#657286;margin-bottom:4px">Available demo balance</p>
 <p id="customer-demo-balance" style="font-size:clamp(30px,6vw,42px);font-weight:800;color:#102b50;margin:0">$0.00</p>
+<h3>Simulated transfer to Oso Local Bank</h3>
+<p><strong>Fictional bank only:</strong> Oso Local Bank is not a real bank. This practice transfer only changes your TopSafeB demo balance; it sends no money to any bank.</p>
+<form id="oso-transfer-form" style="display:grid;gap:10px;max-width:520px">
+<label for="oso-recipient">Recipient name</label>
+<input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<label for="oso-account">Fictional account number (8–16 digits)</label>
+<input id="oso-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<label for="oso-amount">Amount (USD)</label>
+<input id="oso-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<label for="oso-description">Transfer description (optional)</label>
+<input id="oso-description" maxlength="120" autocomplete="off" placeholder="Practice transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<button id="oso-transfer-submit" type="submit">Make simulated transfer</button>
+<p id="oso-transfer-status" class="muted" role="status" aria-live="polite"></p>
+</form>
 <h3>Recent demo activity</h3>
 <div id="customer-demo-history" style="display:grid;gap:8px"></div>
 </section>
@@ -225,6 +239,37 @@ document.getElementById("download-certificate").addEventListener("click",async()
   }
 });
 
+async function submitOsoLocalTransfer(event){
+ event.preventDefault();
+ const form=document.getElementById("oso-transfer-form");
+ const button=document.getElementById("oso-transfer-submit");
+ const status=document.getElementById("oso-transfer-status");
+ const recipient=document.getElementById("oso-recipient").value.trim();
+ const accountNumber=document.getElementById("oso-account").value.trim();
+ const amount=Number(document.getElementById("oso-amount").value);
+ const description=document.getElementById("oso-description").value.trim();
+ if(!recipient||!/^[0-9]{8,16}$/.test(accountNumber)||!Number.isFinite(amount)||amount<=0){
+  status.textContent="Enter a recipient, an 8–16 digit fictional account number and a valid amount.";
+  return;
+ }
+ if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
+ if(!window.confirm("This is only a simulation to the fictional Oso Local Bank. No real money will move. Continue?"))return;
+ button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated transfer…";
+ try{
+  const {data,error}=await supabase.rpc("customer_demo_transfer_oso_local",{p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
+  if(error)throw error;
+  const result=Array.isArray(data)?data[0]:data;
+  status.textContent="Simulated transfer completed to Oso Local Bank. Demo balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result?.new_balance||0))+". No real money was sent.";
+  form.reset();
+  await loadCustomerDemoFunds(currentUserId);
+ }catch(error){
+  status.textContent="Transfer not completed: "+(error.message||"Please try again.");
+ }finally{
+  button.disabled=false;button.textContent="Make simulated transfer";
+ }
+}
+document.getElementById("oso-transfer-form").addEventListener("submit",submitOsoLocalTransfer);
+
 async function loadCustomerDemoFunds(userId){
  const status=document.getElementById("demo-account-status");
  const balanceEl=document.getElementById("customer-demo-balance");
@@ -239,7 +284,7 @@ async function loadCustomerDemoFunds(userId){
  if(historyError){const p=document.createElement("p");p.className="muted";p.textContent="Recent activity is temporarily unavailable.";historyEl.append(p);return;}
  for(const item of items||[]){
   const card=document.createElement("article");card.style.cssText="padding:12px;border:1px solid #dbe3ed;border-radius:8px;background:#f8fafc";
-  const title=document.createElement("strong");title.textContent=({add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted"})[item.action]||"Demo account update";
+  const title=document.createElement("strong");title.textContent=({add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted",transfer:"Simulated transfer to Oso Local Bank"})[item.action]||"Demo account update";
   const amount=document.createElement("p");amount.style.margin="4px 0";amount.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount))+" • Balance after: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.balance_after));
   const date=document.createElement("p");date.className="muted";date.style.margin="0";date.textContent=new Date(item.created_at).toLocaleString()+(item.note?" — "+item.note:"");
   card.append(title,amount,date);historyEl.append(card);

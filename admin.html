@@ -6,27 +6,31 @@
 <meta name="description" content="TopSafeB owner administration area.">
 <title>Owner Dashboard | TopSafeB</title>
 <style>
-:root{--navy:#102b50;--blue:#194875;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f6fa}
+:root{--navy:#102b50;--gold:#dfbd70;--ink:#183252;--muted:#657286;--pale:#f3f5f8;--purple:#7650a8}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--ink);background:var(--pale)}
-header{background:var(--navy);color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #b18a3e;outline-offset:3px}
-main{max-width:1000px;margin:36px auto;padding:0 18px 55px}h1,h2{color:var(--navy)}h1{font-size:clamp(30px,5vw,42px);line-height:1.2;margin:8px 0}
-.muted{color:var(--muted)}.panel{background:white;padding:22px;border-radius:14px;box-shadow:0 8px 30px #102b5010;margin:18px 0}
+header{background:#fff;color:var(--navy);padding:15px 5%;display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 2px 12px #102b5010;position:sticky;top:0;z-index:20}
+.brand{font-size:24px;font-weight:800}.brand span{color:var(--purple)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:var(--navy);text-decoration:none;font-weight:bold}
+.menu-toggle{display:none;background:transparent;color:var(--navy);font-size:25px;padding:3px 10px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #b18a3e;outline-offset:3px}
+main{max-width:1080px;margin:28px auto;padding:0 18px 55px}h1,h2{color:var(--navy)}h1{font-size:clamp(30px,5vw,40px);line-height:1.2;margin:8px 0}
+.muted{color:var(--muted)}.panel{background:white;padding:22px;border-radius:10px;box-shadow:0 5px 22px #102b500d;margin:18px 0}
 button,.button{display:inline-block;background:var(--gold);color:var(--navy);padding:12px 18px;border:0;border-radius:8px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer}
 button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);background:#fff9e9;padding:15px;border-radius:8px;margin:20px 0}
 #status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
 table{width:100%;border-collapse:collapse;margin-top:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid #e4eaf1;overflow-wrap:anywhere}th{background:#f3f6fa}
-.table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy)}
+.table-wrap{overflow-x:auto}.stat{font-size:30px;font-weight:800;color:var(--navy);margin:4px 0}
 .search-tools{margin:18px 0}.search-tools label{display:block;font-weight:700;margin-bottom:6px}.search-tools input{width:100%;max-width:480px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.search-summary{font-size:14px;color:var(--muted);margin:6px 0}.detail-panel{margin-top:18px;border:1px solid #dbe3ed;border-radius:10px;padding:18px;background:#f8fafc}.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.detail-item{background:white;padding:12px;border-radius:8px}.detail-item strong{display:block;color:var(--muted);font-size:13px}.lesson-list{margin:8px 0 0;padding-left:22px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:24px 0}.summary-card{background:#fff;border-left:5px solid var(--purple);border-radius:8px;padding:20px;box-shadow:0 5px 22px #102b500d}.summary-card h2{font-size:18px;margin:0 0 8px}.summary-card p{margin:5px 0;color:var(--muted)}.summary-card .stat{font-size:32px}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
-@media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:16px 5%}nav{gap:10px}nav a{font-size:14px}main{margin-top:24px}th,td{padding:9px;font-size:14px}.panel{padding:16px}}
+@media(max-width:700px){header{padding:13px 5%}.menu-toggle{display:block}nav{display:none;position:absolute;top:100%;left:0;right:0;background:white;padding:14px 5%;box-shadow:0 8px 14px #102b5020;flex-direction:column;gap:12px}nav.open{display:flex}main{margin-top:22px}.dashboard-grid{grid-template-columns:1fr;gap:14px}.summary-card{padding:18px}th,td{padding:9px;font-size:13px}.panel{padding:16px}}
 </style>
 </head>
 <body>
-<header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
+<header><div class="brand"><span>◆</span> TopSafeB</div><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
 <main>
 <p class="muted">RESTRICTED OWNER AREA</p>
-<h1>Owner / Admin Dashboard</h1>
+<h1>Dashboard</h1>
+<div class="dashboard-grid" aria-label="Dashboard summary"><article class="summary-card"><h2>Users</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p></article><article class="summary-card"><h2>Customer Feedback</h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p></article><article class="summary-card"><h2>Learning Progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p></article></div>
 <section class="panel">
 <p class="muted">SIGNED-IN OWNER</p>
 <h2 id="owner-name">Checking access…</h2>
@@ -34,9 +38,8 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p id="status" role="status" aria-live="polite">Verifying administrator access…</p>
 <button id="signout" class="secondary" type="button">Sign out</button>
 </section>
-<section class="panel">
+<section class="panel" id="registered-customers">
 <h2>Registered customers</h2>
-<p class="stat" id="customer-count">—</p>
 <p class="muted">Customer profiles available to this admin account.</p>
 <p><button id="export-csv" class="secondary" type="button" hidden disabled>Export customer records (CSV)</button></p>
 <div class="search-tools" id="customer-search-tools" hidden><label for="customer-search">Search customers by name or email</label><input id="customer-search" type="search" placeholder="Enter a customer name or email" autocomplete="off"><p class="search-summary" id="search-summary" aria-live="polite"></p></div>
@@ -62,7 +65,6 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <section class="panel" id="feedback-management">
 <h2>Customer feedback</h2>
 <p class="muted">Private feedback submitted by signed-in customers. Only authorised administrators can view these submissions.</p>
-<p id="feedback-count" class="stat">—</p>
 <p id="feedback-admin-status" class="muted" role="status" aria-live="polite">Loading customer feedback…</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Date</th><th>Customer</th><th>Rating</th><th>Feedback</th><th>Status</th><th>Owner reply</th><th>Action</th></tr></thead>
@@ -147,6 +149,7 @@ async function loadFeedback(){
  }
 }
 document.getElementById("close-details").addEventListener("click",()=>{detailsPanel.hidden=true;});
+const menuToggle=document.getElementById("menu-toggle");const ownerNav=document.getElementById("owner-nav");menuToggle.addEventListener("click",()=>{const opened=ownerNav.classList.toggle("open");menuToggle.setAttribute("aria-expanded",String(opened));});ownerNav.addEventListener("click",event=>{if(event.target.closest("a")){ownerNav.classList.remove("open");menuToggle.setAttribute("aria-expanded","false");}});
 let exportRows=[];
 let customerTableRows=[];
 const noSearchResults=document.createElement("tr");
@@ -224,6 +227,7 @@ async function loadAdmin(){
  const progressByUser=new Map((progressRows||[]).map(item=>[item.user_id,item]));
  const formatDate=value=>{if(!value)return "—";const date=new Date(value);return Number.isNaN(date.getTime())?"—":date.toLocaleString(undefined,{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});};
  countEl.textContent=String(list.length);
+ document.getElementById("dashboard-completed-count").textContent=String((progressRows||[]).reduce((sum,item)=>sum+(Array.isArray(item.completed_lessons)?Math.min(item.completed_lessons.length,4):0),0));
  searchTools.hidden=false;customerTableRows=[];
  exportRows=list.map(customer=>{const record=progressByUser.get(customer.user_id);const completed=Array.isArray(record?.completed_lessons)?Math.min(record.completed_lessons.length,4):0;return [customer.full_name||"",customer.email||"",completed+" of 4",formatDate(record?.completed_at),formatDate(record?.updated_at)];});
  exportButton.hidden=false;exportButton.disabled=false;

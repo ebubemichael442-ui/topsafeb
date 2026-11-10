@@ -297,12 +297,20 @@ async function loadOwnerLiveChats(){
  supportProfiles=new Map((profiles||[]).map(p=>[p.user_id,p]));
  for(const [uid,last] of latestByUser){
   const profile=supportProfiles.get(uid)||{};
-  const button=document.createElement("button");button.type="button";button.className="secondary";button.style.cssText="text-align:left;white-space:normal";
-  button.textContent=(profile.full_name||profile.email||"Customer")+" — "+last.message.slice(0,65);
-  button.addEventListener("click",()=>{activeSupportUserId=uid;supportOwnerHeading.textContent="Conversation with "+(profile.full_name||profile.email||"customer");supportOwnerSend.disabled=false;loadSelectedOwnerChat();});
+  const readKey="topsafeb_owner_chat_read_"+uid;
+  const lastViewed=localStorage.getItem(readKey)||"";
+  const unread=messages.filter(message=>message.user_id===uid&&message.sender_role==="customer"&&(!lastViewed||new Date(message.created_at)>new Date(lastViewed))).length;
+  const button=document.createElement("button");button.type="button";button.className="secondary";button.style.cssText="text-align:left;white-space:normal;display:flex;align-items:center;justify-content:space-between;gap:10px";
+  const summary=document.createElement("span");summary.style.cssText="min-width:0;overflow-wrap:anywhere";
+  const customerName=document.createElement("strong");customerName.textContent=profile.full_name||profile.email||"Customer";customerName.style.display="block";
+  const preview=document.createElement("small");preview.className="muted";preview.textContent=(last.sender_role==="owner"?"You: ":"")+last.message.slice(0,58);preview.style.display="block";
+  summary.append(customerName,preview);button.append(summary);
+  if(unread){const badge=document.createElement("span");badge.textContent=String(unread);badge.setAttribute("aria-label",unread+" unread customer messages");badge.style.cssText="flex:0 0 auto;min-width:25px;height:25px;padding:2px 7px;border-radius:20px;background:#a13d42;color:white;font-size:12px;font-weight:800;text-align:center";button.append(badge);}
+  button.addEventListener("click",()=>{activeSupportUserId=uid;localStorage.setItem(readKey,new Date().toISOString());supportOwnerHeading.textContent="Conversation with "+(profile.full_name||profile.email||"customer");supportOwnerSend.disabled=false;loadOwnerLiveChats();loadSelectedOwnerChat();});
   supportCustomerList.append(button);
  }
- supportOwnerStatus.textContent=ids.length+" customer "+(ids.length===1?"conversation":"conversations")+". Updated "+new Date().toLocaleTimeString();
+ const unreadTotal=messages.filter(message=>message.sender_role==="customer"&&(!localStorage.getItem("topsafeb_owner_chat_read_"+message.user_id)||new Date(message.created_at)>new Date(localStorage.getItem("topsafeb_owner_chat_read_"+message.user_id)))).length;
+ supportOwnerStatus.textContent=ids.length+" customer "+(ids.length===1?"conversation":"conversations")+" · "+unreadTotal+" unread customer message(s). Updated "+new Date().toLocaleTimeString();
  if(activeSupportUserId)await loadSelectedOwnerChat();
 }
 async function loadSelectedOwnerChat(){

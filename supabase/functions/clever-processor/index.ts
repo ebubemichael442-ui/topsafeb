@@ -69,8 +69,20 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!emailResponse.ok) {
-      console.error("Resend send failed", emailResponse.status, await emailResponse.text());
-      return Response.json({ error: "Email provider could not send test notification" }, { status: 502, headers: corsHeaders });
+      const providerBody = await emailResponse.text();
+      let providerDetails: { message?: string; name?: string } = {};
+      try {
+        providerDetails = JSON.parse(providerBody);
+      } catch {
+        // Keep the response safe if the provider returns non-JSON text.
+      }
+      const providerMessage = providerDetails.message || providerDetails.name || "See the function logs for the provider response.";
+      console.error("Resend send failed", emailResponse.status, providerBody);
+      return Response.json({
+        error: "Email provider could not send test notification",
+        providerStatus: emailResponse.status,
+        providerMessage,
+      }, { status: 502, headers: corsHeaders });
     }
 
     const result = await emailResponse.json();

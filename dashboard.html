@@ -90,30 +90,37 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p id="demo-account-status" class="muted" role="status" aria-live="polite">Loading your demo balance…</p>
 <p style="font-size:14px;color:#657286;margin-bottom:4px">Available demo balance</p>
 <p id="customer-demo-balance" style="font-size:clamp(30px,6vw,42px);font-weight:800;color:#102b50;margin:0">$0.00</p>
-<h3>Transfer to a fictional local bank</h3>
-<p><strong>SIMULATION ONLY:</strong> Every bank below is fictional. These practice transfers only update your TopSafeB demo balance and history. They do not send money to any real bank.</p>
+<h3>International demo transfer</h3>
+<p><strong>SIMULATION ONLY:</strong> Choose a destination country and fictional receiving bank. Exchange rates are fixed teaching examples, not live market rates. No real money is sent and no real bank is contacted.</p>
 <form id="oso-transfer-form" style="display:grid;gap:10px;max-width:520px">
-<label for="oso-bank">Choose fictional bank</label>
+<label for="oso-country">Destination country</label>
+<select id="oso-country" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<option value="">Choose a country</option>
+<option value="United Kingdom">United Kingdom (GBP)</option>
+<option value="United States">United States (USD)</option>
+<option value="Canada">Canada (CAD)</option>
+<option value="Ghana">Ghana (GHS)</option>
+<option value="South Africa">South Africa (ZAR)</option>
+<option value="Kenya">Kenya (KES)</option>
+<option value="India">India (INR)</option>
+<option value="Nigeria">Nigeria (NGN)</option>
+<option value="Eurozone">Eurozone (EUR)</option>
+</select>
+<label for="oso-bank">Choose fictional receiving bank</label>
 <select id="oso-bank" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
 <option value="">Select a demo bank</option>
-<option>Oso Local Bank</option>
-<option>Rivergate Community Bank</option>
-<option>Maple Street Savings Bank</option>
-<option>Harborlight Local Bank</option>
-<option>Pioneer Town Bank</option>
-<option>Greenfield Neighbourhood Bank</option>
-<option>Unity Corner Bank</option>
-<option>Westbridge Local Bank</option>
+<option>Oso Local Bank</option><option>Rivergate Community Bank</option><option>Maple Street Savings Bank</option><option>Harborlight Local Bank</option><option>Pioneer Town Bank</option><option>Greenfield Neighbourhood Bank</option><option>Unity Corner Bank</option><option>Westbridge Local Bank</option>
 </select>
 <label for="oso-recipient">Recipient name</label>
 <input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
 <label for="oso-account">Fictional account number (8–16 digits)</label>
 <input id="oso-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<label for="oso-amount">Amount (USD)</label>
+<label for="oso-amount">Amount to practise sending (USD)</label>
 <input id="oso-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<p id="oso-conversion-preview" class="notice" aria-live="polite">Choose a country and enter an amount to see the illustrative conversion.</p>
 <label for="oso-description">Transfer description (optional)</label>
-<input id="oso-description" maxlength="120" autocomplete="off" placeholder="Practice transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<button id="oso-transfer-submit" type="submit">Make simulated transfer</button>
+<input id="oso-description" maxlength="120" autocomplete="off" placeholder="Practice international transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<button id="oso-transfer-submit" type="submit">Make simulated international transfer</button>
 <p id="oso-transfer-status" class="muted" role="status" aria-live="polite"></p>
 </form>
 <h3>Recent demo activity</h3>
@@ -251,34 +258,58 @@ document.getElementById("download-certificate").addEventListener("click",async()
   }
 });
 
+const demoFxRates={
+ "United Kingdom":{currency:"GBP",rate:0.79},
+ "United States":{currency:"USD",rate:1},
+ "Canada":{currency:"CAD",rate:1.36},
+ "Ghana":{currency:"GHS",rate:15},
+ "South Africa":{currency:"ZAR",rate:18.5},
+ "Kenya":{currency:"KES",rate:129},
+ "India":{currency:"INR",rate:83},
+ "Nigeria":{currency:"NGN",rate:1500},
+ "Eurozone":{currency:"EUR",rate:0.95}
+};
+const countrySelect=document.getElementById("oso-country");
+const amountInput=document.getElementById("oso-amount");
+const conversionPreview=document.getElementById("oso-conversion-preview");
+function updateDemoConversion(){
+ const country=demoFxRates[countrySelect.value];
+ const amount=Number(amountInput.value);
+ if(!country||!Number.isFinite(amount)||amount<=0){conversionPreview.textContent="Choose a country and enter an amount to see the illustrative conversion.";return;}
+ conversionPreview.textContent="Teaching example only: $"+amount.toFixed(2)+" USD ≈ "+new Intl.NumberFormat("en-US",{style:"currency",currency:country.currency}).format(amount*country.rate)+" "+country.currency+". This fixed example is not a live exchange rate.";
+}
+countrySelect.addEventListener("change",updateDemoConversion);
+amountInput.addEventListener("input",updateDemoConversion);
 async function submitOsoLocalTransfer(event){
  event.preventDefault();
  const form=document.getElementById("oso-transfer-form");
  const button=document.getElementById("oso-transfer-submit");
  const status=document.getElementById("oso-transfer-status");
+ const country=countrySelect.value;
  const bank=document.getElementById("oso-bank").value;
  const recipient=document.getElementById("oso-recipient").value.trim();
  const accountNumber=document.getElementById("oso-account").value.trim();
- const amount=Number(document.getElementById("oso-amount").value);
+ const amount=Number(amountInput.value);
  const description=document.getElementById("oso-description").value.trim();
- if(!bank||!recipient||!/^[0-9]{8,16}$/.test(accountNumber)||!Number.isFinite(amount)||amount<=0){
-  status.textContent="Enter a recipient, an 8–16 digit fictional account number and a valid amount.";
+ if(!country||!bank||!recipient||!/^[0-9]{8,16}$/.test(accountNumber)||!Number.isFinite(amount)||amount<=0){
+  status.textContent="Choose a destination and fictional bank, enter a recipient, an 8–16 digit fictional account number and a valid USD amount.";
   return;
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
- if(!window.confirm("This is only a simulation to the fictional Oso Local Bank. No real money will move. Continue?"))return;
- button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated transfer…";
+ if(!window.confirm("SIMULATED INTERNATIONAL TRANSFER: no real money will move and no bank will be contacted. Continue?"))return;
+ button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated international transfer…";
  try{
-  const {data,error}=await supabase.rpc("customer_demo_transfer_fictional_bank",{p_bank_name:bank,p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
+  const {data,error}=await supabase.rpc("customer_demo_transfer_international",{p_country:country,p_bank_name:bank,p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
   if(error)throw error;
   const result=Array.isArray(data)?data[0]:data;
-  status.textContent="Simulated transfer to "+bank+" completed. Reference: DEMO-"+String(result?.transaction_id||"").slice(0,8).toUpperCase()+". New demo balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result?.new_balance||0))+". No real money was sent.";
-  form.reset();
+  const converted=new Intl.NumberFormat("en-US",{style:"currency",currency:result.destination_currency}).format(Number(result.converted_amount));
+  status.textContent="Simulated transfer to "+recipient+" in "+country+" completed. Illustrative received amount: "+converted+". Reference: DEMO-"+String(result.transaction_id||"").slice(0,8).toUpperCase()+". New USD demo balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result.new_balance||0))+". No real money was sent.";
+  form.reset();updateDemoConversion();
   await loadCustomerDemoFunds(currentUserId);
  }catch(error){
   status.textContent="Transfer not completed: "+(error.message||"Please try again.");
  }finally{
-  button.disabled=false;button.textContent="Make simulated transfer";
+  button.disabled=false;button.textContent="Make simulated international transfer";
  }
 }
 document.getElementById("oso-transfer-form").addEventListener("submit",submitOsoLocalTransfer);

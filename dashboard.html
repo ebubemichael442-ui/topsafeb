@@ -241,23 +241,43 @@ async function loadCustomerReplies(userId){
   replyList.replaceChildren();
   const replies=(data||[]).filter(item=>item.owner_reply&&item.owner_reply.trim());
   if(!replies.length){notification.hidden=true;replyStatus.textContent="You do not have any replies yet. Check back later.";return;}
-  const newReplies=replies.filter(item=>!seenIds.includes(item.id));
-  notification.hidden=newReplies.length===0;
-  replyStatus.textContent=newReplies.length
-    ?newReplies.length+" new private "+(newReplies.length===1?"reply":"replies")+" — "+replies.length+" total available."
-    :replies.length+" owner "+(replies.length===1?"reply":"replies")+" available. You have read the latest replies.";
+  const unreadIds=new Set(replies.filter(item=>!seenIds.includes(item.id)).map(item=>item.id));
+  function updateReplySummary(){
+    const unreadCount=unreadIds.size;
+    notification.hidden=unreadCount===0;
+    replyStatus.textContent=unreadCount
+      ?unreadCount+" unread private "+(unreadCount===1?"reply":"replies")+" — select Read reply to mark each one as read."
+      :replies.length+" owner "+(replies.length===1?"reply":"replies")+" available. You have read all replies.";
+  }
   for(const item of replies){
-    const isNew=!seenIds.includes(item.id);
-    const card=document.createElement("article");card.style.cssText="padding:16px;border:1px solid "+(isNew?"#dfbd70":"#dbe3ed")+";border-radius:10px;background:"+(isNew?"#fff9e9":"#f8fafc");
-    if(isNew){const tag=document.createElement("strong");tag.textContent="NEW PRIVATE REPLY";tag.style.cssText="display:inline-block;margin-bottom:8px;color:#7a5714";card.append(tag);}
+    const isNew=unreadIds.has(item.id);
+    const card=document.createElement("article");
+    card.style.cssText="padding:16px;border:1px solid "+(isNew?"#dfbd70":"#dbe3ed")+";border-radius:10px;background:"+(isNew?"#fff9e9":"#f8fafc");
+    let tag=null;
+    if(isNew){tag=document.createElement("strong");tag.textContent="NEW PRIVATE REPLY";tag.style.cssText="display:inline-block;margin-bottom:8px;color:#7a5714";card.append(tag);}
     const date=document.createElement("p");date.className="muted";date.textContent="Reply received: "+new Date(item.replied_at).toLocaleString();
     const originalTitle=document.createElement("strong");originalTitle.textContent="Your feedback";
     const original=document.createElement("p");original.textContent=item.message;original.style.whiteSpace="pre-wrap";
     const replyTitle=document.createElement("strong");replyTitle.textContent="TopSafeB owner reply";
     const reply=document.createElement("p");reply.textContent=item.owner_reply;reply.style.whiteSpace="pre-wrap";
-    card.append(date,originalTitle,original,replyTitle,reply);replyList.append(card);
+    card.append(date,originalTitle,original,replyTitle,reply);
+    if(isNew){
+      const readButton=document.createElement("button");
+      readButton.type="button";readButton.textContent="Read reply";
+      readButton.addEventListener("click",()=>{
+        unreadIds.delete(item.id);
+        seenIds=[...new Set([...seenIds,item.id])];
+        try{localStorage.setItem(seenKey,JSON.stringify(seenIds));}catch{}
+        if(tag)tag.remove();
+        readButton.remove();
+        card.style.borderColor="#dbe3ed";card.style.background="#f8fafc";
+        updateReplySummary();
+      });
+      card.append(readButton);
+    }
+    replyList.append(card);
   }
-  try{localStorage.setItem(seenKey,JSON.stringify(replies.map(item=>item.id)));}catch{}
+  updateReplySummary();
 }
 const feedbackForm=document.getElementById("feedback-form");
 const feedbackRating=document.getElementById("feedback-rating");

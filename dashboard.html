@@ -221,17 +221,39 @@ async function loadSession(){
   const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
   if(adminRecord) document.getElementById("admin-entry").hidden=false;
 }
-document.getElementById("feedback-form").addEventListener("submit",async event=>{
+const feedbackForm=document.getElementById("feedback-form");
+const feedbackRating=document.getElementById("feedback-rating");
+const feedbackMessage=document.getElementById("feedback-message");
+const feedbackStatus=document.getElementById("feedback-status");
+const feedbackSubmitButton=feedbackForm.querySelector('button[type="submit"]');
+let lastSubmittedFeedback="";
+let feedbackIsSubmitting=false;
+function updateFeedbackSubmitState(){
+  const currentFeedback=feedbackRating.value+"\\n"+feedbackMessage.value.trim();
+  const alreadySubmitted=lastSubmittedFeedback!==""&&currentFeedback===lastSubmittedFeedback;
+  feedbackSubmitButton.disabled=feedbackIsSubmitting||alreadySubmitted;
+  feedbackSubmitButton.textContent=feedbackIsSubmitting?"Submitting…":alreadySubmitted?"Feedback submitted":"Submit feedback";
+  if(lastSubmittedFeedback&& !alreadySubmitted && feedbackStatus.textContent==="Your feedback has been saved securely. Edit your rating or message to submit an update."){
+    feedbackStatus.textContent="You have edited your feedback. You can submit this update.";
+  }
+}
+feedbackRating.addEventListener("change",updateFeedbackSubmitState);
+feedbackMessage.addEventListener("input",updateFeedbackSubmitState);
+feedbackForm.addEventListener("submit",async event=>{
   event.preventDefault();
   const form=event.currentTarget;
-  const rating=document.getElementById("feedback-rating").value;
-  const message=document.getElementById("feedback-message").value.trim();
-  const feedbackStatus=document.getElementById("feedback-status");
-  const submitButton=form.querySelector('button[type="submit"]');
+  const rating=feedbackRating.value;
+  const message=feedbackMessage.value.trim();
+  const feedbackKey=rating+"\\n"+message;
   if(!rating||!message){feedbackStatus.textContent="Please choose a rating and enter your feedback.";return;}
+  if(feedbackKey===lastSubmittedFeedback){
+    feedbackStatus.textContent="This feedback has already been submitted. Edit your rating or message if you want to send an update.";
+    updateFeedbackSubmitState();
+    return;
+  }
   if(!currentUserId){feedbackStatus.textContent="Your sign-in session is not ready. Refresh the page and sign in again.";return;}
-  submitButton.disabled=true;
-  submitButton.textContent="Submitting…";
+  feedbackIsSubmitting=true;
+  updateFeedbackSubmitState();
   feedbackStatus.textContent="Submitting your feedback securely…";
   try{
     const insertRequest=supabase.from("customer_feedback").insert({
@@ -246,14 +268,14 @@ document.getElementById("feedback-form").addEventListener("submit",async event=>
       new Promise((_,reject)=>setTimeout(()=>reject(new Error("The database did not respond within 20 seconds.")),20000))
     ]);
     if(result.error) throw result.error;
-    form.reset();
-    feedbackStatus.textContent="Thank you. Your feedback has been saved securely to TopSafeB.";
+    lastSubmittedFeedback=feedbackKey;
+    feedbackStatus.textContent="Your feedback has been saved securely. Edit your rating or message to submit an update.";
   }catch(error){
     console.error("TopSafeB feedback submission failed:",error);
     feedbackStatus.textContent="Feedback was not saved: "+(error.message||"Please refresh and try again.");
   }finally{
-    submitButton.disabled=false;
-    submitButton.textContent="Submit feedback";
+    feedbackIsSubmitting=false;
+    updateFeedbackSubmitState();
   }
 });
 signoutButton.addEventListener("click",async()=>{

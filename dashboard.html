@@ -456,12 +456,10 @@ button,.button{border-radius:9px}
 </form>
 </div>
 
-<h3>Private replies from the owner</h3>
-<p class="muted">Replies are private to your TopSafeB account. Refresh here to check for a new response.</p>
-<button id="refresh-owner-replies" class="secondary" type="button">Refresh replies</button>
-<div id="reply-notification" class="notice" role="status" aria-live="polite" hidden><strong>New private reply:</strong> TopSafeB has responded to your feedback. Read your reply below.</div>
-<p id="owner-replies-status" class="muted" role="status" aria-live="polite">Checking for replies…</p>
-<div id="owner-replies-list" style="display:grid;gap:12px;margin-top:12px"></div>
+<div class="support-inbox-brand" style="display:flex;align-items:center;gap:12px;margin:18px 0 8px;padding:14px;background:#f3f6fa;border:1px solid #e1e8f0;border-radius:13px">
+<span aria-hidden="true" style="display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:13px;background:#102b50;color:#e2c783;font-size:19px;font-weight:900">TS</span>
+<div><strong>TopSafeB Message Centre</strong><p class="muted" style="margin:2px 0;font-size:13px">Your messages and owner replies, together in one private conversation</p></div>
+</div>
 </section>
 
 <section class="panel" id="learning-progress" style="margin-top:22px">
@@ -779,7 +777,6 @@ async function loadSession(){
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);
   statusEl.textContent="You are signed in. Your learning progress is synced to your account.";
-  await loadCustomerReplies(user.id);
   await loadCustomerLiveChat();
   if(customerChatTimer)clearInterval(customerChatTimer);
   customerChatTimer=setInterval(loadCustomerLiveChat,5000);
@@ -853,13 +850,31 @@ function appendChatBubble(container,item,own){
 }
 async function loadCustomerLiveChat(){
  if(!currentUserId)return;
- const {data,error}=await supabase.from("support_messages").select("id,sender_id,sender_role,message,created_at").eq("user_id",currentUserId).order("created_at",{ascending:true}).limit(100);
- if(error){customerChatStatus.textContent=error.message.includes("support_messages")?"Live chat database setup is required. Please contact the TopSafeB owner.":"Could not refresh messages: "+error.message;return;}
+ const [chatResult,legacyResult]=await Promise.all([
+  supabase.from("support_messages").select("id,sender_id,sender_role,message,created_at").eq("user_id",currentUserId).order("created_at",{ascending:true}).limit(100),
+  supabase.from("customer_feedback").select("id,message,owner_reply,created_at,replied_at").eq("user_id",currentUserId).not("owner_reply","is",null).order("created_at",{ascending:true}).limit(100)
+ ]);
+ if(chatResult.error){customerChatStatus.textContent=chatResult.error.message.includes("support_messages")?"Live chat database setup is required. Please contact the TopSafeB owner.":"Could not refresh messages: "+chatResult.error.message;return;}
+ if(legacyResult.error){customerChatStatus.textContent="Could not load all previous replies: "+legacyResult.error.message;return;}
+ const timeline=[];
+ for(const item of chatResult.data||[])timeline.push({message:item.message,created_at:item.created_at,own:item.sender_role==="customer",source:"chat"});
+ for(const item of legacyResult.data||[]){
+  if(item.message)timeline.push({message:item.message,created_at:item.created_at,own:true,source:"previous"});
+  if(item.owner_reply)timeline.push({message:item.owner_reply,created_at:item.replied_at||item.created_at,own:false,source:"previous"});
+ }
+ timeline.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
  customerChatThread.replaceChildren();
- if(!(data||[]).length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No messages yet. Send a message to start your private conversation.";customerChatThread.append(empty);}
- for(const item of data||[])appendChatBubble(customerChatThread,item,item.sender_role==="customer");
+ if(!timeline.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No messages yet. Send a message to start your private conversation.";customerChatThread.append(empty);}
+ for(const item of timeline){
+  const bubble=document.createElement("article");
+  bubble.style.cssText="max-width:88%;justify-self:"+(item.own?"end":"start")+";padding:12px 14px;border-radius:14px;background:"+(item.own?"#e7f0fa":"#fff")+";border:1px solid "+(item.own?"#d6e3f0":"#dfbd70")+";overflow-wrap:anywhere;box-shadow:0 2px 8px #102b5008";
+  const head=document.createElement("strong");head.textContent=item.own?"You":"TopSafeB Support";head.style.cssText="display:block;color:"+(item.own?"#244a70":"#8a6728");
+  const body=document.createElement("p");body.textContent=item.message;body.style.cssText="white-space:pre-wrap;margin:6px 0";
+  const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();
+  bubble.append(head,body,when);customerChatThread.append(bubble);
+ }
  customerChatThread.scrollTop=customerChatThread.scrollHeight;
- customerChatStatus.textContent="Conversation updated "+new Date().toLocaleTimeString();
+ customerChatStatus.textContent="Message centre updated "+new Date().toLocaleTimeString()+". Previous owner replies are included above.";
 }
 customerChatForm.addEventListener("submit",async event=>{
  event.preventDefault();
@@ -872,13 +887,7 @@ customerChatForm.addEventListener("submit",async event=>{
  customerChatInput.value="";customerChatStatus.textContent="Message sent.";await loadCustomerLiveChat();button.disabled=false;button.textContent="Send message";
 });
 
-document.getElementById("refresh-owner-replies").addEventListener("click",async()=>{
-  const button=document.getElementById("refresh-owner-replies");
-  if(!currentUserId){document.getElementById("owner-replies-status").textContent="Please sign in again to check replies.";return;}
-  button.disabled=true;button.textContent="Checking…";
-  try{await loadCustomerReplies(currentUserId);}
-  finally{button.disabled=false;button.textContent="Refresh replies";}
-});
+// The single Message Centre refreshes both new chat messages and older owner replies together.
 document.getElementById("menu-logout").addEventListener("click",()=>signoutButton.click());
 const menuToggle=document.getElementById("customer-menu-toggle");
 const menu=document.getElementById("customer-menu");

@@ -296,6 +296,14 @@ button,.button{border-radius:9px}
  .activity-list article{padding:13px!important}
 }
 
+
+/* Floating customer support message shortcut */
+.support-chat-fab{position:fixed;right:20px;bottom:20px;z-index:1000;display:flex;align-items:center;gap:9px;padding:13px 18px;border-radius:999px;background:#123f68;color:#fff;text-decoration:none;font-weight:800;font-size:14px;box-shadow:0 8px 26px #102b5040;border:1px solid #ffffff40}
+.support-chat-fab .support-chat-icon{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#ffffff20;font-size:18px;line-height:1}
+.support-chat-fab:hover{background:#0c3154;transform:translateY(-1px)}
+.support-chat-fab:focus-visible{outline:3px solid #d7ad62;outline-offset:3px}
+@media(max-width:650px){.support-chat-fab{right:14px;bottom:14px;padding:12px 15px;font-size:13px;box-shadow:0 6px 22px #102b5040}}
+@media print{.support-chat-fab{display:none!important}}
 </style>
 </head>
 <body>
@@ -903,5 +911,6 @@ supabase.auth.onAuthStateChange((_event,session)=>{
 });
 loadSession().catch(error=>{console.error("TopSafeB session loading failed:",error);statusEl.textContent="Could not finish sign-in check: "+(error.message||"Please refresh the page or sign in again.");});
 </script>
+<a class="support-chat-fab" href="#customer-support" aria-label="Open private TopSafeB customer support messages" title="Message TopSafeB support"><span class="support-chat-icon" aria-hidden="true">✉</span><span>Message support</span></a>
 </body>
 </html>

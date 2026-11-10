@@ -381,15 +381,17 @@ button,.button{border-radius:9px}
 <label for="oso-country">Destination country</label>
 <select id="oso-country" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
 <option value="">Choose a country</option>
-<option value="United Kingdom">United Kingdom (GBP)</option>
-<option value="United States">United States (USD)</option>
-<option value="Canada">Canada (CAD)</option>
-<option value="Ghana">Ghana (GHS)</option>
-<option value="South Africa">South Africa (ZAR)</option>
-<option value="Kenya">Kenya (KES)</option>
-<option value="India">India (INR)</option>
-<option value="Nigeria">Nigeria (NGN)</option>
-<option value="Eurozone">Eurozone (EUR)</option>
+<optgroup label="Africa">
+<option value="Nigeria">Nigeria (NGN)</option><option value="Ghana">Ghana (GHS)</option><option value="South Africa">South Africa (ZAR)</option><option value="Kenya">Kenya (KES)</option><option value="Uganda">Uganda (UGX)</option><option value="Tanzania">Tanzania (TZS)</option><option value="Rwanda">Rwanda (RWF)</option><option value="Zambia">Zambia (ZMW)</option><option value="Botswana">Botswana (BWP)</option><option value="Egypt">Egypt (EGP)</option><option value="Morocco">Morocco (MAD)</option><option value="Ethiopia">Ethiopia (ETB)</option><option value="Senegal">Senegal (XOF)</option><option value="Ivory Coast">Côte d’Ivoire (XOF)</option><option value="Cameroon">Cameroon (XAF)</option>
+</optgroup><optgroup label="Europe">
+<option value="United Kingdom">United Kingdom (GBP)</option><option value="Eurozone">Eurozone (EUR)</option><option value="Switzerland">Switzerland (CHF)</option><option value="Sweden">Sweden (SEK)</option><option value="Norway">Norway (NOK)</option><option value="Denmark">Denmark (DKK)</option><option value="Poland">Poland (PLN)</option><option value="Turkey">Türkiye (TRY)</option>
+</optgroup><optgroup label="Americas">
+<option value="United States">United States (USD)</option><option value="Canada">Canada (CAD)</option><option value="Mexico">Mexico (MXN)</option><option value="Brazil">Brazil (BRL)</option>
+</optgroup><optgroup label="Asia and Middle East">
+<option value="India">India (INR)</option><option value="China">China (CNY)</option><option value="Japan">Japan (JPY)</option><option value="Singapore">Singapore (SGD)</option><option value="Malaysia">Malaysia (MYR)</option><option value="Indonesia">Indonesia (IDR)</option><option value="Philippines">Philippines (PHP)</option><option value="Thailand">Thailand (THB)</option><option value="United Arab Emirates">United Arab Emirates (AED)</option><option value="Saudi Arabia">Saudi Arabia (SAR)</option>
+</optgroup><optgroup label="Oceania">
+<option value="Australia">Australia (AUD)</option><option value="New Zealand">New Zealand (NZD)</option>
+</optgroup>
 </select>
 <label for="oso-bank">Choose fictional receiving bank</label>
 <select id="oso-bank" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
@@ -595,15 +597,13 @@ document.getElementById("download-certificate").addEventListener("click",async()
 });
 
 const demoFxRates={
- "United Kingdom":{currency:"GBP",rate:0.79},
- "United States":{currency:"USD",rate:1},
- "Canada":{currency:"CAD",rate:1.36},
- "Ghana":{currency:"GHS",rate:15},
- "South Africa":{currency:"ZAR",rate:18.5},
- "Kenya":{currency:"KES",rate:129},
- "India":{currency:"INR",rate:83},
- "Nigeria":{currency:"NGN",rate:1500},
- "Eurozone":{currency:"EUR",rate:0.95}
+ "United Kingdom":{currency:"GBP",rate:0.79},"United States":{currency:"USD",rate:1},"Canada":{currency:"CAD",rate:1.36},
+ "Ghana":{currency:"GHS",rate:15},"South Africa":{currency:"ZAR",rate:18.5},"Kenya":{currency:"KES",rate:129},"India":{currency:"INR",rate:83},"Nigeria":{currency:"NGN",rate:1500},"Eurozone":{currency:"EUR",rate:0.95},
+ "Uganda":{currency:"UGX",rate:3700},"Tanzania":{currency:"TZS",rate:2550},"Rwanda":{currency:"RWF",rate:1300},"Zambia":{currency:"ZMW",rate:27},"Botswana":{currency:"BWP",rate:13.5},"Egypt":{currency:"EGP",rate:49},"Morocco":{currency:"MAD",rate:10},"Ethiopia":{currency:"ETB",rate:57},"Senegal":{currency:"XOF",rate:600},"Ivory Coast":{currency:"XOF",rate:600},"Cameroon":{currency:"XAF",rate:600},
+ "Switzerland":{currency:"CHF",rate:0.9},"Sweden":{currency:"SEK",rate:10.5},"Norway":{currency:"NOK",rate:10.7},"Denmark":{currency:"DKK",rate:7.1},"Poland":{currency:"PLN",rate:4},"Turkey":{currency:"TRY",rate:32},
+ "Mexico":{currency:"MXN",rate:17},"Brazil":{currency:"BRL",rate:5},
+ "China":{currency:"CNY",rate:7.2},"Japan":{currency:"JPY",rate:150},"Singapore":{currency:"SGD",rate:1.35},"Malaysia":{currency:"MYR",rate:4.7},"Indonesia":{currency:"IDR",rate:15600},"Philippines":{currency:"PHP",rate:56},"Thailand":{currency:"THB",rate:36},"United Arab Emirates":{currency:"AED",rate:3.67},"Saudi Arabia":{currency:"SAR",rate:3.75},
+ "Australia":{currency:"AUD",rate:1.52},"New Zealand":{currency:"NZD",rate:1.65}
 };
 const countrySelect=document.getElementById("oso-country");
 const amountInput=document.getElementById("oso-amount");

@@ -47,11 +47,41 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 .conversion-preview{padding:13px;background:#f0f3ff;border-radius:9px;color:#34477f;font-size:13px;margin:4px 0}
 .activity-list{display:grid;gap:9px;margin:12px 20px 0}
 @media(max-width:600px){.bank-dashboard{border-radius:14px}.bank-dashboard-top{padding:19px 16px;align-items:flex-start;flex-direction:column}.market-strip{margin:14px 12px}.market-strip>div{padding:10px 7px}.market-strip strong{font-size:13px}.market-strip span,.market-strip small{font-size:10px}.account-card{margin:0 12px;padding:17px}.quick-actions{margin:14px 12px;gap:7px}.quick-action{font-size:11px;padding:12px 5px;flex-direction:column}.demo-warning{margin:14px 12px}.bank-section-title{margin-left:12px;margin-right:12px}.bank-dashboard>p:not(.bank-section-title){margin-left:12px;margin-right:12px}.transfer-form{margin-left:12px;margin-right:12px;padding:13px}.activity-list{margin-left:12px;margin-right:12px}}
+
+.customer-header{background:linear-gradient(120deg,#172c88,#4436b5);padding:15px 5%;position:sticky;top:0;z-index:40;flex-direction:row;align-items:center}
+.customer-header .brand{color:#fff}.header-user{display:flex;align-items:center;gap:16px;color:#fff;font-weight:bold}
+#customer-menu-toggle{background:transparent;color:#fff;border:1px solid #ffffff55;border-radius:9px;padding:8px 13px;font-size:24px;line-height:1}
+.menu-backdrop{position:fixed;inset:0;background:#0c153b88;z-index:48}
+.customer-menu{position:fixed;z-index:49;top:0;right:0;bottom:0;width:min(82vw,340px);overflow-y:auto;background:linear-gradient(160deg,#3026a8,#172c88);color:#fff;padding:22px 16px 30px;transform:translateX(105%);transition:transform .22s ease;box-shadow:-12px 0 35px #101c4a35}
+.customer-menu.open{transform:translateX(0)}
+.menu-brand{font-size:23px;font-weight:900;padding:8px 10px 22px;border-bottom:1px solid #ffffff30;margin-bottom:10px}.menu-brand span{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#c9d2ff;font-weight:600}
+.menu-link{display:block;color:#fff;text-decoration:none;padding:13px 14px;border-radius:7px;margin:3px 0;font-size:15px}.menu-link:hover,.menu-link:focus,.menu-link.active{background:#f08a00;color:#fff}.menu-link small{display:block;font-size:10px;opacity:.8;margin-top:2px}
+.menu-logout{display:block;width:100%;text-align:left;background:transparent;color:#fff;border:0;padding:14px;margin-top:8px;font-size:15px}
+.menu-disclaimer{font-size:11px;line-height:1.5;color:#d9e0ff;padding:15px 10px;border-top:1px solid #ffffff30}
+.feature-learning{margin:20px 0;scroll-margin-top:85px}.feature-learning h2{margin-top:0}.sample-ledger{padding:13px;background:#f2f4fa;border-radius:9px;font-size:13px}
+#customer-demo-funds,#customer-demo-history,#oso-transfer-form,#learning-progress,#customer-support{scroll-margin-top:85px}
+@media(max-width:600px){.customer-header{padding:12px 5%;flex-direction:row;align-items:center}.header-user{gap:10px}.customer-menu{left:auto}}
 </style>
 </head>
 <body>
-<header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="index.html">Home</a><a href="investment-basics.html">Investing</a><a href="financial-safety.html">Safety</a><a href="online-banking-demo.html">Banking Demo</a></nav></header>
-<main>
+<header class="customer-header"><div class="brand"><span>◆</span> TopSafeB</div><div class="header-user"><span id="header-customer-name">Customer</span><button id="customer-menu-toggle" type="button" aria-label="Open customer menu" aria-expanded="false">☰</button></div></header>
+<div id="customer-menu-backdrop" class="menu-backdrop" hidden></div>
+<aside id="customer-menu" class="customer-menu" aria-label="Customer navigation" aria-hidden="true">
+<div class="menu-brand">TopSafeB <span>Practice menu</span></div>
+<a class="menu-link active" href="#customer-home">Dashboard</a>
+<a class="menu-link" href="#customer-demo-history">Account Statement</a>
+<a class="menu-link" href="#oso-transfer-form">Fund Transfer</a>
+<a class="menu-link" href="#blockchain-learning">Blockchain Transfer <small>Learning demo</small></a>
+<a class="menu-link" href="#blockchain-history">Blockchain History <small>Sample ledger</small></a>
+<a class="menu-link" href="#demo-deposit-info">Make Deposit <small>Demo explanation only</small></a>
+<a class="menu-link" href="#virtual-cards-info">Virtual Cards <small>Learning preview only</small></a>
+<a class="menu-link" href="#quick-loan-info">Quick Loan <small>Learning guide only</small></a>
+<a class="menu-link" href="#customer-demo-funds">Manage Accounts</a>
+<a class="menu-link" href="#customer-support">Support</a>
+<button id="menu-logout" class="menu-logout" type="button">Logout</button>
+<p class="menu-disclaimer">All account features are simulated. No real deposits, cards, loans, crypto or bank transfers are provided.</p>
+</aside>
+<main id="customer-home">
 <p class="muted">CUSTOMER LEARNING AREA</p>
 <h1>Welcome to your dashboard</h1>
 <section class="panel">
@@ -103,7 +133,23 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <h3 class="bank-section-title">Recent demo activity</h3>
 <div id="customer-demo-history" class="activity-list"></div>
 </section>
-es from the TopSafeB owner to your submitted feedback.</p>
+<section class="panel feature-learning" id="blockchain-learning"><h2>Blockchain transfer learning demo</h2><p>This section explains how blockchain transfers work. TopSafeB does not connect to a blockchain, wallet or cryptocurrency network and cannot send crypto.</p><div class="notice">Practice only: no crypto assets, wallet addresses or blockchain transactions are used here.</div><a class="button" href="#blockchain-history">View sample ledger</a></section>
+<section class="panel feature-learning" id="blockchain-history"><h2>Sample blockchain history</h2><p>This is an educational example, not a real blockchain explorer or transaction record.</p><div class="activity-list"><article class="sample-ledger">Example only · Demo transaction TX-DEMO-001 · Status: Not broadcast</article><article class="sample-ledger">Example only · Demo transaction TX-DEMO-002 · Status: Not broadcast</article></div></section>
+<section class="panel feature-learning" id="demo-deposit-info"><h2>Demo deposits</h2><p>TopSafeB does not accept deposits. Only the owner can add clearly labelled practice funds through the owner dashboard. Customers cannot deposit real money here.</p><a class="button" href="#customer-demo-funds">View practice account</a></section>
+<section class="panel feature-learning" id="virtual-cards-info"><h2>Virtual card learning</h2><p>Learn how virtual cards can help protect online purchases. TopSafeB does not issue cards, card numbers, payment credentials or spending access.</p></section>
+<section class="panel feature-learning" id="quick-loan-info"><h2>Loan learning guide</h2><p>Explore loan interest, repayment schedules, affordability and the risks of borrowing. TopSafeB does not offer loans or approve credit.</p></section>
+<section class="panel" id="customer-support" style="margin-top:22px">
+<h2>Support and feedback</h2>
+<p class="muted">Send a message or rating to the TopSafeB owner. Private replies will appear below.</p>
+<form id="feedback-form" style="display:grid;gap:12px;max-width:620px">
+<label for="feedback-rating">Your rating</label>
+<select id="feedback-rating" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit"><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Okay</option><option value="2">2 — Needs improvement</option><option value="1">1 — Poor</option></select>
+<label for="feedback-message">Your feedback</label>
+<textarea id="feedback-message" required maxlength="2000" rows="4" placeholder="Write your message…" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit"></textarea>
+<button type="submit">Submit feedback</button>
+<p id="feedback-status" class="muted" role="status" aria-live="polite"></p>
+</form>
+<h3>Private replies</h3>
 <div id="reply-notification" class="notice" role="status" aria-live="polite" hidden><strong>New private reply:</strong> TopSafeB has responded to your feedback. Read your reply below.</div>
 <p id="owner-replies-status" class="muted" role="status" aria-live="polite">Checking for replies…</p>
 <div id="owner-replies-list" style="display:grid;gap:12px"></div>
@@ -327,6 +373,7 @@ async function loadSession(){
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
   document.getElementById("bank-customer-name").textContent=nameEl.textContent;
   document.getElementById("bank-account-holder").textContent=nameEl.textContent;
+  document.getElementById("header-customer-name").textContent=nameEl.textContent;
   emailEl.textContent=user.email || "";
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);
@@ -443,6 +490,14 @@ feedbackForm.addEventListener("submit",async event=>{
     updateFeedbackSubmitState();
   }
 });
+document.getElementById("menu-logout").addEventListener("click",()=>signoutButton.click());
+const menuToggle=document.getElementById("customer-menu-toggle");
+const menu=document.getElementById("customer-menu");
+const backdrop=document.getElementById("customer-menu-backdrop");
+function closeCustomerMenu(){menu.classList.remove("open");menu.setAttribute("aria-hidden","true");menuToggle.setAttribute("aria-expanded","false");backdrop.hidden=true;}
+menuToggle.addEventListener("click",()=>{const opening=!menu.classList.contains("open");menu.classList.toggle("open",opening);menu.setAttribute("aria-hidden",String(!opening));menuToggle.setAttribute("aria-expanded",String(opening));backdrop.hidden=!opening;});
+backdrop.addEventListener("click",closeCustomerMenu);
+menu.querySelectorAll("a").forEach(link=>link.addEventListener("click",closeCustomerMenu));
 signoutButton.addEventListener("click",async()=>{
   signoutButton.disabled=true;
   statusEl.textContent="Signing out…";

@@ -263,6 +263,39 @@ button,.button{border-radius:9px}
 .menu-link:hover,.menu-link:focus,.menu-link.active{background:#d8b56d;color:#102b4a}
 @media(max-width:650px){main{padding-left:13px;padding-right:13px}.bank-dashboard-top{background:linear-gradient(115deg,#071b33,#123c68)}}
 
+
+/* Refined account experience: polished financial-learning simulator */
+.bank-dashboard{position:relative}
+.bank-dashboard-top{min-height:142px;align-items:center}
+.bank-dashboard-top h2{font-size:clamp(27px,4vw,34px);letter-spacing:-.8px}
+.demo-pill{box-shadow:0 2px 8px #00000012;border:1px solid #e7d7b0}
+.account-card{min-height:218px}
+.account-card:before{content:"TOPSAFEB  /  PRACTICE";position:absolute;right:20px;top:20px;color:#ffffff16;font-size:11px;font-weight:900;letter-spacing:2px;pointer-events:none}
+.account-label{font-size:10px;letter-spacing:1.7px}
+.account-meta{font-size:12px}
+.bank-account-status{padding:10px 12px;border:1px solid #ffffff25;border-radius:9px;background:#ffffff0c}
+.topup-card{background:linear-gradient(145deg,#fbfcfe,#f5f8fb);border-color:#dce5ee;box-shadow:0 5px 18px #102b5008}
+.topup-card h3{font-size:17px;color:#143b60}
+.topup-history article{border-color:#e1e8ef!important;box-shadow:0 2px 8px #102b5007}
+.activity-list article{display:grid;gap:5px;border:1px solid #e2e8f0!important;border-radius:12px!important;background:#fff!important;padding:15px 17px!important;box-shadow:0 3px 12px #102b5008}
+.activity-list article strong{color:#173b5d;font-size:14px}
+.activity-list article p{font-size:12px;line-height:1.5}
+.activity-list article p:first-of-type{color:#173b5d;font-weight:700}
+.demo-warning{box-shadow:0 3px 12px #9a6d1b0b}
+.transfer-form{border-radius:13px;box-shadow:0 3px 14px #102b5007}
+.transfer-form input,.transfer-form select{min-height:47px}
+.transfer-form button{min-height:48px;letter-spacing:.1px}
+#demo-transfer-receipt{background:#fff;box-shadow:0 8px 24px #102b500b}
+.receipt-status{letter-spacing:.8px}
+#learning-progress label{display:block;padding:10px 12px;margin:7px 0;border:1px solid #e7edf3;border-radius:9px;background:#fbfcfe}
+#customer-support textarea{min-height:130px}
+@media(max-width:650px){
+ .bank-dashboard-top{min-height:0}
+ .account-card{min-height:0}
+ .account-card:before{font-size:8px;right:13px;top:13px}
+ .activity-list article{padding:13px!important}
+}
+
 </style>
 </head>
 <body>
@@ -293,7 +326,7 @@ button,.button{border-radius:9px}
 <p id="status" role="status" aria-live="polite">Checking your sign-in session…</p>
 <p id="admin-entry" hidden><a class="button" href="admin.html">Open Owner / Admin Dashboard</a></p><button id="signout" class="secondary" type="button">Sign out</button></section>
 <section class="bank-dashboard" id="customer-demo-funds">
-<div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB • PRACTICE ACCOUNT</p><h2>Bank Dashboard</h2><p class="bank-subtitle">Welcome back, <span id="bank-customer-name">Customer</span></p></div><span class="demo-pill">SIMULATION ONLY</span></div>
+<div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB • PRACTICE ACCOUNT</p><h2>Practice Account Overview</h2><p class="bank-subtitle">Welcome back, <span id="bank-customer-name">Customer</span></p></div><span class="demo-pill">SIMULATION ONLY</span></div>
 <div class="market-strip" aria-label="Financial learning indicators"><div><span>Market learning</span><strong>Risk &amp; return</strong><small>Understand market movement</small></div><div><span>Money skills</span><strong>Budgeting</strong><small>Plan and track spending</small></div><div><span>Account safety</span><strong>Protected practice</strong><small>Never enter real bank details</small></div></div>
 <div class="account-card"><div class="account-card-head"><div><span class="account-label">DEMO CHECKING ACCOUNT</span><h3>Available Demo Balance</h3></div><span class="account-symbol" aria-hidden="true">◆</span></div><p id="customer-demo-balance" class="bank-balance">$0.00</p><div class="account-meta"><span>Account holder: <strong id="bank-account-holder">TopSafeB Customer</strong></span><span>Currency: <strong>USD</strong></span></div><div class="account-meta"><span>Account status: <strong>Practice account</strong></span><span>Account number: <strong>DEMO •••• 0000</strong></span></div><p id="demo-account-status" class="bank-account-status" role="status" aria-live="polite">Loading your simulated balance…</p></div>
 <section class="topup-card" id="demo-add-money">

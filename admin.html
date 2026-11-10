@@ -48,6 +48,17 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </div>
 <section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
 </section>
+<section class="panel" id="demo-funds-manager">
+<h2>Demo Funds Manager</h2>
+<p class="notice"><strong>SIMULATED FUNDS ONLY:</strong> These are fictional USD balances for learning demonstrations. They are not deposits, cash, or transferable money.</p>
+<p id="demo-funds-status" class="muted" role="status" aria-live="polite">Loading demo accounts…</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Customer</th><th>Demo balance (USD)</th><th>Action</th><th>Amount (USD)</th><th>Note</th><th>Apply</th></tr></thead>
+<tbody id="demo-funds-rows"><tr><td colspan="6">Loading demo accounts…</td></tr></tbody>
+</table></div>
+<h3>Recent demo balance history</h3>
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Action</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody id="demo-history-rows"><tr><td colspan="6">Loading history…</td></tr></tbody></table></div>
+</section>
 <section class="panel" id="feedback-management">
 <h2>Customer feedback</h2>
 <p class="muted">Private feedback submitted by signed-in customers. Only authorised administrators can view these submissions.</p>
@@ -148,6 +159,52 @@ function filterCustomers(){
  for(const row of customerTableRows){const match=row.dataset.search.includes(query);row.hidden=!match;if(match)visible++;}
  noSearchResults.hidden=visible!==0;searchSummary.textContent=query?`Showing ${visible} of ${customerTableRows.length} customers.`:`Showing all ${customerTableRows.length} customers.`;
 }
+
+async function loadDemoFunds(customers){
+ const status=document.getElementById("demo-funds-status");
+ const body=document.getElementById("demo-funds-rows");
+ const historyBody=document.getElementById("demo-history-rows");
+ const {data:accounts,error}=await supabase.from("demo_accounts").select("user_id,balance,currency,updated_at");
+ if(error){status.textContent="Demo Funds setup is not complete yet. Run supabase/demo-funds-setup.sql in Supabase SQL Editor, then refresh this page.";body.replaceChildren();return;}
+ const byUser=new Map((accounts||[]).map(row=>[row.user_id,row]));
+ body.replaceChildren();
+ for(const customer of customers){
+  const account=byUser.get(customer.user_id);
+  const balance=Number(account?.balance||0);
+  const tr=document.createElement("tr");
+  const name=document.createElement("td");name.textContent=(customer.full_name||"Customer")+" — "+(customer.email||"");
+  const balanceCell=document.createElement("td");balanceCell.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(balance);
+  const actionCell=document.createElement("td");const action=document.createElement("select");
+  for(const [value,label] of [["add","Add funds"],["deduct","Deduct funds"],["set","Set balance"]]){const option=document.createElement("option");option.value=value;option.textContent=label;action.append(option);}
+  const amountCell=document.createElement("td");const amount=document.createElement("input");amount.type="number";amount.min="0.01";amount.max="1000000000";amount.step="0.01";amount.placeholder="0.00";amount.inputMode="decimal";amount.style.cssText="width:120px;padding:9px";amountCell.append(amount);
+  const noteCell=document.createElement("td");const note=document.createElement("input");note.type="text";note.maxLength=500;note.placeholder="Optional reason";note.style.cssText="width:150px;padding:9px";noteCell.append(note);
+  const applyCell=document.createElement("td");const apply=document.createElement("button");apply.type="button";apply.textContent="Apply";
+  apply.addEventListener("click",async()=>{
+   const value=Number(amount.value);
+   if(!Number.isFinite(value)||value<=0){status.textContent="Enter an amount greater than zero.";return;}
+   apply.disabled=true;apply.textContent="Saving…";
+   const {data,error:rpcError}=await supabase.rpc("admin_adjust_demo_balance",{p_user_id:customer.user_id,p_action:action.value,p_amount:value,p_note:note.value.trim()});
+   if(rpcError){status.textContent="Could not update demo funds: "+rpcError.message;apply.disabled=false;apply.textContent="Apply";return;}
+   const result=Array.isArray(data)?data[0]:data;
+   status.textContent="Demo balance updated for "+(customer.full_name||customer.email)+". New balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result?.new_balance||0));
+   await loadDemoFunds(customers);
+  });
+  applyCell.append(apply);actionCell.append(action);tr.append(name,balanceCell,actionCell,amountCell,noteCell,applyCell);body.append(tr);
+ }
+ if(!customers.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No customer profiles found.";tr.append(td);body.append(tr);}
+ status.textContent="Demo accounts loaded. Changes are recorded in the history below.";
+ const {data:history,error:historyError}=await supabase.from("demo_transactions").select("user_id,action,amount,balance_after,note,created_at").order("created_at",{ascending:false}).limit(20);
+ historyBody.replaceChildren();
+ if(historyError){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="History is unavailable until the demo funds setup is complete.";tr.append(td);historyBody.append(tr);return;}
+ const customerNames=new Map(customers.map(c=>[c.user_id,(c.full_name||"Customer")+" ("+(c.email||"")+")"]));
+ for(const item of history||[]){
+  const tr=document.createElement("tr");
+  const values=[new Date(item.created_at).toLocaleString(),customerNames.get(item.user_id)||"Customer",({add:"Added",deduct:"Deducted",set:"Balance set"})[item.action]||item.action,new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount)),new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.balance_after)),item.note||"—"];
+  for(const value of values){const td=document.createElement("td");td.textContent=value;tr.append(td);}historyBody.append(tr);
+ }
+ if(!(history||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No demo balance changes yet.";tr.append(td);historyBody.append(tr);}
+}
+
 async function loadAdmin(){
  const {data:{session},error:sessionError}=await supabase.auth.getSession();
  if(sessionError)throw sessionError;
@@ -188,6 +245,7 @@ async function loadAdmin(){
   customerTableRows.push(tr);rowsEl.append(tr);
  }
  rowsEl.append(noSearchResults);filterCustomers();
+ await loadDemoFunds(list);
  await loadFeedback();
 }
 function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));}

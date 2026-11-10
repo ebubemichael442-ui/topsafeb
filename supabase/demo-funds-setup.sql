@@ -285,3 +285,86 @@ $$;
 
 revoke all on function public.customer_demo_transfer_fictional_bank(text,numeric,text,text,text) from public;
 grant execute on function public.customer_demo_transfer_fictional_bank(text,numeric,text,text,text) to authenticated;
+
+
+-- International demo transfer: fixed educational conversion examples only.
+-- No external bank, FX provider, payment rail, or real recipient is contacted.
+create or replace function public.customer_demo_transfer_international(
+  p_country text,
+  p_bank_name text,
+  p_amount numeric,
+  p_recipient_name text,
+  p_account_number text,
+  p_description text default ''
+)
+returns table(new_balance numeric, transaction_id uuid, converted_amount numeric, destination_currency text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_balance numeric(14,2);
+  v_new_balance numeric(14,2);
+  v_transaction_id uuid;
+  v_rate numeric;
+  v_currency text;
+  v_converted numeric(18,2);
+  v_note text;
+begin
+  if v_user_id is null then raise exception 'Please sign in to make a demo transfer'; end if;
+  if p_country = 'United Kingdom' then v_currency := 'GBP'; v_rate := 0.79;
+  elsif p_country = 'United States' then v_currency := 'USD'; v_rate := 1;
+  elsif p_country = 'Canada' then v_currency := 'CAD'; v_rate := 1.36;
+  elsif p_country = 'Ghana' then v_currency := 'GHS'; v_rate := 15;
+  elsif p_country = 'South Africa' then v_currency := 'ZAR'; v_rate := 18.5;
+  elsif p_country = 'Kenya' then v_currency := 'KES'; v_rate := 129;
+  elsif p_country = 'India' then v_currency := 'INR'; v_rate := 83;
+  elsif p_country = 'Nigeria' then v_currency := 'NGN'; v_rate := 1500;
+  elsif p_country = 'Eurozone' then v_currency := 'EUR'; v_rate := 0.95;
+  else raise exception 'Choose a supported demo destination country'; end if;
+
+  if p_bank_name is null or p_bank_name not in (
+    'Oso Local Bank','Rivergate Community Bank','Maple Street Savings Bank',
+    'Harborlight Local Bank','Pioneer Town Bank','Greenfield Neighbourhood Bank',
+    'Unity Corner Bank','Westbridge Local Bank'
+  ) then raise exception 'Choose one of the listed fictional demo banks'; end if;
+  if p_recipient_name is null or length(trim(p_recipient_name)) < 2 or length(p_recipient_name) > 100 then
+    raise exception 'Enter a valid recipient name';
+  end if;
+  if p_account_number is null or p_account_number !~ '^[0-9]{8,16}$' then
+    raise exception 'Use an 8 to 16 digit fictional account number';
+  end if;
+  if p_amount is null or p_amount <= 0 or p_amount > 1000000000 then
+    raise exception 'Enter a valid transfer amount';
+  end if;
+
+  insert into public.demo_accounts(user_id,balance) values(v_user_id,0)
+  on conflict(user_id) do nothing;
+  select balance into v_balance from public.demo_accounts
+  where user_id=v_user_id for update;
+
+  if v_balance < round(p_amount,2) then
+    raise exception 'Insufficient demo funds. Your available balance is % USD',v_balance;
+  end if;
+  v_new_balance := v_balance - round(p_amount,2);
+  v_converted := round(round(p_amount,2) * v_rate, 2);
+  v_note := 'SIMULATED INTERNATIONAL TRANSFER | Country: ' || p_country
+    || ' | Fictional bank: ' || p_bank_name
+    || ' | Recipient: ' || trim(p_recipient_name)
+    || ' | Account ending ' || right(p_account_number,4)
+    || ' | Example conversion: ' || v_converted || ' ' || v_currency
+    || ' (not a live FX rate)'
+    || case when coalesce(trim(p_description),'') <> '' then ' | Description: ' || left(trim(p_description),120) else '' end;
+
+  update public.demo_accounts set balance=v_new_balance,updated_at=now()
+  where user_id=v_user_id;
+  insert into public.demo_transactions(user_id,action,amount,balance_after,note,created_by)
+  values(v_user_id,'transfer',round(p_amount,2),v_new_balance,v_note,v_user_id)
+  returning id into v_transaction_id;
+
+  return query select v_new_balance,v_transaction_id,v_converted,v_currency;
+end;
+$$;
+revoke all on function public.customer_demo_transfer_international(text,text,numeric,text,text,text) from public;
+grant execute on function public.customer_demo_transfer_international(text,text,numeric,text,text,text) to authenticated;

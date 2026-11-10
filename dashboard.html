@@ -77,6 +77,12 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </form>
 <p class="muted">Your feedback is submitted securely and can be reviewed by the TopSafeB owner. Do not include passwords, PINs, OTPs or bank details.</p>
 </section>
+<section class="panel" id="owner-replies" style="margin-top:22px">
+<h2>Replies from TopSafeB</h2>
+<p class="muted">Private responses from the TopSafeB owner to your submitted feedback.</p>
+<p id="owner-replies-status" class="muted" role="status" aria-live="polite">Checking for replies…</p>
+<div id="owner-replies-list" style="display:grid;gap:12px"></div>
+</section>
 <section class="panel" style="margin-top:22px">
 <h2>Your learning progress</h2>
 <p class="muted">Tick each lesson when you finish it. Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>
@@ -218,8 +224,28 @@ async function loadSession(){
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);
   statusEl.textContent="You are signed in. Your learning progress is synced to your account.";
+  await loadCustomerReplies(user.id);
   const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
   if(adminRecord) document.getElementById("admin-entry").hidden=false;
+}
+async function loadCustomerReplies(userId){
+  const replyStatus=document.getElementById("owner-replies-status");
+  const replyList=document.getElementById("owner-replies-list");
+  const {data,error}=await supabase.from("customer_feedback").select("id,message,owner_reply,replied_at,created_at").eq("user_id",userId).not("owner_reply","is",null).order("replied_at",{ascending:false});
+  if(error){replyStatus.textContent="Your replies could not be loaded right now. Please refresh the page.";return;}
+  replyList.replaceChildren();
+  const replies=(data||[]).filter(item=>item.owner_reply&&item.owner_reply.trim());
+  if(!replies.length){replyStatus.textContent="You do not have any replies yet. Check back later.";return;}
+  replyStatus.textContent=replies.length+" owner "+(replies.length===1?"reply":"replies")+" available.";
+  for(const item of replies){
+    const card=document.createElement("article");card.style.cssText="padding:16px;border:1px solid #dbe3ed;border-radius:10px;background:#f8fafc";
+    const date=document.createElement("p");date.className="muted";date.textContent="Reply received: "+new Date(item.replied_at).toLocaleString();
+    const originalTitle=document.createElement("strong");originalTitle.textContent="Your feedback";
+    const original=document.createElement("p");original.textContent=item.message;original.style.whiteSpace="pre-wrap";
+    const replyTitle=document.createElement("strong");replyTitle.textContent="TopSafeB owner reply";
+    const reply=document.createElement("p");reply.textContent=item.owner_reply;reply.style.whiteSpace="pre-wrap";
+    card.append(date,originalTitle,original,replyTitle,reply);replyList.append(card);
+  }
 }
 const feedbackForm=document.getElementById("feedback-form");
 const feedbackRating=document.getElementById("feedback-rating");

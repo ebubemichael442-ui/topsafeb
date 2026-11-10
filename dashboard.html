@@ -25,6 +25,28 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
   #certificate{display:block!important;max-width:850px;margin:30px auto;padding:50px;border:8px double #102b50;box-shadow:none;text-align:center}
   #certificate button{display:none!important}
 }
+
+.bank-dashboard{margin:24px 0;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 12px 35px #142c5015;padding:0 0 24px}
+.bank-dashboard-top{background:linear-gradient(120deg,#172c88,#4436b5);color:#fff;padding:24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bank-dashboard-top h2{color:#fff;font-size:clamp(24px,5vw,34px);margin:0}.bank-dashboard-top .eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:800;margin:0 0 6px;color:#d9d9ff}.bank-subtitle{margin:4px 0 0;color:#e7e8ff}
+.demo-pill{background:#fff;color:#392c9b;border-radius:999px;padding:7px 10px;font-size:10px;font-weight:900;letter-spacing:.5px;white-space:nowrap}
+.market-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:18px 20px;border:1px solid #e8ebf4;border-radius:12px;overflow:hidden}
+.market-strip>div{padding:13px 12px;border-right:1px solid #e8ebf4;min-width:0}.market-strip>div:last-child{border:0}.market-strip span,.market-strip small{display:block;color:#748097;font-size:11px}.market-strip strong{display:block;color:#233c75;font-size:15px;margin:3px 0}
+.account-card{margin:0 20px;padding:22px;border-radius:17px;background:linear-gradient(135deg,#f7f8ff,#fff);border:1px solid #e6e9f6}
+.account-card-head{display:flex;justify-content:space-between;align-items:center}.account-label{font-size:11px;letter-spacing:1.2px;font-weight:800;color:#6975a0}.account-card h3{margin:5px 0;color:#68748b;font-size:16px}.account-symbol{display:grid;place-items:center;width:54px;height:54px;border-radius:15px;background:#252b49;color:#fff;font-size:24px}
+.bank-balance{font-size:clamp(32px,7vw,46px);font-weight:900;letter-spacing:-1.5px;color:#20804c;margin:4px 0 16px;overflow-wrap:anywhere}
+.account-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:10px;margin-top:8px;border-top:1px solid #e5e9f1;color:#6c7890;font-size:12px}.account-meta strong{color:#24395f}
+.bank-account-status{font-size:12px;color:#68748b;margin:14px 0 0}
+.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 20px}
+.quick-action{display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;text-decoration:none;padding:14px 8px;border:1px solid #e3e7f0;border-radius:12px;color:#253b77;font-size:13px;font-weight:800;background:#fff}
+.quick-action span{font-size:19px}.quick-action.primary-action{background:#e91e63;color:#fff;border-color:#e91e63}
+.demo-warning{margin:18px 20px;padding:13px 15px;border-left:4px solid #d8a53c;background:#fff8e8;border-radius:8px;color:#71551d;font-size:13px}
+.bank-section-title{margin:24px 20px 5px;color:#172e68;font-size:20px}.bank-dashboard>p:not(.bank-section-title){margin:5px 20px 14px;color:#66738a;font-size:14px}
+.transfer-form{display:grid;gap:10px;max-width:620px;margin:14px 20px 20px;padding:18px;border:1px solid #e5e9f1;border-radius:14px;background:#fbfcff}
+.transfer-form label{font-size:13px;font-weight:700;color:#344464}.transfer-form input,.transfer-form select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit;background:#fff}.transfer-form button{background:#e91e63;color:white;border-radius:10px}
+.conversion-preview{padding:13px;background:#f0f3ff;border-radius:9px;color:#34477f;font-size:13px;margin:4px 0}
+.activity-list{display:grid;gap:9px;margin:12px 20px 0}
+@media(max-width:600px){.bank-dashboard{border-radius:14px}.bank-dashboard-top{padding:19px 16px;align-items:flex-start;flex-direction:column}.market-strip{margin:14px 12px}.market-strip>div{padding:10px 7px}.market-strip strong{font-size:13px}.market-strip span,.market-strip small{font-size:10px}.account-card{margin:0 12px;padding:17px}.quick-actions{margin:14px 12px;gap:7px}.quick-action{font-size:11px;padding:12px 5px;flex-direction:column}.demo-warning{margin:14px 12px}.bank-section-title{margin-left:12px;margin-right:12px}.bank-dashboard>p:not(.bank-section-title){margin-left:12px;margin-right:12px}.transfer-form{margin-left:12px;margin-right:12px;padding:13px}.activity-list{margin-left:12px;margin-right:12px}}
 </style>
 </head>
 <body>
@@ -37,49 +59,90 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <h2 id="customer-name">Loading your profile…</h2>
 <p id="customer-email" class="muted"></p>
 <p id="status" role="status" aria-live="polite">Checking your sign-in session…</p>
-<p id="admin-entry" hidden><a class="button" href="admin.html">Open Owner / Admin Dashboard</a></p><button id="signout" class="secondary" type="button">Sign out</button>
-</section>
-<div class="notice"><strong>Education only:</strong> This dashboard is not a bank account. It does not hold deposits, display real balances, process payments or transfer money. Never enter bank passwords, PINs, card details or OTPs.</div>
-<h2>Explore your learning resources</h2>
-<div class="grid">
-<article class="tile"><h2>Investment Basics</h2><p>Learn about saving, investing, risk and diversification.</p><a href="investment-basics.html">Read the guide</a></article>
-<article class="tile"><h2>Financial Safety</h2><p>Learn how to recognise scams and protect your information.</p><a href="financial-safety.html">Read safety tips</a></article>
-<article class="tile"><h2>Banking Demonstration</h2><p>Explore a fictional account and sample activity.</p><a href="online-banking-demo.html">Open demo</a></article>
-<article class="tile"><h2>Contact TopSafeB</h2><p>Find the website contact information.</p><a href="contact.html">Contact page</a></article>
-</div>
-<section class="panel" id="customer-support" style="margin-top:22px">
-<h2>Help &amp; Support</h2>
-<p>Need help using TopSafeB? We can help with website issues, learning content, sign-in and lesson progress, or privacy questions.</p>
-<div class="grid">
-<article class="tile"><h2>Website and learning help</h2><p>Ask a question about a lesson, report an error or suggest an improvement.</p></article>
-<article class="tile"><h2>Account and progress help</h2><p>Tell us if you are having trouble signing in or viewing your completed lessons. Never send your password or verification code.</p></article>
-</div>
-<p><strong>Contact email:</strong> <a href="mailto:ebubemichael442@gmail.com?subject=TopSafeB%20customer%20support">ebubemichael442@gmail.com</a></p>
-<p><a class="button" href="contact.html">Visit Help &amp; Contact page</a></p>
-<p class="muted">We aim to review enquiries and respond as soon as practical, but response times may vary. TopSafeB cannot access bank accounts, investigate transactions, recover funds or provide personalised financial advice. For banking issues, contact your bank directly.</p>
-</section>
-<section class="panel" id="customer-feedback" style="margin-top:22px">
-<h2>Share your feedback</h2>
-<p>Tell us about your experience using TopSafeB. Your comments can help us improve the learning resources and website.</p>
-<form id="feedback-form">
-<label for="feedback-rating"><strong>How would you rate your experience?</strong></label>
-<select id="feedback-rating" name="rating" required style="display:block;width:100%;max-width:420px;padding:12px;margin:8px 0 16px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<option value="">Choose a rating</option>
-<option value="Very good">Very good</option>
-<option value="Good">Good</option>
-<option value="Fair">Fair</option>
-<option value="Needs improvement">Needs improvement</option>
+<p id="admin-entry" hidden><a class="button" href="admin.html">Open Owner / Admin Dashboard</a></p><button id="signout" class="secondary" type="button">Si<section class="bank-dashboard" id="customer-demo-funds">
+<div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB • PRACTICE ACCOUNT</p><h2>Bank Dashboard</h2><p class="bank-subtitle">Welcome back, <span id="bank-customer-name">Customer</span></p></div><span class="demo-pill">SIMULATION ONLY</span></div>
+<div class="market-strip" aria-label="Financial learning indicators"><div><span>Market learning</span><strong>Risk &amp; return</strong><small>Understand market movement</small></div><div><span>Money skills</span><strong>Budgeting</strong><small>Plan and track spending</small></div><div><span>Account safety</span><strong>Protected practice</strong><small>Never enter real bank details</small></div></div>
+<div class="account-card"><div class="account-card-head"><div><span class="account-label">DEMO CHECKING ACCOUNT</span><h3>Available Demo Balance</h3></div><span class="account-symbol" aria-hidden="true">◆</span></div><p id="customer-demo-balance" class="bank-balance">$0.00</p><div class="account-meta"><span>Account holder: <strong id="bank-account-holder">TopSafeB Customer</strong></span><span>Currency: <strong>USD</strong></span></div><div class="account-meta"><span>Account status: <strong>Practice account</strong></span><span>Account number: <strong>DEMO •••• 0000</strong></span></div><p id="demo-account-status" class="bank-account-status" role="status" aria-live="polite">Loading your simulated balance…</p></div>
+<div class="quick-actions"><a class="quick-action primary-action" href="#oso-transfer-form"><span aria-hidden="true">↗</span> Make Demo Transfer</a><a class="quick-action" href="#customer-demo-history"><span aria-hidden="true">▤</span> View Activity</a><a class="quick-action" href="#learning-progress"><span aria-hidden="true">◎</span> Learning</a></div>
+<div class="demo-warning"><strong>Demo funds — not real money.</strong> This fictional balance is only for education. It cannot be withdrawn, redeemed, or transferred outside TopSafeB. No real bank is connected.</div>
+<h3 class="bank-section-title">International demo transfer</h3>
+<p>Practise sending simulated USD to a fictional receiving bank in another country. Exchange rates are fixed teaching examples, not live rates.</p>
+<form id="oso-transfer-form" class="transfer-form">
+<label for="oso-country">Destination country</label>
+<select id="oso-country" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<option value="">Choose a country</option>
+<option value="United Kingdom">United Kingdom (GBP)</option>
+<option value="United States">United States (USD)</option>
+<option value="Canada">Canada (CAD)</option>
+<option value="Ghana">Ghana (GHS)</option>
+<option value="South Africa">South Africa (ZAR)</option>
+<option value="Kenya">Kenya (KES)</option>
+<option value="India">India (INR)</option>
+<option value="Nigeria">Nigeria (NGN)</option>
+<option value="Eurozone">Eurozone (EUR)</option>
 </select>
-<label for="feedback-message"><strong>Your feedback</strong></label>
-<textarea id="feedback-message" name="message" required maxlength="3000" rows="5" placeholder="What did you find helpful? What could we improve?" style="display:block;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;resize:vertical"></textarea>
-<button type="submit">Submit feedback</button>
-<p id="feedback-status" class="muted" role="status" aria-live="polite"></p>
+<label for="oso-bank">Choose fictional receiving bank</label>
+<select id="oso-bank" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<option value="">Select a demo bank</option>
+<option>Oso Local Bank</option><option>Rivergate Community Bank</option><option>Maple Street Savings Bank</option><option>Harborlight Local Bank</option><option>Pioneer Town Bank</option><option>Greenfield Neighbourhood Bank</option><option>Unity Corner Bank</option><option>Westbridge Local Bank</option>
+</select>
+<label for="oso-recipient">Recipient name</label>
+<input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<label for="oso-account">Fictional account number (8–16 digits)</label>
+<input id="oso-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<label for="oso-amount">Amount to practise sending (USD)</label>
+<input id="oso-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<p id="oso-conversion-preview" class="conversion-preview" aria-live="polite">Choose a country and enter an amount to see the illustrative conversion.</p>
+<label for="oso-description">Transfer description (optional)</label>
+<input id="oso-description" maxlength="120" autocomplete="off" placeholder="Practice international transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<button id="oso-transfer-submit" type="submit">Make simulated international transfer</button>
+<p id="oso-transfer-status" class="muted" role="status" aria-live="polite"></p>
 </form>
-<p class="muted">Your feedback is submitted securely and can be reviewed by the TopSafeB owner. Do not include passwords, PINs, OTPs or bank details.</p>
+
+<h3 class="bank-section-title">Recent demo activity</h3>
+<div id="customer-demo-history" class="activity-list"></div>
 </section>
-<section class="panel" id="owner-replies" style="margin-top:22px">
-<h2>Replies from TopSafeB</h2>
-<p class="muted">Private responses from the TopSafeB owner to your submitted feedback.</p>
+<h2>Your Demo Business Account</h2>
+<p class="notice"><strong>DEMO FUNDS — NOT REAL MONEY.</strong> This fictional USD balance is provided only for learning and demonstration. It is not a bank deposit and cannot be withdrawn or transferred as real money.</p>
+<p id="demo-account-status" class="muted" role="status" aria-live="polite">Loading your demo balance…</p>
+<p style="font-size:14px;color:#657286;margin-bottom:4px">Available demo balance</p>
+<p id="customer-demo-balance" style="font-size:clamp(30px,6vw,42px);font-weight:800;color:#102b50;margin:0">$0.00</p>
+<h3>International demo transfer</h3>
+<p><strong>SIMULATION ONLY:</strong> Choose a destination country and fictional receiving bank. Exchange rates are fixed teaching examples, not live market rates. No real money is sent and no real bank is contacted.</p>
+<form id="oso-transfer-form" style="display:grid;gap:10px;max-width:520px">
+<label for="oso-country">Destination country</label>
+<select id="oso-country" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<option value="">Choose a country</option>
+<option value="United Kingdom">United Kingdom (GBP)</option>
+<option value="United States">United States (USD)</option>
+<option value="Canada">Canada (CAD)</option>
+<option value="Ghana">Ghana (GHS)</option>
+<option value="South Africa">South Africa (ZAR)</option>
+<option value="Kenya">Kenya (KES)</option>
+<option value="India">India (INR)</option>
+<option value="Nigeria">Nigeria (NGN)</option>
+<option value="Eurozone">Eurozone (EUR)</option>
+</select>
+<label for="oso-bank">Choose fictional receiving bank</label>
+<select id="oso-bank" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<option value="">Select a demo bank</option>
+<option>Oso Local Bank</option><option>Rivergate Community Bank</option><option>Maple Street Savings Bank</option><option>Harborlight Local Bank</option><option>Pioneer Town Bank</option><option>Greenfield Neighbourhood Bank</option><option>Unity Corner Bank</option><option>Westbridge Local Bank</option>
+</select>
+<label for="oso-recipient">Recipient name</label>
+<input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<label for="oso-account">Fictional account number (8–16 digits)</label>
+<input id="oso-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<label for="oso-amount">Amount to practise sending (USD)</label>
+<input id="oso-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<p id="oso-conversion-preview" class="notice" aria-live="polite">Choose a country and enter an amount to see the illustrative conversion.</p>
+<label for="oso-description">Transfer description (optional)</label>
+<input id="oso-description" maxlength="120" autocomplete="off" placeholder="Practice international transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<button id="oso-transfer-submit" type="submit">Make simulated international transfer</button>
+<p id="oso-transfer-status" class="muted" role="status" aria-live="polite"></p>
+</form>
+<h3>Recent demo activity</h3>
+<div id="customer-demo-history" style="display:grid;gap:8px"></div>
+</section>es from the TopSafeB owner to your submitted feedback.</p>
 <div id="reply-notification" class="notice" role="status" aria-live="polite" hidden><strong>New private reply:</strong> TopSafeB has responded to your feedback. Read your reply below.</div>
 <p id="owner-replies-status" class="muted" role="status" aria-live="polite">Checking for replies…</p>
 <div id="owner-replies-list" style="display:grid;gap:12px"></div>
@@ -126,7 +189,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <h3>Recent demo activity</h3>
 <div id="customer-demo-history" style="display:grid;gap:8px"></div>
 </section>
-<section class="panel" style="margin-top:22px">
+<section class="panel" id="learning-progress" style="margin-top:22px">
 <h2>Your learning progress</h2>
 <p class="muted">Tick each lesson when you finish it. Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>
 <div id="progress-summary" role="status" aria-live="polite">0 of 4 lessons completed</div>
@@ -328,7 +391,7 @@ async function loadCustomerDemoFunds(userId){
  if(historyError){const p=document.createElement("p");p.className="muted";p.textContent="Recent activity is temporarily unavailable.";historyEl.append(p);return;}
  for(const item of items||[]){
   const card=document.createElement("article");card.style.cssText="padding:12px;border:1px solid #dbe3ed;border-radius:8px;background:#f8fafc";
-  const title=document.createElement("strong");title.textContent=({add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted",transfer:"Simulated transfer to Oso Local Bank"})[item.action]||"Demo account update";
+  const title=document.createElement("strong");title.textContent=({add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted",transfer:"Simulated transfer"})[item.action]||"Demo account update";
   const amount=document.createElement("p");amount.style.margin="4px 0";amount.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount))+" • Balance after: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.balance_after));
   const date=document.createElement("p");date.className="muted";date.style.margin="0";date.textContent=new Date(item.created_at).toLocaleString()+(item.note?" — "+item.note:"");
   card.append(title,amount,date);historyEl.append(card);
@@ -342,6 +405,8 @@ async function loadSession(){
   if(!session){window.location.replace("login.html");return;}
   const user=session.user;
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
+  document.getElementById("bank-customer-name").textContent=nameEl.textContent;
+  document.getElementById("bank-account-holder").textContent=nameEl.textContent;
   emailEl.textContent=user.email || "";
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);

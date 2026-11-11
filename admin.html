@@ -110,7 +110,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <div class="search-tools" id="customer-search-tools" hidden><label for="customer-search">Search customers by name or email</label><input id="customer-search" type="search" placeholder="Enter a customer name or email" autocomplete="off"><p class="search-summary" id="search-summary" aria-live="polite"></p></div>
 <div class="table-wrap">
 <table>
-<thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th><th>Completed on</th><th>Last progress update</th><th>Details</th></tr></thead>
+<thead><tr><th>Full name</th><th>Email</th><th>Lessons completed</th><th>Completed on</th><th>Last progress update</th><th>Customer access</th><th>Details</th></tr></thead>
 <tbody id="customer-rows"><tr><td colspan="5">Loading customer list…</td></tr></tbody>
 </table>
 </div>
@@ -166,6 +166,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const supabase=createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
 let currentOwnerId=null;
+let customerAccessReady=false;
 const nameEl=document.getElementById("owner-name");
 const emailEl=document.getElementById("owner-email");
 const statusEl=document.getElementById("status");
@@ -475,6 +476,15 @@ async function loadAdmin(){
  const {data:customers,error:customerError}=await supabase.from("profiles").select("user_id,full_name,email").order("full_name",{ascending:true});
  if(customerError)throw customerError;
  const list=customers||[];
+ const {data:accessRows,error:accessError}=await supabase.from("customer_access_controls").select("user_id,is_blocked,reason,updated_at");
+ customerAccessReady=!accessError;
+ const accessByUser=new Map((accessRows||[]).map(item=>[item.user_id,item]));
+ for(const customer of list){
+  const access=accessByUser.get(customer.user_id);
+  customer.access_blocked=!!access?.is_blocked;
+  customer.access_reason=access?.reason||"";
+ }
+ if(accessError)statusEl.textContent="Administrator access confirmed. Run supabase/customer-access-controls.sql to enable customer blocking.";
  customerProfiles=list;
  const {data:progressRows,error:progressError}=await supabase.from("learning_progress").select("user_id,completed_lessons,completed_at,updated_at");
  if(progressError)throw progressError;
@@ -496,9 +506,22 @@ async function loadAdmin(){
   progress.textContent=Math.min(completed,4)+" of 4";
   const completedOn=document.createElement("td");completedOn.textContent=formatDate(record?.completed_at);
   const updatedOn=document.createElement("td");updatedOn.textContent=formatDate(record?.updated_at);
+  const accessCell=document.createElement("td");
+  const accessLabel=document.createElement("strong");
+  accessLabel.textContent=customer.access_blocked?"Blocked":"Active";
+  accessLabel.style.color=customer.access_blocked?"#a13d42":"#197451";
+  accessLabel.style.display="block";
+  const accessButton=document.createElement("button");
+  accessButton.type="button";
+  accessButton.className=customer.access_blocked?"secondary":"";
+  accessButton.textContent=customer.access_blocked?"Unblock customer":"Block customer";
+  accessButton.disabled=!customerAccessReady;
+  accessButton.title=customerAccessReady?"Change this customer's dashboard access":"Run the customer access SQL setup first";
+  accessButton.addEventListener("click",()=>changeCustomerAccess(customer,!customer.access_blocked,accessButton,accessLabel));
+  accessCell.append(accessLabel,accessButton);
   const action=document.createElement("td");const viewButton=document.createElement("button");viewButton.type="button";viewButton.className="secondary";viewButton.textContent="View details";
   viewButton.addEventListener("click",()=>showCustomerDetails(customer,record,formatDate));action.append(viewButton);
-  tr.append(name,email,progress,completedOn,updatedOn,action);
+  tr.append(name,email,progress,completedOn,updatedOn,accessCell,action);
   tr.dataset.search=((customer.full_name||"")+" "+(customer.email||"")).toLocaleLowerCase();
   tr.dataset.userId=customer.user_id;
   customerTableRows.push(tr);rowsEl.append(tr);
@@ -620,6 +643,29 @@ async function loadCustomerActivityTimeline(customer,formatDate){
   const date=document.createElement("small");date.className="muted";date.textContent=formatDate(event.date);
   item.append(heading,detail,date);timeline.append(item);
  }
+}
+async function changeCustomerAccess(customer,nextBlocked,button,label){
+ if(!customerAccessReady){statusEl.textContent="Run supabase/customer-access-controls.sql in Supabase before changing customer access.";return;}
+ const action=nextBlocked?"block":"unblock";
+ const verb=nextBlocked?"Block":"Unblock";
+ if(!window.confirm(verb+" "+(customer.full_name||"this customer")+"? "+(nextBlocked?"They will be signed out of the customer dashboard.":"They will be able to access the customer dashboard again.")))return;
+ button.disabled=true;button.textContent=nextBlocked?"Blocking…":"Unblocking…";
+ const {error}=await supabase.rpc("admin_set_customer_access",{p_user_id:customer.user_id,p_is_blocked:nextBlocked,p_reason:nextBlocked?"Access restricted by TopSafeB owner":""});
+ if(error){
+  statusEl.textContent="Could not "+action+" customer: "+error.message;
+  button.disabled=false;button.textContent=customer.access_blocked?"Unblock customer":"Block customer";
+  return;
+ }
+ customer.access_blocked=nextBlocked;
+ customer.access_reason=nextBlocked?"Access restricted by TopSafeB owner":"";
+ label.textContent=nextBlocked?"Blocked":"Active";
+ label.style.color=nextBlocked?"#a13d42":"#197451";
+ button.textContent=nextBlocked?"Unblock customer":"Block customer";
+ button.className=nextBlocked?"secondary":"";
+ button.disabled=false;
+ statusEl.textContent=(customer.full_name||"Customer")+" dashboard access "+(nextBlocked?"blocked.":"restored.")+" Other customers are unaffected.";
+ await recordOwnerAction(nextBlocked?"Blocked customer dashboard":"Unblocked customer dashboard",customer.user_id,"Individual customer access changed by owner");
+ await loadOwnerActivityLog();
 }
 async function saveManagedCustomerName(){
  const input=document.getElementById("manage-customer-name");

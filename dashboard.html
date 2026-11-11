@@ -640,7 +640,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
 <script>
 /* Runs before the external Supabase library: never leave the customer on a silent loading screen. */
- setTimeout(()=>{const status=document.getElementById("status");if(status&&status.textContent==="Checking your sign-in session…")status.textContent="Still connecting to the secure sign-in service. The page is allowing extra time for a slower mobile connection.";},65000);
+ setTimeout(()=>{const status=document.getElementById("status");if(status&&status.textContent==="Checking your sign-in session…")status.textContent="TopSafeB could not start the sign-in library. The page is still visible, but your session has not been checked. Please reopen the refreshed login link.";},25000);
 </script>
 <script>
 (function startTopSafeBSupabase(){
@@ -666,7 +666,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
    loadNext();
   },waitLimit);
   const source=sources[index++];
-  script.src=source+(source.includes("?")?"&":"?")+"tsb_build=20261111c";
+  script.src=source+(source.includes("?")?"&":"?")+"tsb_build=20261111d";
   script.async=true;
   script.onload=()=>{
    if(settled)return;

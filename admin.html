@@ -51,7 +51,7 @@ button:hover{filter:brightness(.97);transform:translateY(-1px)}
 footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}footer p{color:#c6d2e1}
 @media(max-width:700px){header{padding:13px 5%}.menu-toggle{display:block;color:#fff;border:1px solid #ffffff40;border-radius:8px}nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--navy);padding:16px 5%;box-shadow:0 8px 14px #102b5020;flex-direction:column;gap:14px}nav.open{display:flex}main{margin-top:22px;padding-left:14px;padding-right:14px}.dashboard-grid{grid-template-columns:1fr;gap:12px;margin:18px 0}.summary-card{padding:18px}.summary-card .stat{font-size:32px}th,td{padding:10px;font-size:12px}.panel{padding:17px;border-radius:12px}.panel h2{font-size:19px}}
 
-/* Banking-inspired owner control centre styling */
+.activity-metrics{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0}.activity-metrics .summary-card{padding:16px}.activity-metrics .stat{font-size:27px}.activity-metrics .summary-card h2{font-size:13px}#transaction-search{width:100%;max-width:520px;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}@media(max-width:700px){.activity-metrics{grid-template-columns:1fr}.activity-metrics .summary-card{padding:14px}}\n/* Banking-inspired owner control centre styling */
 .owner-hero{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:28px 0 18px;padding:clamp(24px,4vw,42px);border-radius:22px;background:radial-gradient(circle at 80% 10%,#34577d 0,transparent 34%),linear-gradient(120deg,#0d2340,#173d5d 72%,#1c5360);color:#fff;box-shadow:0 18px 42px #10274424;position:relative;overflow:hidden}
 .owner-hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff18;border-radius:50%;right:130px;bottom:-165px;box-shadow:0 0 0 28px #ffffff08,0 0 0 58px #ffffff05;pointer-events:none}
 .owner-hero h1{color:#fff;font-size:clamp(27px,4vw,39px);margin:7px 0 10px;letter-spacing:-1px}
@@ -88,6 +88,20 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <p id="owner-email" class="muted"></p>
 <p id="status" role="status" aria-live="polite">Verifying administrator access…</p>
 <button id="signout" class="secondary" type="button">Sign out</button>
+</section>
+<section class="panel" id="owner-activity-overview">
+<h2>Daily activity overview</h2>
+<p class="muted">A live snapshot of recent customer activity across the practice platform.</p>
+<div class="dashboard-grid activity-metrics">
+<article class="summary-card"><h2>Activity in last 24 hours</h2><p class="stat" id="activity-24h-count">—</p><span class="metric-foot">Recorded practice transactions</span></article>
+<article class="summary-card"><h2>Simulated transfers</h2><p class="stat" id="activity-transfer-count">—</p><span class="metric-foot">Included in recent records</span></article>
+<article class="summary-card"><h2>Latest transaction</h2><p class="stat" id="activity-latest-time" style="font-size:18px">—</p><span class="metric-foot">Most recent recorded activity</span></article>
+</div>
+<h3>Transaction register</h3>
+<p class="muted">Search by customer name, email, activity type or note. Amounts and balances are fictional practice records.</p>
+<div class="search-tools"><label for="transaction-search">Search transactions</label><input id="transaction-search" type="search" placeholder="Search customer, transfer, note…" autocomplete="off"><p class="search-summary" id="transaction-search-summary" aria-live="polite"></p></div>
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Activity</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody id="owner-transaction-rows"><tr><td colspan="6">Loading transaction register…</td></tr></tbody></table></div>
+<p class="muted" id="owner-transaction-status" role="status" aria-live="polite">Loading recent practice activity…</p>
 </section>
 <section class="panel" id="registered-customers">
 <h2>Registered customers</h2>
@@ -320,6 +334,42 @@ async function loadDemoFunds(customers){
 }
 
 
+let ownerTransactionRows=[];
+function filterOwnerTransactions(){
+ const query=(document.getElementById("transaction-search").value||"").trim().toLocaleLowerCase();
+ let visible=0;
+ for(const row of ownerTransactionRows){const match=row.dataset.search.includes(query);row.hidden=!match;if(match)visible++;}
+ document.getElementById("transaction-search-summary").textContent=query?"Showing "+visible+" matching transaction(s).":"Showing "+visible+" recent transaction(s).";
+}
+async function loadOwnerTransactionRegister(customers){
+ const body=document.getElementById("owner-transaction-rows");
+ const status=document.getElementById("owner-transaction-status");
+ const money=value=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(value)||0);
+ const names=new Map(customers.map(customer=>[customer.user_id,(customer.full_name||"Customer")+" · "+(customer.email||"")]));
+ const {data:items,error}=await supabase.from("demo_transactions").select("user_id,action,amount,balance_after,note,created_at").order("created_at",{ascending:false}).limit(500);
+ body.replaceChildren();ownerTransactionRows=[];
+ if(error){status.textContent="Transaction register is unavailable: "+error.message;const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="Could not load practice transactions.";tr.append(td);body.append(tr);return;}
+ const rows=items||[];
+ const now=Date.now(),dayAgo=now-24*60*60*1000;
+ const lastDay=rows.filter(item=>new Date(item.created_at).getTime()>=dayAgo);
+ const transfers=rows.filter(item=>item.action==="transfer");
+ document.getElementById("activity-24h-count").textContent=String(lastDay.length);
+ document.getElementById("activity-transfer-count").textContent=String(transfers.length);
+ document.getElementById("activity-latest-time").textContent=rows.length?new Date(rows[0].created_at).toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"None yet";
+ const labels={add:"Practice funds added",deduct:"Practice funds deducted",set:"Practice balance adjusted",transfer:"Simulated transfer"};
+ for(const item of rows){
+  const tr=document.createElement("tr");
+  const values=[new Date(item.created_at).toLocaleString(),names.get(item.user_id)||"Customer",labels[item.action]||item.action,money(item.amount),money(item.balance_after),item.note||"—"];
+  for(const value of values){const td=document.createElement("td");td.textContent=value;tr.append(td);}
+  tr.dataset.search=values.join(" ").toLocaleLowerCase();
+  ownerTransactionRows.push(tr);body.append(tr);
+ }
+ if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.textContent="No practice transactions recorded yet.";tr.append(td);body.append(tr);}
+ status.textContent=rows.length+" recent practice transaction(s) loaded · Maximum 500 records.";
+ filterOwnerTransactions();
+}
+document.getElementById("transaction-search").addEventListener("input",filterOwnerTransactions);
+
 let activeSupportUserId=null;
 let supportChatTimer=null;
 const supportCustomerList=document.getElementById("live-chat-customer-list");
@@ -436,7 +486,7 @@ async function loadAdmin(){
   customerTableRows.push(tr);rowsEl.append(tr);
  }
  rowsEl.append(noSearchResults);filterCustomers();
- await loadDemoFunds(list);
+ await loadDemoFunds(list);\n await loadOwnerTransactionRegister(list);
  await loadTopupRequests(list);
  await loadFeedback();
  await loadOwnerLiveChats();

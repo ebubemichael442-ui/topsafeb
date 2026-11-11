@@ -17,6 +17,34 @@ main{max-width:960px;margin:36px auto;padding:0 18px 55px}h1,h2{color:var(--navy
 button,.button{display:inline-block;background:var(--gold);color:var(--navy);padding:12px 18px;border:0;border-radius:8px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer}
 button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);background:#fff9e9;padding:15px;border-radius:8px;margin:20px 0}
 #status{padding:12px;background:#edf2f7;border-radius:8px;overflow-wrap:anywhere}
+/* Refined private message centre */
+#customer-support{padding:24px;border:1px solid #e4eaf0;border-radius:20px;background:#fff;box-shadow:0 12px 32px #102b500d}
+.message-centre-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.message-centre-heading h2{margin:2px 0;font-size:clamp(23px,4vw,30px)}
+.message-centre-kicker{margin:0;color:#218653;font-size:10px;font-weight:900;letter-spacing:1.5px}
+.message-online{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #dcefe4;border-radius:999px;background:#f1faf4;color:#247347;font-size:11px;font-weight:800}
+.message-online i{width:7px;height:7px;border-radius:50%;background:#2e9d61}
+#live-chat-panel{padding:0;border:0;background:transparent;box-shadow:none}
+#live-chat-panel>div:first-child{padding:14px;border:1px solid #e8edf2;border-radius:14px;background:#f9fbfc}
+#customer-chat-thread{display:flex;flex-direction:column;gap:13px;height:420px;max-height:55vh;min-height:260px;overflow:auto;padding:18px 14px;margin:0 0 16px;border:1px solid #e5ebf1;border-radius:16px;background:linear-gradient(180deg,#f7faf8,#f2f6f9);scroll-behavior:smooth}
+.message-day-divider{align-self:center;padding:5px 11px;border:1px solid #e3e9ee;border-radius:999px;background:#fff;color:#758397;font-size:10px;font-weight:800}
+.message-bubble{display:flex;flex-direction:column;gap:4px;width:fit-content;max-width:min(82%,520px);padding:11px 14px;border-radius:16px;box-shadow:0 3px 10px #102b500a;overflow-wrap:anywhere}
+.message-bubble.own{align-self:flex-end;border:1px solid #cfe8d8;border-bottom-right-radius:5px;background:#e7f5ec;color:#174d31}
+.message-bubble.support{align-self:flex-start;border:1px solid #e0e7ed;border-bottom-left-radius:5px;background:#fff;color:#26384b}
+.message-bubble-head{font-size:11px;font-weight:900;color:#26774a}
+.message-bubble.support .message-bubble-head{color:#234b70}
+.message-bubble-body{margin:2px 0;white-space:pre-wrap;line-height:1.55;font-size:14px}
+.message-bubble time{align-self:flex-end;color:#788596;font-size:10px}
+.message-thread-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:8px 2px;color:#31465d;font-size:12px}
+.message-thread-top span{color:#7a8796;font-size:10px}
+.message-compose{padding:16px;border:1px solid #e4eaf0;border-radius:16px;background:#fff}
+.message-compose label{display:block;margin-bottom:8px;font-size:13px;font-weight:800;color:#233c53}
+.message-compose textarea{width:100%;min-height:82px;padding:12px;border:1px solid #dce4eb;border-radius:11px;resize:vertical;font:inherit}
+.message-compose-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.message-compose-footer span{font-size:10px;color:#788596}
+.message-compose-footer button{background:#187747;color:#fff;border-radius:10px}
+#customer-chat-status{margin:8px 0 0;font-size:11px}
+@media(max-width:600px){#customer-support{padding:16px}.message-bubble{max-width:90%}#customer-chat-thread{height:390px;padding:13px 10px}.message-compose-footer{align-items:stretch}.message-compose-footer button{width:100%}}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 @media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:16px 5%}nav{gap:10px}nav a{font-size:14px}main{margin-top:24px}.panel,.tile{padding:18px}}
 @media print{
@@ -525,27 +553,17 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <section class="panel feature-learning" id="quick-loan-info"><h2>Loan learning guide</h2><p>Explore loan interest, repayment schedules, affordability and the risks of borrowing. TopSafeB does not offer loans or approve credit.</p></section>
 <section class="panel" id="customer-support" style="margin-top:22px">
 <button type="button" class="support-chat-close" id="close-customer-support" aria-label="Close messages">Close ✕</button>
-<h2>TopSafeB private messages</h2>
-<p class="muted">Your private messages and replies from the TopSafeB owner are now collected in one branded message centre below.</p>
+<div class="message-centre-heading"><div><p class="message-centre-kicker">PRIVATE CUSTOMER SUPPORT</p><h2>Message Centre</h2><p class="muted">A private conversation between you and TopSafeB Support.</p></div><span class="message-online"><i></i> Secure inbox</span></div>
 <div class="support-contact-card" id="live-chat-panel">
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
 <span aria-hidden="true" style="display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:15px;background:#123f68;color:#e2c783;font-size:23px;font-weight:900">TS</span>
 <div><strong>TopSafeB Message Support</strong><p class="muted" style="margin:2px 0">Private customer-to-owner chat</p></div>
 </div>
 <p class="muted">Send a message directly to the TopSafeB owner here. No email app or file attachment is needed. Your signed-in account identifies the conversation.</p>
-<div id="customer-chat-thread" aria-live="polite" style="display:grid;gap:10px;max-height:360px;overflow:auto;padding:12px;background:#f5f8fb;border-radius:12px;margin:12px 0"><p class="muted">Your conversation will appear here.</p></div>
-<form id="customer-chat-form" class="support-form" style="max-width:none">
-<label for="customer-chat-input">Your message</label>
-<textarea id="customer-chat-input" rows="3" maxlength="2000" required placeholder="Type a message to TopSafeB support…"></textarea>
-<button type="submit" id="customer-chat-send">Send message</button>
-<p id="customer-chat-status" class="muted" role="status" aria-live="polite">Messages refresh automatically.</p>
-</form>
+<div class="message-thread-top"><strong>Conversation</strong><span>Messages are shown in date order</span></div><div id="customer-chat-thread" class="message-thread" aria-live="polite"><p class="muted">Your conversation will appear here.</p></div>
+<form id="customer-chat-form" class="support-form message-compose" style="max-width:none"><label for="customer-chat-input">Write a message</label><textarea id="customer-chat-input" rows="3" maxlength="2000" required placeholder="Write your message to TopSafeB Support…"></textarea><div class="message-compose-footer"><span>Private message · Up to 2,000 characters</span><button type="submit" id="customer-chat-send">Send message&nbsp; ↗</button></div><p id="customer-chat-status" class="muted" role="status" aria-live="polite">Messages refresh automatically.</p></form>
 </div>
 
-<div class="support-inbox-brand" style="display:flex;align-items:center;gap:12px;margin:18px 0 8px;padding:14px;background:#f3f6fa;border:1px solid #e1e8f0;border-radius:13px">
-<span aria-hidden="true" style="display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:13px;background:#102b50;color:#e2c783;font-size:19px;font-weight:900">TS</span>
-<div><strong>TopSafeB Message Centre</strong><p class="muted" style="margin:2px 0;font-size:13px">Your messages and owner replies, together in one private conversation</p></div>
-</div>
 </section>
 
 <section class="panel feature-learning" id="savings-learning" style="margin:20px 0"><h2>Savings &amp; budgeting practice</h2><p>Build a simple spending plan, set a savings goal and learn how regular contributions can add up over time.</p><div class="grid"><article class="tile"><h3>Plan your spending</h3><p>Separate needs, wants and savings before deciding how to use a monthly budget.</p></article><article class="tile"><h3>Set a savings goal</h3><p>Choose a target amount, a time frame and a realistic regular contribution.</p></article><article class="tile"><h3>Review progress</h3><p>Check your plan regularly and adjust it when your circumstances change.</p></article></div><p class="muted">Educational guidance only. This page does not open a savings account or accept deposits.</p></section>
@@ -1044,12 +1062,14 @@ async function loadCustomerLiveChat(){
  timeline.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
  customerChatThread.replaceChildren();
  if(!timeline.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No messages yet. Send a message to start your private conversation.";customerChatThread.append(empty);}
+ let lastDay="";
  for(const item of timeline){
-  const bubble=document.createElement("article");
-  bubble.style.cssText="max-width:88%;justify-self:"+(item.own?"end":"start")+";padding:12px 14px;border-radius:14px;background:"+(item.own?"#e7f0fa":"#fff")+";border:1px solid "+(item.own?"#d6e3f0":"#dfbd70")+";overflow-wrap:anywhere;box-shadow:0 2px 8px #102b5008";
-  const head=document.createElement("strong");head.textContent=item.own?"You":"TopSafeB Support";head.style.cssText="display:block;color:"+(item.own?"#244a70":"#8a6728");
-  const body=document.createElement("p");body.textContent=item.message;body.style.cssText="white-space:pre-wrap;margin:6px 0";
-  const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();
+  const stamp=new Date(item.created_at);const dayKey=stamp.toLocaleDateString();
+  if(dayKey!==lastDay){const divider=document.createElement("div");divider.className="message-day-divider";divider.textContent=dayKey===new Date().toLocaleDateString()?"Today":dayKey;customerChatThread.append(divider);lastDay=dayKey;}
+  const bubble=document.createElement("article");bubble.className="message-bubble "+(item.own?"own":"support");
+  const head=document.createElement("strong");head.className="message-bubble-head";head.textContent=item.own?"You":"TopSafeB Support";
+  const body=document.createElement("p");body.className="message-bubble-body";body.textContent=item.message;
+  const when=document.createElement("time");when.dateTime=stamp.toISOString();when.textContent=stamp.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
   bubble.append(head,body,when);customerChatThread.append(bubble);
  }
  customerChatThread.scrollTop=customerChatThread.scrollHeight;

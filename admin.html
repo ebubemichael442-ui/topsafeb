@@ -42,6 +42,7 @@ button{transition:filter .15s ease,transform .15s ease}
 button:hover{filter:brightness(.97);transform:translateY(-1px)}
 #status{border:1px solid #dce7df;background:#f0f7f2;color:#246044;font-weight:700}
 #live-chat-customer-list button{width:100%;border:1px solid #d9e2ed;background:#fff;color:var(--navy);border-radius:10px}
+.messages-logo{position:relative;display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;padding:8px 12px;border:1px solid #ffffff42;border-radius:12px;color:#fff;text-decoration:none;font-size:13px;font-weight:800;background:#ffffff12}.messages-logo svg{width:23px;height:23px;color:var(--gold)}.messages-logo:hover{background:#ffffff22;color:#fff}.messages-logo b{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:1px 5px;border-radius:20px;background:#c7474d;color:#fff;font-size:11px;line-height:18px;text-align:center;border:2px solid var(--navy)}.messages-logo b[hidden]{display:none}@media(max-width:700px){header{flex-wrap:wrap}.messages-logo{margin-left:auto;margin-right:8px}.menu-toggle{flex:0 0 auto}}
 #live-chat-customer-list button:hover{background:#f2f6fb}
 #owner-chat-thread{border:1px solid #e0e7ef}
 @media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -52,7 +53,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 </style>
 </head>
 <body>
-<header><div class="brand"><span>◆</span> TopSafeB</div><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
+<header><div class="brand"><span>◆</span> TopSafeB</div><a class="messages-logo" href="#live-support-inbox" aria-label="Open live customer messages" title="Live customer messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 11.5h8M8 14.5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Messages</span><b id="messages-logo-unread" hidden>0</b></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
 <main>
 <p class="muted">RESTRICTED OWNER AREA</p>
 <h1>Owner Control Centre</h1>
@@ -341,6 +342,7 @@ async function loadOwnerLiveChats(){
   supportCustomerList.append(button);
  }
  const unreadTotal=messages.filter(message=>message.sender_role==="customer"&&(!localStorage.getItem("topsafeb_owner_chat_read_"+message.user_id)||new Date(message.created_at)>new Date(localStorage.getItem("topsafeb_owner_chat_read_"+message.user_id)))).length;
+ const messageBadge=document.getElementById("messages-logo-unread");if(messageBadge){messageBadge.textContent=unreadTotal>99?"99+":String(unreadTotal);messageBadge.hidden=unreadTotal===0;messageBadge.setAttribute("aria-label",unreadTotal+" unread customer messages");}
  supportOwnerStatus.textContent=ids.length+" customer "+(ids.length===1?"conversation":"conversations")+" · "+unreadTotal+" unread customer message(s). Updated "+new Date().toLocaleTimeString();
  if(activeSupportUserId)await loadSelectedOwnerChat();
 }

@@ -51,6 +51,13 @@ button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);ba
 .chat-attach-preview{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #dce7e0;border-radius:10px;background:#f5fbf7}
 .chat-attach-preview img{width:54px;height:54px;object-fit:cover;border-radius:8px}
 .chat-attach-preview button{border:0;background:transparent;color:#9b3434;font-weight:800}
+.support-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0 20px}
+.support-overview-card{display:grid;gap:4px;padding:14px;border:1px solid #e7edf0;border-radius:14px;background:linear-gradient(145deg,#fff,#f5faf7)}
+.support-overview-card strong{font-size:21px;color:#183c58}
+.support-overview-card>span:last-child{font-size:11px;color:#718092}
+.support-overview-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#e6f5eb;color:#167345;font-weight:900}
+@media(max-width:520px){.support-overview-grid{grid-template-columns:1fr 1fr}.support-overview-card:first-child{grid-column:span 2}}
+
 
 @media(max-width:600px){#customer-support{padding:16px}.message-bubble{max-width:90%}#customer-chat-thread{height:390px;padding:13px 10px}.message-compose-footer{align-items:stretch}.message-compose-footer button{width:100%}}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
@@ -562,6 +569,11 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <section class="panel" id="customer-support" style="margin-top:22px">
 <button type="button" class="support-chat-close" id="close-customer-support" aria-label="Close messages">Close ✕</button>
 <div class="message-centre-heading"><div><p class="message-centre-kicker">PRIVATE CUSTOMER SUPPORT</p><h2>Message Centre</h2><p class="muted">A private conversation between you and TopSafeB Support.</p></div><span class="message-online"><i></i> Secure inbox</span></div>
+<div class="support-overview-grid">
+ <article class="support-overview-card"><span class="support-overview-icon">✉</span><strong>1</strong><span>Private support conversation</span></article>
+ <article class="support-overview-card"><span class="support-overview-icon">◷</span><strong>Live</strong><span>Inbox updates automatically</span></article>
+ <article class="support-overview-card"><span class="support-overview-icon">▧</span><strong>Photos</strong><span>Attach images to explain an issue</span></article>
+</div>
 <div class="support-contact-card" id="live-chat-panel">
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
 <span aria-hidden="true" style="display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:15px;background:#123f68;color:#e2c783;font-size:23px;font-weight:900">TS</span>

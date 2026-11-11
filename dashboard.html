@@ -642,8 +642,34 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 /* Runs before the external Supabase library: never leave the customer on a silent loading screen. */
 setTimeout(()=>{const status=document.getElementById("status");if(status&&status.textContent==="Checking your sign-in session…")status.textContent="The secure sign-in service has not started. Please refresh this page. If it continues, the service connection needs attention.";},12000);
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+(function startTopSafeBSupabase(){
+ const status=document.getElementById("status");
+ const sources=[
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js",
+  "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"
+ ];
+ let index=0;
+ function loadNext(){
+  if(index>=sources.length){
+   if(status)status.textContent="The secure sign-in library could not be loaded from either source. Please try another internet connection or contact TopSafeB support.";
+   return;
+  }
+  const script=document.createElement("script");
+  script.src=sources[index++];
+  script.async=true;
+  script.onload=()=>{
+   if(window.supabase&&typeof window.supabase.createClient==="function"){
+    runCustomerDashboard();
+   }else{
+    script.remove();
+    loadNext();
+   }
+  };
+  script.onerror=()=>{script.remove();loadNext();};
+  document.head.appendChild(script);
+ }
+ function runCustomerDashboard(){
 if(!window.supabase || typeof window.supabase.createClient!=="function"){
  const status=document.getElementById("status");
  if(status)status.textContent="The secure sign-in service could not load. Please check your internet connection and refresh this page.";
@@ -1248,6 +1274,9 @@ loadSession().then(()=>clearTimeout(sessionWatchdog)).catch(error=>{clearTimeout
    link.classList.toggle("active",url.searchParams.get("view")===view || (view==="home" && url.searchParams.get("view")==="home"));
   });
  }
+})();
+ }
+ loadNext();
 })();
 </script>
 

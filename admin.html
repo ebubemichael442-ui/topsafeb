@@ -46,6 +46,7 @@ button:hover{filter:brightness(.97);transform:translateY(-1px)}
 #live-chat-customer-list button:hover{background:#f2f6fb}
 #owner-chat-thread{border:1px solid #e0e7ef}
 .owner-chat-photo{display:block;max-width:min(100%,360px);max-height:300px;object-fit:contain;border-radius:12px;margin-top:8px;border:1px solid #dce5eb;background:#fff}
+.owner-chat-photo-save{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:9px 13px;border-radius:9px;background:#176d43;color:#fff!important;text-decoration:none;font-size:13px;font-weight:800}.owner-chat-photo-save:hover{background:#125735}.owner-chat-photo-hint{display:block;margin-top:6px}
 .owner-chat-bubble{max-width:88%;padding:11px 13px;border-radius:13px;overflow-wrap:anywhere}
 .owner-chat-bubble.owner{justify-self:end;background:#e6f5ec;border:1px solid #cfe8d8}
 .owner-chat-bubble.customer{justify-self:start;background:#fff;border:1px solid #dce5ef}
@@ -493,7 +494,7 @@ async function renderOwnerChatBubble(item){
  const bubble=document.createElement("article");bubble.className="owner-chat-bubble "+(own?"owner":"customer");
  const who=document.createElement("strong");who.textContent=own?"You (owner)":(supportProfiles.get(item.user_id)?.full_name||"Customer");who.style.display="block";
  const body=document.createElement("p");body.textContent=item.message||"Photo attachment";body.style.cssText="white-space:pre-wrap;margin:6px 0";bubble.append(who,body);
- if(item.attachment_path){const {data:fileData,error:fileError}=await supabase.storage.from("support-attachments").createSignedUrl(item.attachment_path,3600);if(!fileError&&fileData?.signedUrl){const img=document.createElement("img");img.className="owner-chat-photo";img.src=fileData.signedUrl;img.alt="Customer photo attachment";img.loading="lazy";bubble.append(img);}else{const note=document.createElement("small");note.className="muted";note.textContent="Photo attachment unavailable";bubble.append(note);}}
+ if(item.attachment_path){const {data:fileData,error:fileError}=await supabase.storage.from("support-attachments").createSignedUrl(item.attachment_path,3600);if(!fileError&&fileData?.signedUrl){const img=document.createElement("img");img.className="owner-chat-photo";img.src=fileData.signedUrl;img.alt="Customer photo attachment";img.loading="lazy";bubble.append(img);const saveLink=document.createElement("a");saveLink.className="owner-chat-photo-save";saveLink.href=fileData.signedUrl;saveLink.target="_blank";saveLink.rel="noopener";saveLink.textContent="↓ Save photo";saveLink.setAttribute("aria-label","Open customer photo so it can be saved to your device");bubble.append(saveLink);const saveHint=document.createElement("small");saveHint.className="muted owner-chat-photo-hint";saveHint.textContent="On iPhone: open the photo, then touch and hold it to save to Photos.";bubble.append(saveHint);}else{const note=document.createElement("small");note.className="muted";note.textContent="Photo attachment unavailable";bubble.append(note);}}
  const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();bubble.append(when);supportOwnerThread.append(bubble);
 }
 async function loadOwnerLiveChats(){

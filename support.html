@@ -33,7 +33,7 @@ form{display:grid;gap:10px;margin-top:12px}textarea{width:100%;min-height:90px;r
 <script type="module">
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 const supabase=createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
-const $=id=>document.getElementById(id);let owner=null,active=null,profiles=new Map(),messages=[],photoFile=null,refreshBusy=false,threadNeedsBottom=true;
+const $=id=>document.getElementById(id);let owner=null,active=null,profiles=new Map(),messages=[],photoFile=null,refreshBusy=false,threadNeedsBottom=true,lastThreadSignature="";
 const readKey=id=>"topsafeb_owner_chat_read_"+id;
 function setStatus(t){$("status").textContent=t}
 async function init(){
@@ -73,18 +73,19 @@ async function refreshInbox(){
   if(active)await loadThread();
  }catch(e){setStatus("Could not refresh inbox: "+e.message)}finally{refreshBusy=false}
 }
-async function selectConversation(uid){active=uid;threadNeedsBottom=true;localStorage.setItem(readKey(uid),new Date().toISOString());$("heading").textContent="Conversation with "+(profiles.get(uid)?.full_name||"Customer");$("reply").disabled=false;$("photo").disabled=false;$("send").disabled=false;await refreshInbox()}
+async function selectConversation(uid){active=uid;threadNeedsBottom=true;lastThreadSignature="";localStorage.setItem(readKey(uid),new Date().toISOString());$("heading").textContent="Conversation with "+(profiles.get(uid)?.full_name||"Customer");$("reply").disabled=false;$("photo").disabled=false;$("send").disabled=false;await refreshInbox()}
 async function loadThread(){
   if(!active)return;
   const previousTop=$("thread").scrollTop;const wasNearBottom=$("thread").scrollHeight-$("thread").clientHeight-previousTop<90;const forceBottom=threadNeedsBottom;threadNeedsBottom=false;
  const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,attachment_path,created_at").eq("user_id",active).order("created_at",{ascending:true}).limit(300);
  if(error){setStatus("Could not load conversation: "+error.message);return}
+ const threadSignature=(data||[]).map(m=>m.id).join("|");if(threadSignature===lastThreadSignature)return;lastThreadSignature=threadSignature;
  $("thread").replaceChildren();
  for(const m of data||[]){
   const own=m.sender_role==="owner",bubble=document.createElement("article");bubble.className="bubble "+(own?"owner":"customer");
   const who=document.createElement("strong");who.textContent=own?"You (owner)":(profiles.get(active)?.full_name||"Customer");
   const body=document.createElement("p");body.textContent=m.message||"Photo attachment";bubble.append(who,body);
-   if(m.message){const copy=document.createElement("button");copy.type="button";copy.className="copy-message";copy.textContent="Copy message";copy.addEventListener("click",async()=>{try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(m.message);else{const field=document.createElement("textarea");field.value=m.message;field.style.position="fixed";field.style.opacity="0";document.body.append(field);field.select();if(!document.execCommand("copy"))throw new Error("Copy unavailable");field.remove()}copy.textContent="Copied";setTimeout(()=>copy.textContent="Copy message",1600)}catch(e){copy.textContent="Select text to copy"}});bubble.append(copy)}
+   if(m.message){const copy=document.createElement("button");copy.type="button";copy.className="copy-message";copy.textContent="Copy message";copy.addEventListener("click",async(event)=>{event.preventDefault();event.stopPropagation();const pageY=window.scrollY,threadY=$("thread").scrollTop;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(m.message);else{const field=document.createElement("textarea");field.value=m.message;field.setAttribute("readonly","");field.style.cssText="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px";document.body.append(field);field.focus({preventScroll:true});field.select();if(!document.execCommand("copy"))throw new Error("Copy unavailable");field.remove()}copy.textContent="Copied"}catch(e){copy.textContent="Copy unavailable"}window.scrollTo(0,pageY);$("thread").scrollTop=threadY;setTimeout(()=>{copy.textContent="Copy message";window.scrollTo(0,pageY);$("thread").scrollTop=threadY},1400)});bubble.append(copy)}
   if(m.attachment_path){
    const {data:file,error:fileError}=await supabase.storage.from("support-attachments").createSignedUrl(m.attachment_path,3600);
    if(!fileError&&file?.signedUrl){const img=document.createElement("img");img.className="chat-photo";img.src=file.signedUrl;img.alt="Customer photo attachment";bubble.append(img);const link=document.createElement("a");link.className="save";link.href=file.signedUrl;link.target="_blank";link.rel="noopener";link.textContent="↓ Open / Save photo";bubble.append(link)}
@@ -107,7 +108,7 @@ $("reply-form").addEventListener("submit",async e=>{
   if(file){const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";path=active+"/"+crypto.randomUUID()+"."+ext;const {error}=await supabase.storage.from("support-attachments").upload(path,file,{contentType:file.type,upsert:false});if(error)throw error}
   const {error}=await supabase.from("support_messages").insert({user_id:active,sender_id:owner.id,sender_role:"owner",message:message||"Photo attachment",attachment_path:path});
   if(error)throw error;
-  $("reply").value="";$("photo").value="";photoFile=null;$("file-name").textContent="";setStatus("Reply sent.");threadNeedsBottom=true;await refreshInbox();
+  $("reply").value="";$("photo").value="";photoFile=null;$("file-name").textContent="";setStatus("Reply sent.");threadNeedsBottom=true;lastThreadSignature="";await refreshInbox();
  }catch(err){setStatus("Message was not sent: "+err.message)}
  finally{$("send").disabled=!active;$("send").textContent="Send reply"}
 });

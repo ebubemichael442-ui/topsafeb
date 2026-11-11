@@ -74,7 +74,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 </style>
 </head>
 <body>
-<header><div class="brand"><span>◆</span> TopSafeB</div><a class="messages-logo" href="#live-support-inbox" aria-label="Open live customer messages" title="Live customer messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 11.5h8M8 14.5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Messages</span><b id="messages-logo-unread" hidden>0</b></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
+<header><div class="brand"><span>◆</span> TopSafeB</div><a class="messages-logo" href="#live-support-inbox" aria-label="Open live customer messages" title="Live customer messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 11.5h8M8 14.5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Messages</span><b id="messages-logo-unread" hidden>0</b></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="#owner-activity-log">Owner log</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
 <main>
 <section class="owner-hero" aria-label="Owner dashboard welcome">
   <div><p class="hero-kicker">PRIVATE OWNER ACCESS · TOPSAFEB</p><h1>Welcome to your Control Centre</h1><p>Manage your customer community, review activity and oversee practice accounts from one place.</p></div>
@@ -142,7 +142,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <tbody id="feedback-rows"><tr><td colspan="7">Loading feedback…</td></tr></tbody>
 </table></div>
 </section>
-<section class="panel" id="live-support-inbox">
+<section class="panel" id="owner-activity-log"><h2>Owner activity log</h2><p class="muted">Private record of owner actions, practice balance changes, top-up decisions and customer replies.</p><div class="search-tools"><label for="owner-log-search">Search owner activity</label><input id="owner-log-search" type="search" placeholder="Search action, customer or details…"></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Owner</th><th>Action</th><th>Customer</th><th>Details</th></tr></thead><tbody id="owner-log-rows"><tr><td colspan="5">Loading owner activity…</td></tr></tbody></table></div><p id="owner-log-status" class="muted" role="status">Loading private owner records…</p></section><section class="panel" id="live-support-inbox">
 <h2>Live customer messages</h2>
 <p class="muted">Private conversations with signed-in customers. Select a customer conversation to read and reply. New messages refresh automatically while this page is open.</p>
 <p id="live-chat-admin-status" class="muted" role="status" aria-live="polite">Loading conversations…</p>
@@ -165,6 +165,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const supabase=createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
+let currentOwnerId=null;
 const nameEl=document.getElementById("owner-name");
 const emailEl=document.getElementById("owner-email");
 const statusEl=document.getElementById("status");
@@ -341,6 +342,20 @@ function filterOwnerTransactions(){
  for(const row of ownerTransactionRows){const match=row.dataset.search.includes(query);row.hidden=!match;if(match)visible++;}
  document.getElementById("transaction-search-summary").textContent=query?"Showing "+visible+" matching transaction(s).":"Showing "+visible+" recent transaction(s).";
 }
+let ownerLogRows=[];
+async function recordOwnerAction(action,targetUserId,details){const {error}=await supabase.rpc('admin_record_owner_activity',{p_action:action,p_target_user_id:targetUserId||null,p_details:details||''});if(error)console.warn('Owner activity log could not be saved:',error.message);}
+async function loadOwnerActivityLog(){
+ const body=document.getElementById('owner-log-rows'),status=document.getElementById('owner-log-status');
+ const {data,error}=await supabase.from('owner_activity_logs').select('id,actor_id,target_user_id,action,details,created_at').order('created_at',{ascending:false}).limit(250);
+ body.replaceChildren();ownerLogRows=[];
+ if(error){status.textContent='Run supabase/owner-activity-log.sql in Supabase SQL Editor, then refresh.';const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent='Owner activity records are not available yet.';tr.append(td);body.append(tr);return;}
+ const names=new Map((customerProfiles||[]).map(p=>[p.user_id,p.full_name||p.email||'Customer']));
+ for(const item of data||[]){const tr=document.createElement('tr');const vals=[new Date(item.created_at).toLocaleString(),item.actor_id===currentOwnerId?'You (owner)':'Authorised owner',item.action,names.get(item.target_user_id)||(item.target_user_id?'Customer':'—'),item.details||'—'];for(const value of vals){const td=document.createElement('td');td.textContent=value;tr.append(td);}tr.dataset.search=vals.join(' ').toLowerCase();ownerLogRows.push(tr);body.append(tr);}
+ if(!ownerLogRows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent='No owner actions recorded yet.';tr.append(td);body.append(tr);}
+ status.textContent=ownerLogRows.length+' owner action(s) shown · Latest 250 records.';filterOwnerLog();
+}
+function filterOwnerLog(){const q=(document.getElementById('owner-log-search').value||'').trim().toLowerCase();let n=0;for(const row of ownerLogRows){row.hidden=!row.dataset.search.includes(q);if(!row.hidden)n++;}document.getElementById('owner-log-status').textContent='Showing '+n+' matching owner action(s).';}
+document.getElementById('owner-log-search').addEventListener('input',filterOwnerLog);
 async function loadOwnerTransactionRegister(customers){
  const body=document.getElementById("owner-transaction-rows");
  const status=document.getElementById("owner-transaction-status");
@@ -447,6 +462,7 @@ async function loadAdmin(){
  if(sessionError)throw sessionError;
  if(!session){statusEl.textContent="Your session has expired. Please sign in again.";setTimeout(()=>window.location.replace("login.html"),1800);return;}
  const user=session.user;
+ currentOwnerId=user.id;
  nameEl.textContent=user.user_metadata?.full_name||"TopSafeB owner";
  emailEl.textContent=user.email||"";
  statusEl.textContent="Checking administrator permissions…";
@@ -491,6 +507,7 @@ async function loadAdmin(){
  await loadTopupRequests(list);
  await loadFeedback();
  await loadOwnerLiveChats();
+ await loadOwnerActivityLog();
  if(supportChatTimer)clearInterval(supportChatTimer);
  supportChatTimer=setInterval(loadOwnerLiveChats,5000);
 }

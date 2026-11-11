@@ -45,6 +45,11 @@ button:hover{filter:brightness(.97);transform:translateY(-1px)}
 .messages-logo{position:relative;display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;padding:8px 12px;border:1px solid #ffffff42;border-radius:12px;color:#fff;text-decoration:none;font-size:13px;font-weight:800;background:#ffffff12}.messages-logo svg{width:23px;height:23px;color:var(--gold)}.messages-logo:hover{background:#ffffff22;color:#fff}.messages-logo b{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:1px 5px;border-radius:20px;background:#c7474d;color:#fff;font-size:11px;line-height:18px;text-align:center;border:2px solid var(--navy)}.messages-logo b[hidden]{display:none}@media(max-width:700px){header{flex-wrap:wrap}.messages-logo{margin-left:auto;margin-right:8px}.menu-toggle{flex:0 0 auto}}
 #live-chat-customer-list button:hover{background:#f2f6fb}
 #owner-chat-thread{border:1px solid #e0e7ef}
+.owner-chat-photo{display:block;max-width:min(100%,360px);max-height:300px;object-fit:contain;border-radius:12px;margin-top:8px;border:1px solid #dce5eb;background:#fff}
+.owner-chat-bubble{max-width:88%;padding:11px 13px;border-radius:13px;overflow-wrap:anywhere}
+.owner-chat-bubble.owner{justify-self:end;background:#e6f5ec;border:1px solid #cfe8d8}
+.owner-chat-bubble.customer{justify-self:start;background:#fff;border:1px solid #dce5ef}
+
 @media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.dashboard-grid{grid-template-columns:1fr}.summary-card{padding:16px}}
 
@@ -424,15 +429,14 @@ function refreshBillingCustomers(){
 let supportProfiles=new Map();
 function renderOwnerChatBubble(item){
  const own=item.sender_role==="owner";
- const bubble=document.createElement("article");
- bubble.style.cssText="max-width:88%;justify-self:"+(own?"end":"start")+";padding:11px 13px;border-radius:13px;background:"+(own?"#e6f0fb":"#fff")+";border:1px solid #dce5ef;overflow-wrap:anywhere";
+ const bubble=document.createElement("article");bubble.className="owner-chat-bubble "+(own?"owner":"customer");
  const who=document.createElement("strong");who.textContent=own?"You (owner)":(supportProfiles.get(item.user_id)?.full_name||"Customer");who.style.display="block";
- const body=document.createElement("p");body.textContent=item.message;body.style.cssText="white-space:pre-wrap;margin:6px 0";
- const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();
- bubble.append(who,body,when);supportOwnerThread.append(bubble);
+ const body=document.createElement("p");body.textContent=item.message||"Photo attachment";body.style.cssText="white-space:pre-wrap;margin:6px 0";bubble.append(who,body);
+ if(item.attachment_path){const {data:fileData,error:fileError}=await supabase.storage.from("support-attachments").createSignedUrl(item.attachment_path,3600);if(!fileError&&fileData?.signedUrl){const img=document.createElement("img");img.className="owner-chat-photo";img.src=fileData.signedUrl;img.alt="Customer photo attachment";img.loading="lazy";bubble.append(img);}else{const note=document.createElement("small");note.className="muted";note.textContent="Photo attachment unavailable";bubble.append(note);}}
+ const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();bubble.append(when);supportOwnerThread.append(bubble);
 }
 async function loadOwnerLiveChats(){
- const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,created_at").order("created_at",{ascending:false}).limit(300);
+ const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,attachment_path,created_at").order("created_at",{ascending:false}).limit(300);
  if(error){supportOwnerStatus.textContent="Live chat setup is not complete. Run supabase/live-support-chat.sql in Supabase SQL Editor, then refresh.";return;}
  const messages=data||[];
  const latestByUser=new Map();
@@ -450,7 +454,7 @@ async function loadOwnerLiveChats(){
   const button=document.createElement("button");button.type="button";button.className="secondary";button.style.cssText="text-align:left;white-space:normal;display:flex;align-items:center;justify-content:space-between;gap:10px";
   const summary=document.createElement("span");summary.style.cssText="min-width:0;overflow-wrap:anywhere";
   const customerName=document.createElement("strong");customerName.textContent=profile.full_name||profile.email||"Customer";customerName.style.display="block";
-  const preview=document.createElement("small");preview.className="muted";preview.textContent=(last.sender_role==="owner"?"You: ":"")+last.message.slice(0,58);preview.style.display="block";
+  const preview=document.createElement("small");preview.className="muted";preview.textContent=(last.sender_role==="owner"?"You: ":"")+(last.message||"Photo attachment").slice(0,58)+(last.attachment_path?" · 📷 Photo":"");preview.style.display="block";
   summary.append(customerName,preview);button.append(summary);
   if(unread){const badge=document.createElement("span");badge.textContent=String(unread);badge.setAttribute("aria-label",unread+" unread customer messages");badge.style.cssText="flex:0 0 auto;min-width:25px;height:25px;padding:2px 7px;border-radius:20px;background:#a13d42;color:white;font-size:12px;font-weight:800;text-align:center";button.append(badge);}
   button.addEventListener("click",()=>{activeSupportUserId=uid;localStorage.setItem(readKey,new Date().toISOString());supportOwnerHeading.textContent="Conversation with "+(profile.full_name||profile.email||"customer");supportOwnerSend.disabled=false;loadOwnerLiveChats();loadSelectedOwnerChat();});

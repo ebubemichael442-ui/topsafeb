@@ -666,6 +666,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
    loadNext();
   },waitLimit);
   const source=sources[index++];
+  if(status)status.textContent=index===1?"Loading the secure sign-in library from TopSafeB…":index===2?"Trying the secure sign-in backup service…":"Trying the final secure sign-in backup…";
   script.src=source+(source.includes("?")?"&":"?")+"tsb_build=20261111e";
   script.async=true;
   script.onload=()=>{
@@ -673,7 +674,11 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
    settled=true;
    clearTimeout(sourceTimer);
    if(window.supabase&&typeof window.supabase.createClient==="function"){
-    runCustomerDashboard();
+    try{runCustomerDashboard();}
+    catch(error){
+     console.error("TopSafeB dashboard startup error:",error);
+     if(status)status.textContent="The sign-in library loaded, but the customer dashboard could not start: "+(error&&error.message?error.message:"Unknown startup error")+". Please contact TopSafeB support with this message.";
+    }
    }else{
     script.remove();
     loadNext();

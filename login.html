@@ -38,13 +38,18 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <p class="small muted">Use an email address you control. Keep your password private.</p>
 </section></main>
 <footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-if(!window.supabase || typeof window.supabase.createClient!=="function"){
- const message=document.getElementById("message");
- if(message)message.textContent="The secure sign-in service could not load. Check your connection and refresh this page.";
- throw new Error("TopSafeB sign-in library did not load.");
-}
+const loadingMessage=document.getElementById("message");
+const supabaseLibrary=document.createElement("script");
+supabaseLibrary.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";
+supabaseLibrary.async=true;
+let supabaseLibraryLoaded=false;
+supabaseLibrary.onload=()=>{
+ supabaseLibraryLoaded=true;
+ if(!window.supabase || typeof window.supabase.createClient!=="function"){
+  loadingMessage.textContent="The sign-in library loaded incorrectly. Please refresh and try again.";
+  return;
+ }
 const supabase=window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const form=document.getElementById("auth-form"),message=document.getElementById("message");
 const nameWrap=document.getElementById("name-wrap"),nameInput=document.getElementById("full-name");
@@ -76,5 +81,9 @@ resetButton.addEventListener("click",async()=>{
  catch(error){say(error.message||"Unable to request a password reset.");}
 });
 withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your learning account.");if(session)window.location.assign("dashboard.html");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
+};
+supabaseLibrary.onerror=()=>{loadingMessage.textContent="Could not load the secure sign-in service. Check your internet connection or try again later.";};
+setTimeout(()=>{if(!supabaseLibraryLoaded)loadingMessage.textContent="The secure sign-in service is taking too long to load. Refresh the page or try another network.";},10000);
+document.head.appendChild(supabaseLibrary);
 </script>
 </body></html>

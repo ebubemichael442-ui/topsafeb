@@ -145,6 +145,18 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <section class="panel" id="owner-activity-log"><h2 class="section-heading"><span class="section-icon activity" aria-hidden="true">◷</span><span>Owner Activity Log<small>Administrative actions and history</small></span></h2><p class="muted">Private record of owner actions, practice balance changes, top-up decisions and customer replies.</p><div class="search-tools"><label for="owner-log-search">Search owner activity</label><input id="owner-log-search" type="search" placeholder="Search action, customer or details…"></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Owner</th><th>Action</th><th>Customer</th><th>Details</th></tr></thead><tbody id="owner-log-rows"><tr><td colspan="5">Loading owner activity…</td></tr></tbody></table></div><p id="owner-log-status" class="muted" role="status">Loading private owner records…</p></section><section class="panel" id="live-support-inbox">
 <h2 class="section-heading"><span class="section-icon messages" aria-hidden="true">▤</span><span>Live Customer Messages<small>Private customer conversations</small></span></h2>
 <p class="muted">Private conversations with signed-in customers. Select a customer conversation to read and reply. New messages refresh automatically while this page is open.</p>
+<div class="detail-panel" id="billing-notice-builder" style="margin:18px 0;background:#f8fafc">
+ <h3 style="margin-top:0">Prepare account billing notice</h3>
+ <p class="muted">Create a bank-style practice notice and load it into the private reply box. Review it before sending. Any amount is illustrative only; no payment is due or accepted.</p>
+ <div class="detail-grid">
+  <div><label for="billing-customer"><strong>Customer</strong></label><select id="billing-customer" style="display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin-top:6px"><option value="">Choose a customer</option></select></div>
+  <div><label for="billing-reference"><strong>Notice reference</strong></label><input id="billing-reference" maxlength="40" style="display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin-top:6px" placeholder="Auto-generated if blank"></div>
+  <div><label for="billing-amount"><strong>Illustrative amount (USD)</strong></label><input id="billing-amount" type="number" min="0" step="0.01" value="0.00" style="display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin-top:6px"></div>
+  <div><label for="billing-reason"><strong>Reason for restriction</strong></label><input id="billing-reason" maxlength="180" value="Account access review pending" style="display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin-top:6px"></div>
+ </div>
+ <p><button type="button" id="prepare-billing-notice">Prepare notice in reply box</button></p>
+ <p id="billing-notice-status" class="muted" role="status" aria-live="polite">Choose a customer and prepare a practice notice.</p>
+</div>
 <p id="live-chat-admin-status" class="muted" role="status" aria-live="polite">Loading conversations…</p>
 <div style="display:grid;grid-template-columns:minmax(180px,0.8fr) minmax(0,2fr);gap:16px;align-items:start">
 <div id="live-chat-customer-list" style="display:grid;gap:8px"></div>
@@ -397,6 +409,18 @@ const supportOwnerInput=document.getElementById("owner-chat-input");
 const supportOwnerStatus=document.getElementById("live-chat-admin-status");
 const supportOwnerHeading=document.getElementById("live-chat-heading");
 const supportOwnerSend=document.getElementById("owner-chat-send");
+const billingCustomer=document.getElementById("billing-customer");
+function refreshBillingCustomers(){
+ if(!billingCustomer)return;
+ const selected=billingCustomer.value;
+ billingCustomer.replaceChildren(new Option("Choose a customer",""));
+ for(const customer of customerProfiles){
+  const option=new Option(customer.full_name||customer.email||"Customer",customer.user_id);
+  billingCustomer.add(option);
+ }
+ if(selected&&customerProfiles.some(c=>c.user_id===selected))billingCustomer.value=selected;
+}
+
 let supportProfiles=new Map();
 function renderOwnerChatBubble(item){
  const own=item.sender_role==="owner";
@@ -446,6 +470,54 @@ async function loadSelectedOwnerChat(){
  for(const item of data||[])renderOwnerChatBubble(item);
  supportOwnerThread.scrollTop=supportOwnerThread.scrollHeight;
 }
+
+document.getElementById("prepare-billing-notice").addEventListener("click",async()=>{
+ const status=document.getElementById("billing-notice-status");
+ const userId=billingCustomer.value;
+ const customer=customerProfiles.find(item=>item.user_id===userId);
+ if(!customer){status.textContent="Please choose a customer first.";return;}
+ const reason=document.getElementById("billing-reason").value.trim();
+ if(!reason){status.textContent="Please enter the restriction reason.";return;}
+ const amountValue=document.getElementById("billing-amount").value;
+ const amount=Number(amountValue);
+ if(amountValue===""||!Number.isFinite(amount)||amount<0){status.textContent="Enter a valid illustrative amount of zero or more.";return;}
+ const referenceInput=document.getElementById("billing-reference");
+ const reference=referenceInput.value.trim()||("TSB-TEST-"+Date.now().toString().slice(-8));
+ referenceInput.value=reference;
+ const money=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(amount);
+ const customerName=customer.full_name||"Customer";
+ const notice=[
+  "TOPSAFEB — ACCOUNT BILLING & ACCESS REVIEW NOTICE",
+  "PRACTICE ACCOUNT • SIMULATION ONLY • NOT A BANK INVOICE",
+  "",
+  "Dear "+customerName+",",
+  "",
+  "Your TopSafeB practice account is currently restricted while an account access review is pending.",
+  "",
+  "NOTICE DETAILS",
+  "Reference: "+reference,
+  "Account status: Restricted",
+  "Reason: "+reason,
+  "Illustrative test amount: "+money+" USD (display/testing only)",
+  "Payment status: No payment due",
+  "",
+  "NEXT STEP",
+  "Please reply to this private support conversation if you need clarification or wish to request an access review. The administrator will review the request and decide whether to restore practice-dashboard access.",
+  "",
+  "IMPORTANT",
+  "TopSafeB is an educational simulation platform, not a bank. This is not a genuine invoice or demand for payment. No money should be sent, no payment is collected, and paying any amount does not unblock an account. Access is restored only by the administrator.",
+  "",
+  "TopSafeB Customer Support"
+ ].join("\n");
+ activeSupportUserId=userId;
+ supportOwnerHeading.textContent="Conversation with "+customerName;
+ supportOwnerSend.disabled=false;
+ supportOwnerInput.value=notice;
+ supportOwnerStatus.textContent="Practice notice prepared. Review the text below before sending.";
+ status.textContent="Notice loaded into the private reply box. Review it and tap Send reply when ready.";
+ await loadSelectedOwnerChat();
+ supportOwnerInput.focus();
+});
 supportOwnerForm.addEventListener("submit",async event=>{
  event.preventDefault();const message=supportOwnerInput.value.trim();
  if(!message||!activeSupportUserId)return;
@@ -486,6 +558,7 @@ async function loadAdmin(){
  }
  if(accessError)statusEl.textContent="Administrator access confirmed. Run supabase/customer-access-controls.sql to enable customer blocking.";
  customerProfiles=list;
+ refreshBillingCustomers();
  const {data:progressRows,error:progressError}=await supabase.from("learning_progress").select("user_id,completed_lessons,completed_at,updated_at");
  if(progressError)throw progressError;
  const progressByUser=new Map((progressRows||[]).map(item=>[item.user_id,item]));

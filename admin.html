@@ -49,6 +49,18 @@ button:hover{filter:brightness(.97);transform:translateY(-1px)}
 .owner-chat-bubble{max-width:88%;padding:11px 13px;border-radius:13px;overflow-wrap:anywhere}
 .owner-chat-bubble.owner{justify-self:end;background:#e6f5ec;border:1px solid #cfe8d8}
 .owner-chat-bubble.customer{justify-self:start;background:#fff;border:1px solid #dce5ef}
+.support-hub-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:18px 0}
+.support-hub-stats article{display:grid;gap:4px;padding:17px;border:1px solid #e6edf0;border-radius:15px;background:linear-gradient(145deg,#fff,#f6faf8)}
+.support-hub-stats strong{font-size:27px;line-height:1.2;color:#153e58}
+.support-hub-stats small{font-size:11px;color:#718092}
+.support-hub-stat-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#e4f3eb;color:#187447;font-weight:900}
+.support-hub-stat-icon.unread{background:#fff0e9;color:#d45a38}
+.support-hub-stat-icon.photo{background:#edf1ff;color:#536dc4}
+.support-hub-tabs{display:flex;gap:8px;overflow:auto;padding:0 0 13px;margin-bottom:12px;border-bottom:1px solid #e7edf1}
+.support-hub-tabs span{white-space:nowrap;padding:8px 13px;border-radius:999px;background:#f1f5f7;color:#607184;font-size:12px;font-weight:800}
+.support-hub-tabs span.active{background:#e5f5eb;color:#176d43}
+@media(max-width:620px){.support-hub-stats{grid-template-columns:1fr 1fr}.support-hub-stats article:last-child{grid-column:span 2}}
+
 
 @media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.dashboard-grid{grid-template-columns:1fr}.summary-card{padding:16px}}
@@ -148,8 +160,14 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 </table></div>
 </section>
 <section class="panel" id="owner-activity-log"><h2 class="section-heading"><span class="section-icon activity" aria-hidden="true">◷</span><span>Owner Activity Log<small>Administrative actions and history</small></span></h2><p class="muted">Private record of owner actions, practice balance changes, top-up decisions and customer replies.</p><div class="search-tools"><label for="owner-log-search">Search owner activity</label><input id="owner-log-search" type="search" placeholder="Search action, customer or details…"></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Owner</th><th>Action</th><th>Customer</th><th>Details</th></tr></thead><tbody id="owner-log-rows"><tr><td colspan="5">Loading owner activity…</td></tr></tbody></table></div><p id="owner-log-status" class="muted" role="status">Loading private owner records…</p></section><section class="panel" id="live-support-inbox">
-<h2 class="section-heading"><span class="section-icon messages" aria-hidden="true">▤</span><span>Live Customer Messages<small>Private customer conversations</small></span></h2>
-<p class="muted">Private conversations with signed-in customers. Select a customer conversation to read and reply. New messages refresh automatically while this page is open.</p>
+<h2 class="section-heading"><span class="section-icon messages" aria-hidden="true">▤</span><span>Support Hub<small>Customer care · Private conversations</small></span></h2>
+<p class="muted">Your support workspace for customer enquiries, photo attachments and private replies. New conversations refresh automatically while this page is open.</p>
+<div class="support-hub-stats">
+ <article><span class="support-hub-stat-icon">▤</span><strong id="support-total-count">0</strong><small>Total conversations</small></article>
+ <article><span class="support-hub-stat-icon unread">●</span><strong id="support-unread-count">0</strong><small>Unread customer messages</small></article>
+ <article><span class="support-hub-stat-icon photo">▧</span><strong id="support-photo-count">0</strong><small>Photo attachments</small></article>
+</div>
+<div class="support-hub-tabs"><span class="active">Inbox</span><span>Customer conversations</span><span>Private replies</span></div>
 <div class="detail-panel" id="billing-notice-builder" style="margin:18px 0;background:#f8fafc">
  <h3 style="margin-top:0">Prepare account billing notice</h3>
  <p class="muted">Create a bank-style practice notice and load it into the private reply box. Review it before sending. Any amount is illustrative only; no payment is due or accepted.</p>
@@ -170,7 +188,9 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 <div id="owner-chat-thread" aria-live="polite" style="display:grid;gap:10px;max-height:440px;overflow:auto;padding:12px;background:#f5f8fb;border-radius:12px;margin:12px 0"><p class="muted">Choose a customer to view messages.</p></div>
 <form id="owner-chat-form" style="display:grid;gap:10px">
 <label for="owner-chat-input">Reply to customer</label>
-<textarea id="owner-chat-input" rows="3" maxlength="2000" required placeholder="Write a private reply…" style="width:100%;padding:12px;border:1px solid #d5dee8;border-radius:9px;font:inherit"></textarea>
+<textarea id="owner-chat-input" rows="3" maxlength="2000" placeholder="Write a private reply…" style="width:100%;padding:12px;border:1px solid #d5dee8;border-radius:9px;font:inherit"></textarea>
+<div class="chat-attach-row"><label class="chat-attach-button" for="owner-chat-photo">＋ Attach photo</label><input id="owner-chat-photo" type="file" accept="image/jpeg,image/png,image/webp" hidden><span class="muted" style="font-size:11px">JPG, PNG or WebP · Up to 5 MB</span></div>
+<div id="owner-chat-photo-preview" hidden></div>
 <button type="submit" id="owner-chat-send" disabled>Send reply</button>
 </form>
 </div>
@@ -414,6 +434,9 @@ const supportOwnerInput=document.getElementById("owner-chat-input");
 const supportOwnerStatus=document.getElementById("live-chat-admin-status");
 const supportOwnerHeading=document.getElementById("live-chat-heading");
 const supportOwnerSend=document.getElementById("owner-chat-send");
+const supportOwnerPhoto=document.getElementById("owner-chat-photo");
+const supportOwnerPhotoPreview=document.getElementById("owner-chat-photo-preview");
+let supportOwnerPhotoFile=null;
 const billingCustomer=document.getElementById("billing-customer");
 function refreshBillingCustomers(){
  if(!billingCustomer)return;
@@ -427,7 +450,7 @@ function refreshBillingCustomers(){
 }
 
 let supportProfiles=new Map();
-function renderOwnerChatBubble(item){
+async function renderOwnerChatBubble(item){
  const own=item.sender_role==="owner";
  const bubble=document.createElement("article");bubble.className="owner-chat-bubble "+(own?"owner":"customer");
  const who=document.createElement("strong");who.textContent=own?"You (owner)":(supportProfiles.get(item.user_id)?.full_name||"Customer");who.style.display="block";
@@ -446,6 +469,8 @@ async function loadOwnerLiveChats(){
  if(!ids.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No customer conversations yet.";supportCustomerList.append(empty);}
  const {data:profiles}=ids.length?await supabase.from("profiles").select("user_id,full_name,email").in("user_id",ids):{data:[]};
  supportProfiles=new Map((profiles||[]).map(p=>[p.user_id,p]));
+ const totalCount=document.getElementById("support-total-count");if(totalCount)totalCount.textContent=String(ids.length);
+ const photoCount=document.getElementById("support-photo-count");if(photoCount)photoCount.textContent=String(messages.filter(m=>m.attachment_path).length);
  for(const [uid,last] of latestByUser){
   const profile=supportProfiles.get(uid)||{};
   const readKey="topsafeb_owner_chat_read_"+uid;
@@ -462,16 +487,17 @@ async function loadOwnerLiveChats(){
  }
  const unreadTotal=messages.filter(message=>message.sender_role==="customer"&&(!localStorage.getItem("topsafeb_owner_chat_read_"+message.user_id)||new Date(message.created_at)>new Date(localStorage.getItem("topsafeb_owner_chat_read_"+message.user_id)))).length;
  const messageBadge=document.getElementById("messages-logo-unread");if(messageBadge){messageBadge.textContent=unreadTotal>99?"99+":String(unreadTotal);messageBadge.hidden=unreadTotal===0;messageBadge.setAttribute("aria-label",unreadTotal+" unread customer messages");}
+ const unreadCount=document.getElementById("support-unread-count");if(unreadCount)unreadCount.textContent=String(unreadTotal);
  supportOwnerStatus.textContent=ids.length+" customer "+(ids.length===1?"conversation":"conversations")+" · "+unreadTotal+" unread customer message(s). Updated "+new Date().toLocaleTimeString();
  if(activeSupportUserId)await loadSelectedOwnerChat();
 }
 async function loadSelectedOwnerChat(){
  if(!activeSupportUserId)return;
- const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,created_at").eq("user_id",activeSupportUserId).order("created_at",{ascending:true}).limit(150);
+ const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,attachment_path,created_at").eq("user_id",activeSupportUserId).order("created_at",{ascending:true}).limit(150);
  if(error){supportOwnerStatus.textContent="Could not load this conversation: "+error.message;return;}
  supportOwnerThread.replaceChildren();
  if(!(data||[]).length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No messages in this conversation.";supportOwnerThread.append(empty);}
- for(const item of data||[])renderOwnerChatBubble(item);
+ for(const item of data||[])await renderOwnerChatBubble(item);
  supportOwnerThread.scrollTop=supportOwnerThread.scrollHeight;
 }
 
@@ -519,15 +545,28 @@ document.getElementById("prepare-billing-notice").addEventListener("click",async
  await loadSelectedOwnerChat();
  supportOwnerInput.focus();
 });
+supportOwnerPhoto.addEventListener("change",()=>{
+ const file=supportOwnerPhoto.files?.[0]||null;supportOwnerPhotoFile=file;supportOwnerPhotoPreview.replaceChildren();supportOwnerPhotoPreview.hidden=!file;
+ if(!file)return;
+ const wrap=document.createElement("div");wrap.className="chat-attach-preview";const img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Selected reply photo";
+ const label=document.createElement("span");label.textContent=file.name+" · "+(file.size/1024/1024).toFixed(2)+" MB";
+ const remove=document.createElement("button");remove.type="button";remove.textContent="Remove";remove.addEventListener("click",()=>{supportOwnerPhoto.value="";supportOwnerPhotoFile=null;supportOwnerPhotoPreview.hidden=true;supportOwnerPhotoPreview.replaceChildren();});
+ wrap.append(img,label,remove);supportOwnerPhotoPreview.append(wrap);
+});
 supportOwnerForm.addEventListener("submit",async event=>{
- event.preventDefault();const message=supportOwnerInput.value.trim();
- if(!message||!activeSupportUserId)return;
+ event.preventDefault();const message=supportOwnerInput.value.trim();const file=supportOwnerPhotoFile;
+ if((!message&&!file)||!activeSupportUserId)return;
+ if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024)){supportOwnerStatus.textContent="Choose a JPG, PNG or WebP photo up to 5 MB.";return;}
  supportOwnerSend.disabled=true;supportOwnerSend.textContent="Sending…";
- const {data:{user}}=await supabase.auth.getUser();
- const {error}=await supabase.from("support_messages").insert({user_id:activeSupportUserId,sender_id:user.id,sender_role:"owner",message});
+ const {data:{user}}=await supabase.auth.getUser();let attachmentPath=null;
+ if(file){const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";attachmentPath=activeSupportUserId+"/"+crypto.randomUUID()+"."+ext;
+  const {error:uploadError}=await supabase.storage.from("support-attachments").upload(attachmentPath,file,{contentType:file.type,upsert:false});
+  if(uploadError){supportOwnerStatus.textContent="Photo upload failed: "+uploadError.message;supportOwnerSend.disabled=false;supportOwnerSend.textContent="Send reply";return;}
+ }
+ const {error}=await supabase.from("support_messages").insert({user_id:activeSupportUserId,sender_id:user.id,sender_role:"owner",message:message||"Photo attachment",attachment_path:attachmentPath});
  if(error){supportOwnerStatus.textContent="Reply not sent: "+error.message;}
- else{supportOwnerInput.value="";supportOwnerStatus.textContent="Reply sent.";await recordOwnerAction("Replied to customer support message",activeSupportUserId,message.slice(0,240));await loadOwnerActivityLog();await loadSelectedOwnerChat();}
- supportOwnerSend.disabled=false;supportOwnerSend.textContent="Send reply";
+ else{supportOwnerInput.value="";supportOwnerPhoto.value="";supportOwnerPhotoFile=null;supportOwnerPhotoPreview.hidden=true;supportOwnerPhotoPreview.replaceChildren();supportOwnerStatus.textContent="Reply sent.";await recordOwnerAction("Replied to customer support message",activeSupportUserId,message.slice(0,240));await loadOwnerActivityLog();await loadSelectedOwnerChat();await loadOwnerLiveChats();}
+ supportOwnerSend.disabled=!activeSupportUserId;supportOwnerSend.textContent="Send reply";
 });
 
 async function loadAdmin(){

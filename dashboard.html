@@ -928,7 +928,7 @@ async function loadCustomerDemoFunds(userId){
  if(!account){status.textContent="Your demo account is being prepared. Refresh this page in a moment.";return;}
  balanceEl.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(account.balance||0));
  await loadCustomerTopupRequests(userId);
- status.textContent="Demo account updated "+new Date(account.updated_at).toLocaleString()+". These are simulated funds only.";
+ status.textContent="";
  const {data:items,error:historyError}=await supabase.from("demo_transactions").select("action,amount,balance_after,note,created_at").eq("user_id",userId).order("created_at",{ascending:false}).limit(10);
  historyEl.replaceChildren();
  if(historyError){const p=document.createElement("p");p.className="muted";p.textContent="Recent activity is temporarily unavailable.";historyEl.append(p);return;}

@@ -88,6 +88,32 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 #status{border-radius:11px}
 @media(max-width:760px){.owner-hero{align-items:flex-start;flex-direction:column}.hero-status{display:flex;align-items:center;justify-items:initial;text-align:left;min-width:0;width:100%;justify-content:flex-start}.hero-orb{flex:0 0 38px;width:38px;height:38px}.owner-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-shortcuts a{padding:11px;font-size:12px}.owner-shortcuts a:last-child{grid-column:span 2}}
 @media(max-width:380px){.owner-shortcuts{grid-template-columns:1fr}.owner-shortcuts a:last-child{grid-column:auto}}
+
+/* Support Hub: responsive service-desk workspace */
+#live-support-inbox{border:1px solid #dce9e1;background:linear-gradient(180deg,#fbfefc,#fff);box-shadow:0 16px 42px #143b2610}
+#live-support-inbox>.section-heading{align-items:center}
+#live-support-inbox .support-hub-stats article{box-shadow:0 7px 20px #143b2608}
+#live-support-inbox .support-hub-tabs{display:none}
+.support-workspace{display:grid;grid-template-columns:minmax(230px,.78fr) minmax(0,2fr);gap:16px;align-items:start}
+.support-inbox-column{min-width:0;padding:14px;border:1px solid #e3ece6;border-radius:16px;background:#f8fbf9}
+.support-inbox-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;font-size:14px;color:#183e2c}
+#support-inbox-search{width:100%;padding:11px 12px;border:1px solid #d9e5dd;border-radius:10px;background:#fff;font:inherit;font-size:13px;margin-bottom:12px;outline-color:#238653}
+#live-chat-customer-list{display:grid;gap:8px;max-height:560px;overflow:auto}
+#live-chat-customer-list button{width:100%;min-width:0;padding:12px;border:1px solid #e2eae5;border-radius:12px;background:#fff;color:#203b2d;box-shadow:0 3px 10px #143b2607;transition:border-color .15s,background .15s}
+#live-chat-customer-list button:hover{background:#f0faf3;border-color:#b9dec5}
+.support-conversation-column{min-width:0;padding:14px;border:1px solid #e3ece6;border-radius:16px;background:#fff}
+#live-chat-heading{margin:2px 0 12px;padding-bottom:12px;border-bottom:1px solid #edf1ee;font-size:17px;color:#193d2b}
+#owner-chat-thread{min-height:280px;max-height:480px;background:#f4f8f5!important;border:1px solid #e2ebe5!important;border-radius:14px!important;padding:14px!important}
+.owner-chat-bubble{max-width:min(86%,480px);padding:12px 14px;border-radius:15px;box-shadow:0 4px 14px #143b2609}
+.owner-chat-bubble.owner{border-bottom-right-radius:5px;background:#e2f4e8}
+.owner-chat-bubble.customer{border-bottom-left-radius:5px;background:#fff}
+.owner-chat-bubble>small{display:block;margin-top:7px;color:#738176;font-size:10px}
+#owner-chat-form{padding:13px;border:1px solid #e3ece6;border-radius:14px;background:#fbfdfb}
+#owner-chat-input{min-height:84px;border-radius:11px!important;background:#fff}
+#owner-chat-send{justify-self:end;min-width:145px;background:linear-gradient(135deg,#167345,#23945b);color:#fff;border-radius:10px}
+#owner-chat-send:disabled{opacity:.55}
+#live-chat-admin-status{padding:9px 11px;border-radius:9px;background:#f2f8f4;color:#557060;font-size:11px}
+@media(max-width:760px){.support-workspace{grid-template-columns:1fr}.support-inbox-column{padding:11px}.support-conversation-column{padding:11px}#live-chat-customer-list{max-height:260px;grid-template-columns:1fr}#owner-chat-thread{min-height:250px;max-height:55vh}.owner-chat-bubble{max-width:94%}#owner-chat-send{width:100%}}
 </style>
 </head>
 <body>
@@ -181,9 +207,9 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
  <p id="billing-notice-status" class="muted" role="status" aria-live="polite">Choose a customer and prepare a practice notice.</p>
 </div>
 <p id="live-chat-admin-status" class="muted" role="status" aria-live="polite">Loading conversations…</p>
-<div style="display:grid;grid-template-columns:minmax(180px,0.8fr) minmax(0,2fr);gap:16px;align-items:start">
-<div id="live-chat-customer-list" style="display:grid;gap:8px"></div>
-<div>
+<div class="support-workspace">
+<aside class="support-inbox-column" aria-label="Customer support inbox"><h3 class="support-inbox-title">Customer inbox <span style="color:#718477;font-size:11px">Latest first</span></h3><input id="support-inbox-search" type="search" placeholder="Search customer conversations…" aria-label="Search customer conversations"><div id="live-chat-customer-list" style="display:grid;gap:8px"></div></aside>
+<div class="support-conversation-column">
 <h3 id="live-chat-heading">Select a conversation</h3>
 <div id="owner-chat-thread" aria-live="polite" style="display:grid;gap:10px;max-height:440px;overflow:auto;padding:12px;background:#f5f8fb;border-radius:12px;margin:12px 0"><p class="muted">Choose a customer to view messages.</p></div>
 <form id="owner-chat-form" style="display:grid;gap:10px">
@@ -449,6 +475,9 @@ function refreshBillingCustomers(){
  if(selected&&customerProfiles.some(c=>c.user_id===selected))billingCustomer.value=selected;
 }
 
+
+const supportInboxSearch=document.getElementById("support-inbox-search");
+if(supportInboxSearch){supportInboxSearch.addEventListener("input",()=>{const q=supportInboxSearch.value.trim().toLowerCase();supportCustomerList.querySelectorAll("button").forEach(button=>{button.hidden=!button.textContent.toLowerCase().includes(q);});});}
 let supportProfiles=new Map();
 async function renderOwnerChatBubble(item){
  const own=item.sender_role==="owner";

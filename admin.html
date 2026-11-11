@@ -486,7 +486,8 @@ async function loadAdmin(){
   customerTableRows.push(tr);rowsEl.append(tr);
  }
  rowsEl.append(noSearchResults);filterCustomers();
- await loadDemoFunds(list);\n await loadOwnerTransactionRegister(list);
+ await loadDemoFunds(list);
+ await loadOwnerTransactionRegister(list);
  await loadTopupRequests(list);
  await loadFeedback();
  await loadOwnerLiveChats();

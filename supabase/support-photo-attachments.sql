@@ -21,7 +21,12 @@ create policy "Customers upload own support photos"
 on storage.objects for insert to authenticated
 with check (
   bucket_id = 'support-attachments'
-  and (storage.foldername(name))[1] = auth.uid()::text
+  and (
+    (storage.foldername(name))[1] = auth.uid()::text
+    or exists (
+      select 1 from public.admin_users au where au.user_id = auth.uid()
+    )
+  )
 );
 
 drop policy if exists "Customers and admins view support photos" on storage.objects;

@@ -375,9 +375,24 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 @media(max-width:650px){.bank-dashboard-top{background:linear-gradient(115deg,#0d3828,#176b46 72%,#258657)}}
 
 </style>
+<style>
+.customer-feature-nav{position:sticky;top:64px;z-index:35;display:flex;gap:8px;align-items:center;overflow-x:auto;white-space:nowrap;padding:10px max(12px,calc((100% - 1120px)/2));background:#fff;border-bottom:1px solid #dce6df;box-shadow:0 3px 12px #153b2510;-webkit-overflow-scrolling:touch}
+.customer-feature-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 14px;border:1px solid #d7e5dc;border-radius:9px;color:#185c3c;text-decoration:none;font-size:13px;font-weight:750;background:#f7fbf8}
+.customer-feature-nav a:active,.customer-feature-nav a:focus{background:#dff3e6;border-color:#78b991}
+@media(max-width:600px){.customer-feature-nav{top:60px;gap:6px;padding:8px 10px}.customer-feature-nav a{min-height:40px;padding:8px 12px;font-size:12px}}
+</style>
 </head>
 <body>
 <header class="customer-header"><div class="brand"><span>◆</span> TopSafeB</div><div class="header-user"><span id="header-customer-name">Customer</span><button id="customer-menu-toggle" type="button" aria-label="Open customer menu" aria-expanded="false">☰</button></div></header>
+<nav class="customer-feature-nav" aria-label="Customer features">
+<a href="dashboard.html?view=home">Home</a>
+<a href="dashboard.html?view=transfers">Transfers</a>
+<a href="dashboard.html?view=transactions">Activity</a>
+<a href="dashboard.html?view=cards">Cards</a>
+<a href="dashboard.html?view=savings">Savings</a>
+<a href="dashboard.html?view=learning">Learning</a>
+<a href="dashboard.html?view=messages">Messages</a>
+</nav>
 <div id="customer-menu-backdrop" class="menu-backdrop" hidden></div>
 <aside id="customer-menu" class="customer-menu" aria-label="Customer navigation" aria-hidden="true">
 <div class="menu-brand">TopSafeB <span>Practice menu</span></div>

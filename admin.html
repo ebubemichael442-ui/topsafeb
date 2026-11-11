@@ -50,14 +50,37 @@ button:hover{filter:brightness(.97);transform:translateY(-1px)}
 
 footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}footer p{color:#c6d2e1}
 @media(max-width:700px){header{padding:13px 5%}.menu-toggle{display:block;color:#fff;border:1px solid #ffffff40;border-radius:8px}nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--navy);padding:16px 5%;box-shadow:0 8px 14px #102b5020;flex-direction:column;gap:14px}nav.open{display:flex}main{margin-top:22px;padding-left:14px;padding-right:14px}.dashboard-grid{grid-template-columns:1fr;gap:12px;margin:18px 0}.summary-card{padding:18px}.summary-card .stat{font-size:32px}th,td{padding:10px;font-size:12px}.panel{padding:17px;border-radius:12px}.panel h2{font-size:19px}}
+
+/* Banking-inspired owner control centre styling */
+.owner-hero{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:28px 0 18px;padding:clamp(24px,4vw,42px);border-radius:22px;background:radial-gradient(circle at 80% 10%,#34577d 0,transparent 34%),linear-gradient(120deg,#0d2340,#173d5d 72%,#1c5360);color:#fff;box-shadow:0 18px 42px #10274424;position:relative;overflow:hidden}
+.owner-hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff18;border-radius:50%;right:130px;bottom:-165px;box-shadow:0 0 0 28px #ffffff08,0 0 0 58px #ffffff05;pointer-events:none}
+.owner-hero h1{color:#fff;font-size:clamp(27px,4vw,39px);margin:7px 0 10px;letter-spacing:-1px}
+.owner-hero p:not(.hero-kicker){color:#d8e4ef;margin:0;max-width:650px}
+.hero-kicker{font-size:10px;letter-spacing:1.7px;font-weight:800;color:#e5c77f;margin:0}
+.hero-status{position:relative;z-index:1;display:grid;justify-items:center;gap:5px;min-width:155px;padding:17px 18px;border:1px solid #ffffff32;border-radius:16px;background:#ffffff12;text-align:center}
+.hero-orb{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#d7b56d;color:#102744;font-size:20px}
+.hero-status strong{font-size:13px;color:#fff}.hero-status small{font-size:10px;color:#d8e4ef}
+.owner-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0 0 22px}
+.owner-shortcuts a{display:flex;align-items:center;gap:9px;padding:13px 14px;border:1px solid #dce5ef;border-radius:12px;background:#fff;color:#183451;text-decoration:none;font-size:13px;font-weight:800;box-shadow:0 4px 14px #10274408;transition:transform .15s ease,border-color .15s ease}
+.owner-shortcuts a:hover{transform:translateY(-2px);border-color:#c6a45f}
+.owner-shortcuts span{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:9px;background:#f4eddd;color:#8a6a2d;font-size:17px}
+.summary-card{border-radius:17px;box-shadow:0 8px 22px #1027440b}
+.summary-card .stat{letter-spacing:-1.3px}
+.panel{border-radius:17px;padding:clamp(17px,2.4vw,26px);box-shadow:0 8px 24px #1027440a}
+.panel h2:before{height:22px;background:linear-gradient(#d7b56d,#a9833f)}
+#status{border-radius:11px}
+@media(max-width:760px){.owner-hero{align-items:flex-start;flex-direction:column}.hero-status{display:flex;align-items:center;justify-items:initial;text-align:left;min-width:0;width:100%;justify-content:flex-start}.hero-orb{flex:0 0 38px;width:38px;height:38px}.owner-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-shortcuts a{padding:11px;font-size:12px}.owner-shortcuts a:last-child{grid-column:span 2}}
+@media(max-width:380px){.owner-shortcuts{grid-template-columns:1fr}.owner-shortcuts a:last-child{grid-column:auto}}
 </style>
 </head>
 <body>
 <header><div class="brand"><span>◆</span> TopSafeB</div><a class="messages-logo" href="#live-support-inbox" aria-label="Open live customer messages" title="Live customer messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 11.5h8M8 14.5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Messages</span><b id="messages-logo-unread" hidden>0</b></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
 <main>
-<p class="muted">RESTRICTED OWNER AREA</p>
-<h1>Owner Control Centre</h1>
-<p class="muted">A clear overview of customers, learning activity, support and simulated account tools.</p>
+<section class="owner-hero" aria-label="Owner dashboard welcome">
+  <div><p class="hero-kicker">PRIVATE OWNER ACCESS · TOPSAFEB</p><h1>Welcome to your Control Centre</h1><p>Manage your customer community, review activity and oversee practice accounts from one place.</p></div>
+  <div class="hero-status"><span class="hero-orb">◆</span><strong>Practice platform</strong><small>Simulation only · No real funds</small></div>
+</section>
+<nav class="owner-shortcuts" aria-label="Owner dashboard shortcuts"><a href="#registered-customers"><span>♙</span>Customers</a><a href="#topup-requests"><span>＋</span>Top-up requests</a><a href="#demo-funds-manager"><span>＄</span>Practice funds</a><a href="#feedback-management"><span>☆</span>Feedback</a><a href="#live-support-inbox"><span>✉</span>Messages</a></nav>
 <div class="dashboard-grid" aria-label="Practice operations overview"><article class="summary-card"><h2>Customer portfolio</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p><span class="metric-foot">Customer profiles</span></article><article class="summary-card"><h2>Total practice funds</h2><p class="muted">Illustrative USD balances</p><p class="stat" id="total-demo-funds">—</p><span class="metric-foot">Not real deposits or cash</span></article><article class="summary-card"><h2>Customer feedback</h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p><span class="metric-foot">Private support records</span></article><article class="summary-card"><h2>Learning progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p><span class="metric-foot">Across customer accounts</span></article></div>
 <section class="panel">
 <p class="muted">SIGNED-IN OWNER</p>

@@ -51,17 +51,19 @@ const nameWrap=document.getElementById("name-wrap"),nameInput=document.getElemen
 const submitButton=document.getElementById("submit-button"),signupButton=document.getElementById("signup-button"),resetButton=document.getElementById("reset-button");
 let mode="login";
 const say=text=>message.textContent=text;
+const withTimeout=(promise,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your internet connection and try again.")),12000))]);
 function setMode(next){mode=next;const signup=mode==="signup";nameWrap.hidden=!signup;nameInput.required=signup;document.getElementById("password").autocomplete=signup?"new-password":"current-password";submitButton.textContent=signup?"Create account":"Sign in";signupButton.hidden=signup;resetButton.hidden=signup;say(signup?"Enter your name, email and password to register.":"Enter your email and password to sign in.");}
 signupButton.addEventListener("click",()=>setMode("signup"));
 form.addEventListener("submit",async event=>{
  event.preventDefault();submitButton.disabled=true;
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
  try{
+  say(mode==="signup"?"Connecting to the registration service…":"Connecting securely to sign in…");
   if(mode==="signup"){
-   const {error}=await supabase.auth.signUp({email,password,options:{data:{full_name:nameInput.value.trim()},emailRedirectTo:window.location.origin+window.location.pathname}});
+   const {error}=await withTimeout(supabase.auth.signUp({email,password,options:{data:{full_name:nameInput.value.trim()},emailRedirectTo:window.location.origin+window.location.pathname}}),"Registration service");
    if(error)throw error;say("Registration request received. Check your email for a confirmation link before signing in.");
   }else{
-   const {error}=await supabase.auth.signInWithPassword({email,password});
+   const {error}=await withTimeout(supabase.auth.signInWithPassword({email,password}),"Sign-in request");
    if(error)throw error;window.location.assign("dashboard.html");
   }
  }catch(error){say(error.message||"Something went wrong. Please try again.");}
@@ -73,6 +75,6 @@ resetButton.addEventListener("click",async()=>{
  try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error)throw error;say("If an account exists for that email, a password reset link will be sent.");}
  catch(error){say(error.message||"Unable to request a password reset.");}
 });
-supabase.auth.getSession().then(({data:{session}})=>{say(session?"You are already signed in. Open your dashboard.":"Connection ready. You can sign in or create your learning account.");if(session)window.location.assign("dashboard.html");});
+withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your learning account.");if(session)window.location.assign("dashboard.html");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
 </script>
 </body></html>

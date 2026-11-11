@@ -640,7 +640,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
 <script>
 /* Runs before the external Supabase library: never leave the customer on a silent loading screen. */
-setTimeout(()=>{const status=document.getElementById("status");if(status&&status.textContent==="Checking your sign-in session…")status.textContent="The secure sign-in library is taking too long to load. Please wait for the connection check to finish.";},18000);
+ setTimeout(()=>{const status=document.getElementById("status");if(status&&status.textContent==="Checking your sign-in session…")status.textContent="Still connecting to the secure sign-in service. The page is allowing extra time for a slower mobile connection.";},65000);
 </script>
 <script>
 (function startTopSafeBSupabase(){
@@ -658,13 +658,15 @@ setTimeout(()=>{const status=document.getElementById("status");if(status&&status
   }
   const script=document.createElement("script");
   let settled=false;
+  const waitLimit=index===1?30000:20000;
   const sourceTimer=setTimeout(()=>{
    if(settled)return;
    settled=true;
    script.remove();
    loadNext();
-  },6000);
-  script.src=sources[index++];
+  },waitLimit);
+  const source=sources[index++];
+  script.src=source+(source.includes("?")?"&":"?")+"tsb_build=20261111b";
   script.async=true;
   script.onload=()=>{
    if(settled)return;

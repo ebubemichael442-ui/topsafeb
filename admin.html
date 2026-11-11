@@ -206,7 +206,7 @@ async function loadFeedback(){
    saveReply.disabled=true;saveReply.textContent="Saving…";
    const {error:updateError}=await supabase.from("customer_feedback").update({owner_reply:reply,replied_at:new Date().toISOString(),status:"Reviewed"}).eq("id",item.id);
    if(updateError){replyNote.textContent="Could not save reply: "+updateError.message;saveReply.disabled=false;saveReply.textContent=item.owner_reply?"Update reply":"Send reply";return;}
-   item.owner_reply=reply;item.replied_at=new Date().toISOString();item.status="Reviewed";status.textContent="Reviewed";replyNote.textContent="Reply saved: "+new Date(item.replied_at).toLocaleString();saveReply.textContent="Update reply";saveReply.disabled=false;feedbackStatus.textContent="Your reply is saved in the customer dashboard. Sending email notification…";
+   item.owner_reply=reply;item.replied_at=new Date().toISOString();item.status="Reviewed";status.textContent="Reviewed";await recordOwnerAction("Replied to customer feedback",null,"Feedback record "+item.id);await loadOwnerActivityLog();replyNote.textContent="Reply saved: "+new Date(item.replied_at).toLocaleString();saveReply.textContent="Update reply";saveReply.disabled=false;feedbackStatus.textContent="Your reply is saved in the customer dashboard. Sending email notification…";
    const {error:notifyError}=await supabase.functions.invoke("clever-processor",{body:{feedbackId:item.id}});
    if(notifyError){
     let notifyMessage=notifyError.message||"Unknown notification error";
@@ -276,6 +276,7 @@ async function loadTopupRequests(customers){
      const {error:decisionError}=await supabase.rpc("admin_review_demo_topup",{p_request_id:item.id,p_decision:choice,p_owner_note:ownerNote.value.trim()});
      if(decisionError){status.textContent="Could not save decision: "+decisionError.message;btn.disabled=false;return;}
      status.textContent=choice==="approve"?"Request approved. Simulated funds were added to the customer's practice balance.":"Request rejected. No demo funds were added.";
+     await recordOwnerAction(choice==="approve"?"Approved practice top-up":"Rejected practice top-up",item.user_id,"Request "+item.id+" · USD "+Number(item.amount).toFixed(2));await loadOwnerActivityLog();
      await loadTopupRequests(customers);await loadDemoFunds(customers);
     });
     decision.append(btn);
@@ -316,6 +317,7 @@ async function loadDemoFunds(customers){
    if(rpcError){status.textContent="Could not update demo funds: "+rpcError.message;apply.disabled=false;apply.textContent="Apply";return;}
    const result=Array.isArray(data)?data[0]:data;
    status.textContent="Demo balance updated for "+(customer.full_name||customer.email)+". New balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result?.new_balance||0));
+   await recordOwnerAction(({add:"Added practice funds",deduct:"Deducted practice funds",set:"Set practice balance"})[action.value],customer.user_id,"USD "+value.toFixed(2)+" · "+(note.value.trim()||"No note"));await loadOwnerActivityLog();
    await loadDemoFunds(customers);
   });
   applyCell.append(apply);actionCell.append(action);tr.append(name,balanceCell,actionCell,amountCell,noteCell,applyCell);body.append(tr);
@@ -450,7 +452,7 @@ supportOwnerForm.addEventListener("submit",async event=>{
  const {data:{user}}=await supabase.auth.getUser();
  const {error}=await supabase.from("support_messages").insert({user_id:activeSupportUserId,sender_id:user.id,sender_role:"owner",message});
  if(error){supportOwnerStatus.textContent="Reply not sent: "+error.message;}
- else{supportOwnerInput.value="";supportOwnerStatus.textContent="Reply sent.";await loadSelectedOwnerChat();}
+ else{supportOwnerInput.value="";supportOwnerStatus.textContent="Reply sent.";await recordOwnerAction("Replied to customer support message",activeSupportUserId,message.slice(0,240));await loadOwnerActivityLog();await loadSelectedOwnerChat();}
  supportOwnerSend.disabled=false;supportOwnerSend.textContent="Send reply";
 });
 

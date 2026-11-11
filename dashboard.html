@@ -381,17 +381,13 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <div id="customer-menu-backdrop" class="menu-backdrop" hidden></div>
 <aside id="customer-menu" class="customer-menu" aria-label="Customer navigation" aria-hidden="true">
 <div class="menu-brand">TopSafeB <span>Practice menu</span></div>
-<a class="menu-link active" href="#customer-home">Dashboard</a>
-<a class="menu-link" href="#customer-demo-history">Account Statement</a>
-<a class="menu-link" href="#transfer-centre">Transfer Centre</a>
-<a class="menu-link" href="transfer.html">Open standalone Transfer Centre <small>Domestic + 100+ destinations</small></a>
-<a class="menu-link" href="#blockchain-learning">Blockchain Transfer <small>Learning demo</small></a>
-<a class="menu-link" href="#blockchain-history">Blockchain History <small>Sample ledger</small></a>
-<a class="menu-link" href="#demo-deposit-info">Make Deposit <small>Demo explanation only</small></a>
-<a class="menu-link" href="#virtual-cards-info">Virtual Cards <small>Learning preview only</small></a>
-<a class="menu-link" href="#quick-loan-info">Quick Loan <small>Learning guide only</small></a>
-<a class="menu-link" href="#customer-demo-funds">Manage Accounts</a>
-<a class="menu-link" href="#customer-support">Support</a>
+<a class="menu-link" href="dashboard.html?view=home">Home</a>
+<a class="menu-link" href="dashboard.html?view=transfers">Transfers</a>
+<a class="menu-link" href="dashboard.html?view=transactions">Transactions</a>
+<a class="menu-link" href="dashboard.html?view=cards">Cards</a>
+<a class="menu-link" href="dashboard.html?view=savings">Savings &amp; Budgeting</a>
+<a class="menu-link" href="dashboard.html?view=learning">Learning</a>
+<a class="menu-link" href="dashboard.html?view=messages">Messages &amp; Support</a>
 <button id="menu-logout" class="menu-logout" type="button">Logout</button>
 <p class="menu-disclaimer">All account features are simulated. No real deposits, cards, loans, crypto or bank transfers are provided.</p>
 </aside>
@@ -537,6 +533,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 </div>
 </section>
 
+<section class="panel feature-learning" id="savings-learning" style="margin:20px 0"><h2>Savings &amp; budgeting practice</h2><p>Build a simple spending plan, set a savings goal and learn how regular contributions can add up over time.</p><div class="grid"><article class="tile"><h3>Plan your spending</h3><p>Separate needs, wants and savings before deciding how to use a monthly budget.</p></article><article class="tile"><h3>Set a savings goal</h3><p>Choose a target amount, a time frame and a realistic regular contribution.</p></article><article class="tile"><h3>Review progress</h3><p>Check your plan regularly and adjust it when your circumstances change.</p></article></div><p class="muted">Educational guidance only. This page does not open a savings account or accept deposits.</p></section>
 <section class="panel" id="learning-progress" style="margin-top:22px">
 <h2>Your learning progress</h2>
 <p class="muted">Tick each lesson when you finish it. Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>
@@ -1069,5 +1066,67 @@ supabase.auth.onAuthStateChange((_event,session)=>{
 loadSession().catch(error=>{console.error("TopSafeB session loading failed:",error);statusEl.textContent="Could not finish sign-in check: "+(error.message||"Please refresh the page or sign in again.");});
 </script>
 <button type="button" class="support-chat-fab" id="open-customer-support" aria-label="Open TopSafeB private message chat" aria-expanded="false" aria-controls="customer-support" title="Message TopSafeB support"><span class="support-chat-icon" aria-hidden="true">✉</span><span>Message support</span></button>
+
+<script>
+/* Customer-only page views: the shared session and Supabase logic remains intact,
+   while each navigation destination displays only its own customer feature. */
+(function(){
+ const params=new URLSearchParams(window.location.search);
+ const view=params.get("view")||"home";
+ const main=document.getElementById("customer-home");
+ if(!main)return;
+ const config={
+  home:{title:"Your practice account",targets:[".market-strip",".account-card",".quick-actions"]},
+  transfers:{title:"Transfers",targets:["#transfer-centre","#demo-transfer-receipt"]},
+  transactions:{title:"Transactions",targets:["#customer-demo-history"]},
+  cards:{title:"Cards learning",targets:["#virtual-cards-info"]},
+  savings:{title:"Savings & budgeting",targets:["#savings-learning"]},
+  learning:{title:"Learning",targets:["#learning-progress","#certificate","#savings-learning"]},
+  messages:{title:"Messages & support",targets:["#customer-support"]}
+ };
+ const chosen=config[view]||config.home;
+ const heading=main.querySelector("h1");
+ if(heading)heading.textContent=chosen.title;
+ const intro=main.querySelector(":scope > p.muted:first-child");
+ const accountPanel=main.querySelector(":scope > .panel:first-of-type");
+ const keep=new Set([intro,heading,accountPanel].filter(Boolean));
+ const paths=[];
+ for(const selector of chosen.targets){
+  let node=main.querySelector(selector);
+  if(!node)continue;
+  if(selector==="#customer-demo-history" && node.parentElement) node=node.parentElement;
+  paths.push(node);
+ }
+ if(!paths.length)paths.push(main.querySelector("#customer-demo-funds"));
+ const visible=new Set(keep);
+ for(const target of paths){
+  let node=target;
+  while(node && node!==main){
+   visible.add(node);
+   let parent=node.parentElement;
+   if(parent){
+    for(const sibling of parent.children){if(sibling!==node)sibling.hidden=true;}
+    node.hidden=false;
+   }
+   node=parent;
+  }
+ }
+ for(const child of main.children){if(!visible.has(child))child.hidden=true;else child.hidden=false;}
+ /* Restore the selected branches after the main-level filtering. */
+ for(const target of paths){
+  let node=target;
+  while(node && node!==main){node.hidden=false;node=node.parentElement;}
+ }
+ for(const item of main.querySelectorAll("[hidden]"))item.hidden=true;
+ const menu=document.getElementById("customer-menu");
+ if(menu){
+  menu.querySelectorAll(".menu-link").forEach(link=>{
+   const url=new URL(link.href,location.href);
+   link.classList.toggle("active",url.searchParams.get("view")===view || (view==="home" && url.searchParams.get("view")==="home"));
+  });
+ }
+})();
+</script>
+
 </body>
 </html>

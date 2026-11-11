@@ -41,7 +41,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <script>
 const loadingMessage=document.getElementById("message");
 const supabaseLibrary=document.createElement("script");
-supabaseLibrary.src="supabase.js?tsb_build=20261111b";
+supabaseLibrary.src="supabase.js?tsb_build=20261111c";
 supabaseLibrary.async=true;
 let supabaseLibraryLoaded=false;
 supabaseLibrary.onload=()=>{
@@ -69,7 +69,7 @@ form.addEventListener("submit",async event=>{
    if(error)throw error;say("Registration request received. Check your email for a confirmation link before signing in.");
   }else{
    const {error}=await withTimeout(supabase.auth.signInWithPassword({email,password}),"Sign-in request");
-   if(error)throw error;window.location.assign("dashboard.html");
+   if(error)throw error;window.location.assign("dashboard.html?tsb_build=20261111c");
   }
  }catch(error){say(error.message||"Something went wrong. Please try again.");}
  finally{submitButton.disabled=false;}
@@ -80,7 +80,7 @@ resetButton.addEventListener("click",async()=>{
  try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error)throw error;say("If an account exists for that email, a password reset link will be sent.");}
  catch(error){say(error.message||"Unable to request a password reset.");}
 });
-withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your learning account.");if(session)window.location.assign("dashboard.html");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
+withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your learning account.");if(session)window.location.assign("dashboard.html?tsb_build=20261111c");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
 };
 supabaseLibrary.onerror=()=>{loadingMessage.textContent="Could not load the secure sign-in service. Check your internet connection or try again later.";};
 setTimeout(()=>{if(!supabaseLibraryLoaded)loadingMessage.textContent="Still connecting to the secure sign-in service. Please allow up to 30 seconds on a slower mobile connection.";},15000);

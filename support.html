@@ -14,7 +14,7 @@ main{max-width:1240px;margin:26px auto;padding:0 16px}.hero{padding:25px;border-
 #inbox{display:grid;gap:8px;max-height:680px;overflow:auto}.customer{width:100%;text-align:left;background:white;border:1px solid var(--line);border-radius:11px;padding:12px;cursor:pointer;color:var(--ink)}.customer.active{border-color:var(--green);background:#eff8f2}.customer strong,.customer small{display:block;overflow-wrap:anywhere}.customer small{color:var(--muted);font-size:11px;margin-top:3px}.customer .unread{float:right;background:#b74343;color:white;border-radius:20px;padding:2px 7px}
 #thread{height:min(58vh,600px);min-height:300px;overflow:auto;background:#f5f8fa;border:1px solid var(--line);border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px}
 .bubble{max-width:min(86%,520px);padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:white;overflow-wrap:anywhere}.bubble.owner{align-self:flex-end;background:#e7f5eb;border-color:#cfe7d6;border-bottom-right-radius:4px}.bubble.customer{align-self:flex-start;border-bottom-left-radius:4px}.bubble strong{display:block;font-size:12px}.bubble p{white-space:pre-wrap;margin:6px 0}.bubble small{display:block;color:var(--muted);font-size:10px;margin-top:6px}
-.chat-photo{display:block;max-width:100%;max-height:330px;object-fit:contain;border-radius:10px;margin-top:8px;background:white}.save{display:inline-block;margin-top:8px;padding:8px 12px;background:var(--green);color:white;border-radius:8px;text-decoration:none;font-size:12px;font-weight:800}
+.chat-photo{display:block;max-width:100%;max-height:330px;object-fit:contain;border-radius:10px;margin-top:8px;background:white}.save{display:inline-block;margin-top:8px;padding:8px 12px;background:var(--green);color:white;border-radius:8px;text-decoration:none;font-size:12px;font-weight:800}.copy-message{display:inline-block;margin:7px 8px 0 0;padding:6px 10px;border:1px solid #d8e2e9;border-radius:7px;background:#fff;color:#23465a;font-size:12px;font-weight:800;cursor:pointer}
 form{display:grid;gap:10px;margin-top:12px}textarea{width:100%;min-height:90px;resize:vertical;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit}button.send{border:0;border-radius:10px;background:var(--green);color:white;padding:12px 18px;font-weight:800;font:inherit;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.attach{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.attach label{background:#edf4ef;border:1px solid #d7e8dc;padding:9px 12px;border-radius:9px;color:var(--green);font-weight:800;cursor:pointer;font-size:13px}.hint{font-size:11px;color:var(--muted)}#status{font-size:12px;color:var(--muted);margin:12px 0}.empty{color:var(--muted);text-align:center;padding:28px 12px}
 @media(max-width:760px){main{margin:15px auto}.workspace{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:22px}#inbox{max-height:230px;grid-template-columns:1fr}#thread{height:48vh;min-height:260px}.bubble{max-width:94%}.hero{padding:20px}}
 </style>
@@ -33,7 +33,7 @@ form{display:grid;gap:10px;margin-top:12px}textarea{width:100%;min-height:90px;r
 <script type="module">
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 const supabase=createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
-const $=id=>document.getElementById(id);let owner=null,active=null,profiles=new Map(),messages=[],photoFile=null,refreshBusy=false;
+const $=id=>document.getElementById(id);let owner=null,active=null,profiles=new Map(),messages=[],photoFile=null,refreshBusy=false,threadNeedsBottom=true;
 const readKey=id=>"topsafeb_owner_chat_read_"+id;
 function setStatus(t){$("status").textContent=t}
 async function init(){
@@ -73,9 +73,10 @@ async function refreshInbox(){
   if(active)await loadThread();
  }catch(e){setStatus("Could not refresh inbox: "+e.message)}finally{refreshBusy=false}
 }
-async function selectConversation(uid){active=uid;localStorage.setItem(readKey(uid),new Date().toISOString());$("heading").textContent="Conversation with "+(profiles.get(uid)?.full_name||"Customer");$("reply").disabled=false;$("photo").disabled=false;$("send").disabled=false;await refreshInbox()}
+async function selectConversation(uid){active=uid;threadNeedsBottom=true;localStorage.setItem(readKey(uid),new Date().toISOString());$("heading").textContent="Conversation with "+(profiles.get(uid)?.full_name||"Customer");$("reply").disabled=false;$("photo").disabled=false;$("send").disabled=false;await refreshInbox()}
 async function loadThread(){
- if(!active)return;
+  if(!active)return;
+  const previousTop=$("thread").scrollTop;const wasNearBottom=$("thread").scrollHeight-$("thread").clientHeight-previousTop<90;const forceBottom=threadNeedsBottom;threadNeedsBottom=false;
  const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,attachment_path,created_at").eq("user_id",active).order("created_at",{ascending:true}).limit(300);
  if(error){setStatus("Could not load conversation: "+error.message);return}
  $("thread").replaceChildren();
@@ -83,6 +84,7 @@ async function loadThread(){
   const own=m.sender_role==="owner",bubble=document.createElement("article");bubble.className="bubble "+(own?"owner":"customer");
   const who=document.createElement("strong");who.textContent=own?"You (owner)":(profiles.get(active)?.full_name||"Customer");
   const body=document.createElement("p");body.textContent=m.message||"Photo attachment";bubble.append(who,body);
+   if(m.message){const copy=document.createElement("button");copy.type="button";copy.className="copy-message";copy.textContent="Copy message";copy.addEventListener("click",async()=>{try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(m.message);else{const field=document.createElement("textarea");field.value=m.message;field.style.position="fixed";field.style.opacity="0";document.body.append(field);field.select();if(!document.execCommand("copy"))throw new Error("Copy unavailable");field.remove()}copy.textContent="Copied";setTimeout(()=>copy.textContent="Copy message",1600)}catch(e){copy.textContent="Select text to copy"}});bubble.append(copy)}
   if(m.attachment_path){
    const {data:file,error:fileError}=await supabase.storage.from("support-attachments").createSignedUrl(m.attachment_path,3600);
    if(!fileError&&file?.signedUrl){const img=document.createElement("img");img.className="chat-photo";img.src=file.signedUrl;img.alt="Customer photo attachment";bubble.append(img);const link=document.createElement("a");link.className="save";link.href=file.signedUrl;link.target="_blank";link.rel="noopener";link.textContent="↓ Open / Save photo";bubble.append(link)}
@@ -91,7 +93,7 @@ async function loadThread(){
   const time=document.createElement("small");time.textContent=new Date(m.created_at).toLocaleString();bubble.append(time);$("thread").append(bubble);
  }
  if(!(data||[]).length)$("thread").innerHTML='<p class="empty">No messages in this conversation.</p>';
- $("thread").scrollTop=$("thread").scrollHeight;
+ if(forceBottom||wasNearBottom)$("thread").scrollTop=$("thread").scrollHeight;else $("thread").scrollTop=previousTop;
 }
 $("search").addEventListener("input",()=>refreshInbox());
 $("photo").addEventListener("change",()=>{photoFile=$("photo").files?.[0]||null;$("file-name").textContent=photoFile?photoFile.name:"";});
@@ -105,7 +107,7 @@ $("reply-form").addEventListener("submit",async e=>{
   if(file){const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";path=active+"/"+crypto.randomUUID()+"."+ext;const {error}=await supabase.storage.from("support-attachments").upload(path,file,{contentType:file.type,upsert:false});if(error)throw error}
   const {error}=await supabase.from("support_messages").insert({user_id:active,sender_id:owner.id,sender_role:"owner",message:message||"Photo attachment",attachment_path:path});
   if(error)throw error;
-  $("reply").value="";$("photo").value="";photoFile=null;$("file-name").textContent="";setStatus("Reply sent.");await refreshInbox();
+  $("reply").value="";$("photo").value="";photoFile=null;$("file-name").textContent="";setStatus("Reply sent.");threadNeedsBottom=true;await refreshInbox();
  }catch(err){setStatus("Message was not sent: "+err.message)}
  finally{$("send").disabled=!active;$("send").textContent="Send reply"}
 });

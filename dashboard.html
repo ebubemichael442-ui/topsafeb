@@ -44,6 +44,14 @@ button.secondary{background:#e9eef5}.notice{border-left:4px solid var(--gold);ba
 .message-compose-footer span{font-size:10px;color:#788596}
 .message-compose-footer button{background:#187747;color:#fff;border-radius:10px}
 #customer-chat-status{margin:8px 0 0;font-size:11px}
+.chat-attachment{display:block;max-width:min(100%,360px);max-height:300px;object-fit:contain;border-radius:12px;margin-top:8px;border:1px solid #dce5eb;background:#fff}
+.chat-attachment-link{display:inline-block;margin-top:8px;color:#176b43;font-size:12px;font-weight:800}
+.chat-attach-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0}
+.chat-attach-button{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid #d8e2e9;border-radius:10px;background:#f7faf9;color:#23465a;font-size:12px;font-weight:800;cursor:pointer}
+.chat-attach-preview{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #dce7e0;border-radius:10px;background:#f5fbf7}
+.chat-attach-preview img{width:54px;height:54px;object-fit:cover;border-radius:8px}
+.chat-attach-preview button{border:0;background:transparent;color:#9b3434;font-weight:800}
+
 @media(max-width:600px){#customer-support{padding:16px}.message-bubble{max-width:90%}#customer-chat-thread{height:390px;padding:13px 10px}.message-compose-footer{align-items:stretch}.message-compose-footer button{width:100%}}
 footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 @media(max-width:600px){header{align-items:flex-start;flex-direction:column;padding:16px 5%}nav{gap:10px}nav a{font-size:14px}main{margin-top:24px}.panel,.tile{padding:18px}}
@@ -559,9 +567,9 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <span aria-hidden="true" style="display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:15px;background:#123f68;color:#e2c783;font-size:23px;font-weight:900">TS</span>
 <div><strong>TopSafeB Message Support</strong><p class="muted" style="margin:2px 0">Private customer-to-owner chat</p></div>
 </div>
-<p class="muted">Send a message directly to the TopSafeB owner here. No email app or file attachment is needed. Your signed-in account identifies the conversation.</p>
+<p class="muted">Send a private message to TopSafeB Support. You can include a photo to help explain your enquiry. Your signed-in account identifies the conversation.</p>
 <div class="message-thread-top"><strong>Conversation</strong><span>Messages are shown in date order</span></div><div id="customer-chat-thread" class="message-thread" aria-live="polite"><p class="muted">Your conversation will appear here.</p></div>
-<form id="customer-chat-form" class="support-form message-compose" style="max-width:none"><label for="customer-chat-input">Write a message</label><textarea id="customer-chat-input" rows="3" maxlength="2000" required placeholder="Write your message to TopSafeB Support…"></textarea><div class="message-compose-footer"><span>Private message · Up to 2,000 characters</span><button type="submit" id="customer-chat-send">Send message&nbsp; ↗</button></div><p id="customer-chat-status" class="muted" role="status" aria-live="polite">Messages refresh automatically.</p></form>
+<form id="customer-chat-form" class="support-form message-compose" style="max-width:none"><label for="customer-chat-input">Write a message</label><textarea id="customer-chat-input" rows="3" maxlength="2000" placeholder="Write your message to TopSafeB Support…"></textarea><div class="chat-attach-row"><label class="chat-attach-button" for="customer-chat-photo">＋ Attach photo</label><input id="customer-chat-photo" type="file" accept="image/jpeg,image/png,image/webp" hidden><span class="muted" style="font-size:11px">JPG, PNG or WebP · Up to 5 MB</span></div><div id="customer-chat-photo-preview" hidden></div><div class="message-compose-footer"><span>Private message · Photo optional</span><button type="submit" id="customer-chat-send">Send message&nbsp; ↗</button></div><p id="customer-chat-status" class="muted" role="status" aria-live="polite">Messages refresh automatically.</p></form>
 </div>
 
 </section>
@@ -1036,6 +1044,9 @@ const customerChatThread=document.getElementById("customer-chat-thread");
 const customerChatForm=document.getElementById("customer-chat-form");
 const customerChatInput=document.getElementById("customer-chat-input");
 const customerChatStatus=document.getElementById("customer-chat-status");
+const customerChatPhoto=document.getElementById("customer-chat-photo");
+const customerChatPhotoPreview=document.getElementById("customer-chat-photo-preview");
+let customerChatPhotoFile=null;
 let customerChatTimer=null;
 function appendChatBubble(container,item,own){
  const bubble=document.createElement("article");
@@ -1048,7 +1059,7 @@ function appendChatBubble(container,item,own){
 async function loadCustomerLiveChat(){
  if(!currentUserId)return;
  const [chatResult,legacyResult]=await Promise.all([
-  supabase.from("support_messages").select("id,sender_id,sender_role,message,created_at").eq("user_id",currentUserId).order("created_at",{ascending:true}).limit(100),
+  supabase.from("support_messages").select("id,sender_id,sender_role,message,attachment_path,created_at").eq("user_id",currentUserId).order("created_at",{ascending:true}).limit(100),
   supabase.from("customer_feedback").select("id,message,owner_reply,created_at,replied_at").eq("user_id",currentUserId).not("owner_reply","is",null).order("created_at",{ascending:true}).limit(100)
  ]);
  if(chatResult.error){customerChatStatus.textContent=chatResult.error.message.includes("support_messages")?"Live chat database setup is required. Please contact the TopSafeB owner.":"Could not refresh messages: "+chatResult.error.message;return;}
@@ -1068,22 +1079,37 @@ async function loadCustomerLiveChat(){
   if(dayKey!==lastDay){const divider=document.createElement("div");divider.className="message-day-divider";divider.textContent=dayKey===new Date().toLocaleDateString()?"Today":dayKey;customerChatThread.append(divider);lastDay=dayKey;}
   const bubble=document.createElement("article");bubble.className="message-bubble "+(item.own?"own":"support");
   const head=document.createElement("strong");head.className="message-bubble-head";head.textContent=item.own?"You":"TopSafeB Support";
-  const body=document.createElement("p");body.className="message-bubble-body";body.textContent=item.message;
+  const body=document.createElement("p");body.className="message-bubble-body";body.textContent=item.message||"Photo attachment";
+  bubble.append(head,body);
+  if(item.attachment_path){const {data:fileData,error:fileError}=await supabase.storage.from("support-attachments").createSignedUrl(item.attachment_path,3600);if(!fileError&&fileData?.signedUrl){const img=document.createElement("img");img.className="chat-attachment";img.src=fileData.signedUrl;img.alt="Photo shared in support conversation";img.loading="lazy";bubble.append(img);}else{const note=document.createElement("span");note.className="chat-attach-button";note.textContent="Photo attachment unavailable";bubble.append(note);}}
   const when=document.createElement("time");when.dateTime=stamp.toISOString();when.textContent=stamp.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
-  bubble.append(head,body,when);customerChatThread.append(bubble);
+  bubble.append(when);customerChatThread.append(bubble);
  }
  customerChatThread.scrollTop=customerChatThread.scrollHeight;
  customerChatStatus.textContent="Message centre updated "+new Date().toLocaleTimeString()+". Previous owner replies are included above.";
 }
+customerChatPhoto.addEventListener("change",()=>{
+ const file=customerChatPhoto.files?.[0]||null;customerChatPhotoFile=file;customerChatPhotoPreview.replaceChildren();customerChatPhotoPreview.hidden=!file;
+ if(!file)return;
+ const wrap=document.createElement("div");wrap.className="chat-attach-preview";const img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Selected photo preview";
+ const label=document.createElement("span");label.textContent=file.name+" · "+(file.size/1024/1024).toFixed(2)+" MB";
+ const remove=document.createElement("button");remove.type="button";remove.textContent="Remove";remove.addEventListener("click",()=>{customerChatPhoto.value="";customerChatPhotoFile=null;customerChatPhotoPreview.hidden=true;customerChatPhotoPreview.replaceChildren();});
+ wrap.append(img,label,remove);customerChatPhotoPreview.append(wrap);
+});
 customerChatForm.addEventListener("submit",async event=>{
- event.preventDefault();
- const message=customerChatInput.value.trim();
- if(!message)return;
+ event.preventDefault();const message=customerChatInput.value.trim();const file=customerChatPhotoFile;
+ if(!message&&!file){customerChatStatus.textContent="Write a message or attach a photo first.";return;}
  if(!currentUserId){customerChatStatus.textContent="Please sign in again to send a message.";return;}
- const button=document.getElementById("customer-chat-send");button.disabled=true;button.textContent="Sending…";
- const {error}=await supabase.from("support_messages").insert({user_id:currentUserId,sender_id:currentUserId,sender_role:"customer",message});
- if(error){customerChatStatus.textContent="Message not sent: "+error.message;button.disabled=false;button.textContent="Send message";return;}
- customerChatInput.value="";customerChatStatus.textContent="Message sent.";await loadCustomerLiveChat();button.disabled=false;button.textContent="Send message";
+ if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024)){customerChatStatus.textContent="Choose a JPG, PNG or WebP photo up to 5 MB.";return;}
+ const button=document.getElementById("customer-chat-send");button.disabled=true;button.textContent="Sending…";customerChatStatus.textContent="Sending your message…";
+ let attachmentPath=null;
+ if(file){const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";attachmentPath=currentUserId+"/"+crypto.randomUUID()+"."+ext;
+  const {error:uploadError}=await supabase.storage.from("support-attachments").upload(attachmentPath,file,{contentType:file.type,upsert:false});
+  if(uploadError){customerChatStatus.textContent="Photo upload failed: "+uploadError.message;button.disabled=false;button.textContent="Send message ↗";return;}
+ }
+ const {error}=await supabase.from("support_messages").insert({user_id:currentUserId,sender_id:currentUserId,sender_role:"customer",message:message||"Photo attachment",attachment_path:attachmentPath});
+ if(error){customerChatStatus.textContent="Message not sent: "+error.message;button.disabled=false;button.textContent="Send message ↗";return;}
+ customerChatInput.value="";customerChatPhoto.value="";customerChatPhotoFile=null;customerChatPhotoPreview.hidden=true;customerChatPhotoPreview.replaceChildren();customerChatStatus.textContent="Message sent.";await loadCustomerLiveChat();button.disabled=false;button.textContent="Send message ↗";
 });
 
 // Floating message icon opens the private chat drawer; the owner inbox remains separate.

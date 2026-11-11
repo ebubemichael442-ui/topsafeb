@@ -25,6 +25,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Bundle Supabase sign-in library locally
+        run: |
+          npm install --prefix /tmp/topsafeb-vendor --no-save @supabase/supabase-js@2
+          test -s /tmp/topsafeb-vendor/node_modules/@supabase/supabase-js/dist/umd/supabase.js
+          cp /tmp/topsafeb-vendor/node_modules/@supabase/supabase-js/dist/umd/supabase.js ./supabase.js
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

@@ -46,9 +46,9 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 .transfer-form{display:grid;gap:10px;max-width:620px;margin:14px 20px 20px;padding:18px;border:1px solid #e5e9f1;border-radius:14px;background:#fbfcff}
 .transfer-form label{font-size:13px;font-weight:700;color:#344464}.transfer-form input,.transfer-form select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit;background:#fff}.transfer-form button{background:#e91e63;color:white;border-radius:10px}
 .conversion-preview{padding:13px;background:#f0f3ff;border-radius:9px;color:#34477f;font-size:13px;margin:4px 0}
-.activity-list{display:grid;gap:9px;margin:12px 20px 0}
+.activity-heading-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 26px 0}.activity-heading-row .bank-section-title{margin:0}.activity-subtitle{margin:4px 0 0 26px;color:#718096;font-size:12px}.activity-download-button{white-space:nowrap;font-size:12px;padding:10px 13px}.activity-heading-row+#practice-statement-status{margin:8px 26px 0;font-size:12px}.activity-list{display:grid;gap:9px;margin:12px 20px 0}
 .transfer-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 26px 22px}.transfer-type-card{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0;padding:18px;border:1px solid #dce5ee;border-radius:15px;background:linear-gradient(145deg,#fff,#f5f8fc);color:#173b5d;text-decoration:none;box-shadow:0 5px 16px #102b500c;transition:transform .15s,box-shadow .15s}.transfer-type-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px #102b5018}.transfer-type-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;background:#e8f0f7;font-size:27px}.transfer-type-card.international .transfer-type-icon{background:#e8f4ef}.transfer-type-title{font-size:17px;font-weight:900;color:#102d4e}.transfer-type-description{font-size:12px;color:#718096}.transfer-type-action{margin-top:5px;font-size:12px;font-weight:800;color:#174d78}.transfer-type-card:focus-visible{outline:3px solid #bd9144;outline-offset:3px}
-@media(max-width:600px){.transfer-type-grid{grid-template-columns:1fr;margin:14px 12px 18px}.transfer-type-card{padding:15px;display:grid;grid-template-columns:52px 1fr;column-gap:12px;align-items:center}.transfer-type-icon{grid-row:1/4}.transfer-type-title,.transfer-type-description,.transfer-type-action{grid-column:2}.bank-dashboard{border-radius:14px}.bank-dashboard-top{padding:19px 16px;align-items:flex-start;flex-direction:column}.market-strip{margin:14px 12px}.market-strip>div{padding:10px 7px}.market-strip strong{font-size:13px}.market-strip span,.market-strip small{font-size:10px}.account-card{margin:0 12px;padding:17px}.quick-actions{margin:14px 12px;gap:7px}.quick-action{font-size:11px;padding:12px 5px;flex-direction:column}.demo-warning{margin:14px 12px}.bank-section-title{margin-left:12px;margin-right:12px}.bank-dashboard>p:not(.bank-section-title){margin-left:12px;margin-right:12px}.transfer-form{margin-left:12px;margin-right:12px;padding:13px}.activity-list{margin-left:12px;margin-right:12px}}
+@media(max-width:600px){.activity-heading-row{align-items:flex-start;flex-direction:column;margin:18px 12px 0}.activity-subtitle{margin-left:0}.activity-heading-row+#practice-statement-status{margin-left:12px;margin-right:12px}.activity-download-button{width:100%}.transfer-type-grid{grid-template-columns:1fr;margin:14px 12px 18px}.transfer-type-card{padding:15px;display:grid;grid-template-columns:52px 1fr;column-gap:12px;align-items:center}.transfer-type-icon{grid-row:1/4}.transfer-type-title,.transfer-type-description,.transfer-type-action{grid-column:2}.bank-dashboard{border-radius:14px}.bank-dashboard-top{padding:19px 16px;align-items:flex-start;flex-direction:column}.market-strip{margin:14px 12px}.market-strip>div{padding:10px 7px}.market-strip strong{font-size:13px}.market-strip span,.market-strip small{font-size:10px}.account-card{margin:0 12px;padding:17px}.quick-actions{margin:14px 12px;gap:7px}.quick-action{font-size:11px;padding:12px 5px;flex-direction:column}.demo-warning{margin:14px 12px}.bank-section-title{margin-left:12px;margin-right:12px}.bank-dashboard>p:not(.bank-section-title){margin-left:12px;margin-right:12px}.transfer-form{margin-left:12px;margin-right:12px;padding:13px}.activity-list{margin-left:12px;margin-right:12px}}
 
 .customer-header{background:linear-gradient(120deg,#172c88,#4436b5);padding:15px 5%;position:sticky;top:0;z-index:40;flex-direction:row;align-items:center}
 .customer-header .brand{color:#fff}.header-user{display:flex;align-items:center;gap:16px;color:#fff;font-weight:bold}
@@ -438,7 +438,8 @@ button,.button{border-radius:9px}
   <div class="receipt-actions"><button type="button" id="print-demo-receipt">Print receipt</button><button type="button" id="download-demo-receipt">Save receipt as PDF</button><button type="button" class="secondary" id="close-demo-receipt">Close</button></div><p id="receipt-save-status" class="muted" role="status" aria-live="polite"></p>
 </section>
 
-<h3 class="bank-section-title">Recent demo activity</h3>
+<div class="activity-heading-row"><div><h3 class="bank-section-title">Recent demo activity</h3><p class="activity-subtitle">Your latest practice account entries</p></div><button type="button" id="download-practice-statement" class="secondary activity-download-button">↓ Download activity statement</button></div>
+<p id="practice-statement-status" class="muted" role="status" aria-live="polite"></p>
 <div id="customer-demo-history" class="activity-list"></div>
 </section>
 <section class="panel feature-learning" id="blockchain-learning"><h2>Blockchain transfer learning demo</h2><p>This section explains how blockchain transfers work. TopSafeB does not connect to a blockchain, wallet or cryptocurrency network and cannot send crypto.</p><div class="notice">Practice only: no crypto assets, wallet addresses or blockchain transactions are used here.</div><a class="button" href="#blockchain-history">View sample ledger</a></section>
@@ -811,6 +812,35 @@ async function loadCustomerDemoFunds(userId){
  }
  if(!(items||[]).length){const p=document.createElement("p");p.className="muted";p.textContent="No demo account activity yet.";historyEl.append(p);}
 }
+
+document.getElementById("download-practice-statement").addEventListener("click",async()=>{
+ const button=document.getElementById("download-practice-statement");
+ const status=document.getElementById("practice-statement-status");
+ if(!currentUserId){status.textContent="Please sign in again to download your activity.";return;}
+ button.disabled=true;button.textContent="Preparing statement…";status.textContent="Loading your practice activity…";
+ try{
+  const {data:rows,error}=await supabase.from("demo_transactions").select("action,amount,balance_after,note,created_at").eq("user_id",currentUserId).order("created_at",{ascending:false}).limit(5000);
+  if(error)throw error;
+  if(!rows||!rows.length){status.textContent="There is no practice activity to download yet.";return;}
+  const columns=["Date and time","Activity","Amount (USD)","Practice balance after (USD)","Description"];
+  const csvCell=value=>{let s=String(value??"");if(/^[=+@\\-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';};
+  const labels={add:"Practice funds added",deduct:"Practice funds deducted",set:"Practice balance adjusted",transfer:"Simulated transfer"};
+  const lines=[columns,...rows.map(row=>[
+   new Date(row.created_at).toLocaleString(),
+   labels[row.action]||"Practice account update",
+   Number(row.amount||0).toFixed(2),
+   Number(row.balance_after||0).toFixed(2),
+   row.note||""
+  ])].map(row=>row.map(csvCell).join(","));
+  const blob=new Blob(["\\uFEFF"+lines.join("\\r\\n")],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement("a");
+  link.href=url;link.download="TopSafeB_Practice_Activity_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
+  status.textContent=rows.length+" practice activity entries prepared for download.";
+ }catch(error){status.textContent="Could not prepare your activity statement: "+(error.message||"Please try again.");}
+ finally{button.disabled=false;button.textContent="↓ Download activity statement";}
+});
 
 async function loadSession(){
   statusEl.textContent="Checking your sign-in session…";

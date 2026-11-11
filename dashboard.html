@@ -645,7 +645,7 @@ if(!window.supabase || typeof window.supabase.createClient!=="function"){
  if(status)status.textContent="The secure sign-in service could not load. Please check your internet connection and refresh this page.";
  throw new Error("TopSafeB sign-in library did not load.");
 }
-const supabase = window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
+const supabase = window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,lock:async(_name,_acquireTimeout,fn)=>await fn()}});
 const nameEl=document.getElementById("customer-name");
 const emailEl=document.getElementById("customer-email");
 const statusEl=document.getElementById("status");
@@ -1180,7 +1180,9 @@ signoutButton.addEventListener("click",async()=>{
 supabase.auth.onAuthStateChange((_event,session)=>{
   if(!session) window.location.replace("login.html");
 });
-loadSession().catch(error=>{console.error("TopSafeB session loading failed:",error);statusEl.textContent="Could not finish sign-in check: "+(error.message||"Please refresh the page or sign in again.");});
+const sessionCheckStarted=Date.now();
+const sessionWatchdog=setTimeout(()=>{if(Date.now()-sessionCheckStarted>=12000&&statusEl.textContent==="Checking your sign-in session…"){statusEl.textContent="Sign-in is taking too long. Tap the menu and open Sign in, then sign in again. If this continues, contact TopSafeB support.";console.error("TopSafeB sign-in check exceeded 12 seconds.");}},12000);
+loadSession().then(()=>clearTimeout(sessionWatchdog)).catch(error=>{clearTimeout(sessionWatchdog);console.error("TopSafeB session loading failed:",error);statusEl.textContent="Could not finish sign-in check: "+(error.message||"Please refresh the page or sign in again.");});
 </script>
 <button type="button" class="support-chat-fab" id="open-customer-support" aria-label="Open TopSafeB private message chat" aria-expanded="false" aria-controls="customer-support" title="Message TopSafeB support"><span class="support-chat-icon" aria-hidden="true">✉</span><span>Message support</span></button>
 

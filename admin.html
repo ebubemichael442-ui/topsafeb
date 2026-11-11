@@ -487,8 +487,8 @@ document.getElementById("prepare-billing-notice").addEventListener("click",async
  const money=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(amount);
  const customerName=customer.full_name||"Customer";
  const notice=[
-  "TOPSAFEB — ACCOUNT BILLING & ACCESS REVIEW NOTICE",
-  "PRACTICE ACCOUNT • SIMULATION ONLY • NOT A BANK INVOICE",
+  "TOPSAFEB — ACCOUNT NOTICE",
+  "PRACTICE ACCOUNT • SIMULATION NOTICE",
   "",
   "Dear "+customerName+",",
   "",
@@ -504,10 +504,7 @@ document.getElementById("prepare-billing-notice").addEventListener("click",async
   "NEXT STEP",
   "Please reply to this private support conversation if you need clarification or wish to request an access review. The administrator will review the request and decide whether to restore practice-dashboard access.",
   "",
-  "IMPORTANT",
-  "TopSafeB is an educational simulation platform, not a bank. This is not a genuine invoice or demand for payment. No money should be sent, no payment is collected, and paying any amount does not unblock an account. Access is restored only by the administrator.",
-  "",
-  "TopSafeB Customer Support"
+  "TopSafeB Account Support"
  ].join("\n");
  activeSupportUserId=userId;
  supportOwnerHeading.textContent="Conversation with "+customerName;

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TopSafeB Support Hub</title>
+<style>
+:root{--navy:#102943;--green:#176d43;--gold:#d8b66d;--ink:#203246;--muted:#718092;--line:#e2eaf0;--bg:#f3f6f8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
+header{background:linear-gradient(115deg,#102943,#17465b);color:white;padding:16px max(18px,calc((100% - 1240px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-weight:900;letter-spacing:.08em}.brand span{color:var(--gold)}header a{color:white;text-decoration:none;border:1px solid #ffffff40;border-radius:9px;padding:9px 13px;font-weight:700;font-size:13px}
+main{max-width:1240px;margin:26px auto;padding:0 16px}.hero{padding:25px;border-radius:18px;background:linear-gradient(120deg,#102943,#1a5260);color:white;box-shadow:0 12px 30px #10294320}.hero small{color:#e6c981;font-weight:800;letter-spacing:.14em}.hero h1{margin:7px 0;font-size:clamp(25px,4vw,34px)}.hero p{margin:0;color:#d9e5ed}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:17px 0}.stat,.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 5px 18px #10294308}.stat small{display:block;color:var(--muted);font-weight:700}.stat strong{font-size:26px;color:var(--navy)}
+.workspace{display:grid;grid-template-columns:minmax(260px,350px) minmax(0,1fr);gap:15px}.panel h2{font-size:17px;margin:0 0 12px;color:var(--navy)}#search{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font:inherit;margin-bottom:10px}
+#inbox{display:grid;gap:8px;max-height:680px;overflow:auto}.customer{width:100%;text-align:left;background:white;border:1px solid var(--line);border-radius:11px;padding:12px;cursor:pointer;color:var(--ink)}.customer.active{border-color:var(--green);background:#eff8f2}.customer strong,.customer small{display:block;overflow-wrap:anywhere}.customer small{color:var(--muted);font-size:11px;margin-top:3px}.customer .unread{float:right;background:#b74343;color:white;border-radius:20px;padding:2px 7px}
+#thread{height:min(58vh,600px);min-height:300px;overflow:auto;background:#f5f8fa;border:1px solid var(--line);border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:min(86%,520px);padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:white;overflow-wrap:anywhere}.bubble.owner{align-self:flex-end;background:#e7f5eb;border-color:#cfe7d6;border-bottom-right-radius:4px}.bubble.customer{align-self:flex-start;border-bottom-left-radius:4px}.bubble strong{display:block;font-size:12px}.bubble p{white-space:pre-wrap;margin:6px 0}.bubble small{display:block;color:var(--muted);font-size:10px;margin-top:6px}
+.chat-photo{display:block;max-width:100%;max-height:330px;object-fit:contain;border-radius:10px;margin-top:8px;background:white}.save{display:inline-block;margin-top:8px;padding:8px 12px;background:var(--green);color:white;border-radius:8px;text-decoration:none;font-size:12px;font-weight:800}
+form{display:grid;gap:10px;margin-top:12px}textarea{width:100%;min-height:90px;resize:vertical;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit}button.send{border:0;border-radius:10px;background:var(--green);color:white;padding:12px 18px;font-weight:800;font:inherit;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.attach{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.attach label{background:#edf4ef;border:1px solid #d7e8dc;padding:9px 12px;border-radius:9px;color:var(--green);font-weight:800;cursor:pointer;font-size:13px}.hint{font-size:11px;color:var(--muted)}#status{font-size:12px;color:var(--muted);margin:12px 0}.empty{color:var(--muted);text-align:center;padding:28px 12px}
+@media(max-width:760px){main{margin:15px auto}.workspace{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:22px}#inbox{max-height:230px;grid-template-columns:1fr}#thread{height:48vh;min-height:260px}.bubble{max-width:94%}.hero{padding:20px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span>◆</span> TOPSAFEB <span style="color:#fff;font-weight:500;letter-spacing:0">/ SUPPORT DESK</span></div><a href="admin.html">← Owner Control Centre</a></header>
+<main>
+<section class="hero"><small>PRIVATE OWNER WORKSPACE</small><h1>Support Hub</h1><p>Manage customer conversations, respond privately and view photo attachments in one dedicated workspace.</p></section>
+<div class="stats"><article class="stat"><small>Total conversations</small><strong id="total">—</strong></article><article class="stat"><small>Unread customer messages</small><strong id="unread">—</strong></article><article class="stat"><small>Photo attachments</small><strong id="photos">—</strong></article></div>
+<div class="workspace">
+<aside class="panel"><h2>Customer inbox · Latest first</h2><input id="search" type="search" placeholder="Search by customer name or email"><div id="inbox"><p class="empty">Loading conversations…</p></div></aside>
+<section class="panel"><h2 id="heading">Select a conversation</h2><div id="thread" aria-live="polite"><p class="empty">Choose a customer to read and reply to messages.</p></div>
+<form id="reply-form"><textarea id="reply" maxlength="2000" placeholder="Write a private reply…" disabled></textarea><div class="attach"><label for="photo">＋ Attach photo</label><input id="photo" type="file" accept="image/jpeg,image/png,image/webp" hidden disabled><span class="hint">JPG, PNG or WebP · Maximum 5 MB</span><span id="file-name" class="hint"></span></div><button class="send" id="send" type="submit" disabled>Send reply</button></form><p id="status" role="status">Checking owner access…</p></section>
+</div>
+</main>
+<script type="module">
+import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
+const supabase=createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
+const $=id=>document.getElementById(id);let owner=null,active=null,profiles=new Map(),messages=[],photoFile=null,refreshBusy=false;
+const readKey=id=>"topsafeb_owner_chat_read_"+id;
+function setStatus(t){$("status").textContent=t}
+async function init(){
+ const {data:{session},error}=await supabase.auth.getSession();
+ if(error)throw error;if(!session){location.replace("login.html");return}
+ const {data:admin,error:adminError}=await supabase.from("admin_users").select("user_id").eq("user_id",session.user.id).maybeSingle();
+ if(adminError)throw adminError;if(!admin){setStatus("Access denied. This account is not registered as an administrator.");return}
+ owner=session.user;setStatus("Administrator access confirmed. Inbox refreshes automatically.");
+ await refreshInbox();
+ setInterval(()=>{if(!refreshBusy)refreshInbox()},5000);
+ supabase.auth.onAuthStateChange((_event,next)=>{if(!next)location.replace("login.html")});
+}
+async function refreshInbox(){
+ refreshBusy=true;
+ try{
+  const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,attachment_path,created_at").order("created_at",{ascending:false}).limit(500);
+  if(error)throw error;messages=data||[];
+  const ids=[...new Set(messages.map(m=>m.user_id))];
+  const {data:rows,error:profileError}=ids.length?await supabase.from("profiles").select("user_id,full_name,email").in("user_id",ids):{data:[],error:null};
+  if(profileError)throw profileError;profiles=new Map((rows||[]).map(p=>[p.user_id,p]));
+  const latest=new Map();for(const m of messages)if(!latest.has(m.user_id))latest.set(m.user_id,m);
+  $("total").textContent=String(ids.length);$("photos").textContent=String(messages.filter(m=>m.attachment_path).length);
+  const unreadCount=messages.filter(m=>m.sender_role==="customer"&&(!localStorage.getItem(readKey(m.user_id))||new Date(m.created_at)>new Date(localStorage.getItem(readKey(m.user_id))))).length;
+  $("unread").textContent=String(unreadCount);
+  const q=$("search").value.trim().toLowerCase();$("inbox").replaceChildren();
+  if(!latest.size){$("inbox").innerHTML='<p class="empty">No customer conversations yet.</p>'}
+  for(const [uid,last] of latest){
+   const p=profiles.get(uid)||{},unread=messages.filter(m=>m.user_id===uid&&m.sender_role==="customer"&&(!localStorage.getItem(readKey(uid))||new Date(m.created_at)>new Date(localStorage.getItem(readKey(uid))))).length;
+   const b=document.createElement("button");b.className="customer"+(uid===active?" active":"");b.hidden=!!q&&!((p.full_name||"").toLowerCase().includes(q)||(p.email||"").toLowerCase().includes(q));
+   const name=document.createElement("strong");name.textContent=p.full_name||"Customer";
+   const email=document.createElement("small");email.textContent=p.email||"Private customer account";
+   const preview=document.createElement("small");preview.textContent=(last.sender_role==="owner"?"You: ":"")+(last.message||"Photo attachment")+(last.attachment_path?" · 📷 Photo":"");
+   const date=document.createElement("small");date.textContent=new Date(last.created_at).toLocaleString();
+   b.append(name,email,preview,date);if(unread){const badge=document.createElement("span");badge.className="unread";badge.textContent=String(unread);b.append(badge)}
+   b.addEventListener("click",()=>selectConversation(uid));$("inbox").append(b);
+  }
+  if(active)await loadThread();
+ }catch(e){setStatus("Could not refresh inbox: "+e.message)}finally{refreshBusy=false}
+}
+async function selectConversation(uid){active=uid;localStorage.setItem(readKey(uid),new Date().toISOString());$("heading").textContent="Conversation with "+(profiles.get(uid)?.full_name||"Customer");$("reply").disabled=false;$("photo").disabled=false;$("send").disabled=false;await refreshInbox()}
+async function loadThread(){
+ if(!active)return;
+ const {data,error}=await supabase.from("support_messages").select("id,user_id,sender_id,sender_role,message,attachment_path,created_at").eq("user_id",active).order("created_at",{ascending:true}).limit(300);
+ if(error){setStatus("Could not load conversation: "+error.message);return}
+ $("thread").replaceChildren();
+ for(const m of data||[]){
+  const own=m.sender_role==="owner",bubble=document.createElement("article");bubble.className="bubble "+(own?"owner":"customer");
+  const who=document.createElement("strong");who.textContent=own?"You (owner)":(profiles.get(active)?.full_name||"Customer");
+  const body=document.createElement("p");body.textContent=m.message||"Photo attachment";bubble.append(who,body);
+  if(m.attachment_path){
+   const {data:file,error:fileError}=await supabase.storage.from("support-attachments").createSignedUrl(m.attachment_path,3600);
+   if(!fileError&&file?.signedUrl){const img=document.createElement("img");img.className="chat-photo";img.src=file.signedUrl;img.alt="Customer photo attachment";bubble.append(img);const link=document.createElement("a");link.className="save";link.href=file.signedUrl;link.target="_blank";link.rel="noopener";link.textContent="↓ Open / Save photo";bubble.append(link)}
+   else{const note=document.createElement("small");note.textContent="Photo attachment unavailable";bubble.append(note)}
+  }
+  const time=document.createElement("small");time.textContent=new Date(m.created_at).toLocaleString();bubble.append(time);$("thread").append(bubble);
+ }
+ if(!(data||[]).length)$("thread").innerHTML='<p class="empty">No messages in this conversation.</p>';
+ $("thread").scrollTop=$("thread").scrollHeight;
+}
+$("search").addEventListener("input",()=>refreshInbox());
+$("photo").addEventListener("change",()=>{photoFile=$("photo").files?.[0]||null;$("file-name").textContent=photoFile?photoFile.name:"";});
+$("reply-form").addEventListener("submit",async e=>{
+ e.preventDefault();const message=$("reply").value.trim(),file=photoFile;
+ if(!active||(!message&&!file))return;
+ if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024)){setStatus("Choose a JPG, PNG or WebP photo up to 5 MB.");return}
+ $("send").disabled=true;$("send").textContent="Sending…";
+ try{
+  let path=null;
+  if(file){const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";path=active+"/"+crypto.randomUUID()+"."+ext;const {error}=await supabase.storage.from("support-attachments").upload(path,file,{contentType:file.type,upsert:false});if(error)throw error}
+  const {error}=await supabase.from("support_messages").insert({user_id:active,sender_id:owner.id,sender_role:"owner",message:message||"Photo attachment",attachment_path:path});
+  if(error)throw error;
+  $("reply").value="";$("photo").value="";photoFile=null;$("file-name").textContent="";setStatus("Reply sent.");await refreshInbox();
+ }catch(err){setStatus("Message was not sent: "+err.message)}
+ finally{$("send").disabled=!active;$("send").textContent="Send reply"}
+});
+init().catch(e=>setStatus("Owner access could not be verified: "+e.message));
+</script>
+</body></html>

@@ -398,11 +398,9 @@ button,.button{border-radius:9px}
 <option value="Australia">Australia (AUD)</option><option value="New Zealand">New Zealand (NZD)</option>
 </optgroup>
 </select>
-<label for="oso-bank">Choose fictional receiving bank</label>
-<select id="oso-bank" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<option value="">Select a demo bank</option>
-<option>Oso Local Bank</option><option>Rivergate Community Bank</option><option>Maple Street Savings Bank</option><option>Harborlight Local Bank</option><option>Pioneer Town Bank</option><option>Greenfield Neighbourhood Bank</option><option>Unity Corner Bank</option><option>Westbridge Local Bank</option>
-</select>
+<label for="oso-bank">Receiving bank name (type it yourself)</label>
+<input id="oso-bank" type="text" required minlength="2" maxlength="100" autocomplete="off" placeholder="Enter a fictional bank name" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<small class="muted">Enter any fictional receiving bank name for this practice transfer. No real bank is contacted.</small>
 <label for="oso-recipient">Recipient name</label>
 <input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
 <label for="oso-account">Fictional account number (8–16 digits)</label>

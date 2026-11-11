@@ -921,7 +921,7 @@ async function loadSession(){
   emailEl.textContent="";
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);
-  statusEl.textContent="You are signed in. Your learning progress is synced to your account.";
+  statusEl.textContent="Signed in. Your learning progress is saved to your account.";
   await loadCustomerLiveChat();
   if(customerChatTimer)clearInterval(customerChatTimer);
   customerChatTimer=setInterval(loadCustomerLiveChat,5000);

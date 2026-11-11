@@ -600,6 +600,7 @@ const certificateDate=document.getElementById("certificate-date");
 const progressKey="topsafeb-learning-progress-v1";
 const lessonIds=lessonChecks.map(box=>box.dataset.lesson);
 let currentUserId=null;
+let customerAccessTimer=null;
 let progressReady=false;
 function readLocalProgress(){try{return JSON.parse(localStorage.getItem(progressKey)||"{}");}catch{return {};}}
 function completedIdsFromLocal(){const saved=readLocalProgress();return lessonIds.filter(id=>!!saved[id]);}
@@ -929,6 +930,24 @@ async function loadSession(){
   if(error) throw error;
   if(!session){window.location.replace("login.html");return;}
   const user=session.user;
+  const {data:accessBlocked,error:accessError}=await supabase.rpc("customer_access_is_blocked");
+  if(!accessError&&accessBlocked){
+    statusEl.textContent="Customer dashboard access is paused by the TopSafeB owner.";
+    await supabase.auth.signOut();
+    window.location.replace("access-paused.html");
+    return;
+  }
+  if(accessError)console.warn("Customer access control check is unavailable:",accessError.message);
+  if(customerAccessTimer)clearInterval(customerAccessTimer);
+  customerAccessTimer=setInterval(async()=>{
+    const {data:blocked,error}=await supabase.rpc("customer_access_is_blocked");
+    if(!error&&blocked){
+      clearInterval(customerAccessTimer);
+      statusEl.textContent="Customer dashboard access has been paused.";
+      await supabase.auth.signOut();
+      window.location.replace("access-paused.html");
+    }
+  },15000);
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
   document.getElementById("bank-customer-name").textContent=nameEl.textContent;
   document.getElementById("bank-account-holder").textContent=nameEl.textContent;

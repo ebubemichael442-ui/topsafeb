@@ -416,11 +416,10 @@ button,.button{border-radius:9px}
 
 
 <section id="demo-transfer-receipt" class="panel" hidden aria-labelledby="receipt-title">
-  <div class="receipt-head"><div><p class="receipt-brand">◆ TOPSAFEB</p><p class="receipt-kicker">TRANSFER CONFIRMATION</p></div><span class="receipt-status">SUCCESSFUL</span></div>
+  <div class="receipt-head"><div><p class="receipt-brand">◆ TOPSAFEB</p><p class="receipt-kicker">PRACTICE RECEIPT</p></div><span class="receipt-status">SUCCESSFUL</span></div>
   <h2 id="receipt-title">Transfer completed</h2>
   <p class="receipt-amount" id="receipt-amount">$0.00</p>
   <p class="receipt-caption">Amount sent · USD practice balance</p>
-  <div class="receipt-demo-notice"><strong>TOPSAFEB · PRACTICE RECEIPT</strong><span>Educational simulation confirmation</span></div>
   <div class="receipt-details">
     <div><span>Recipient</span><strong id="receipt-recipient">—</strong></div>
     <div><span>Receiving bank</span><strong id="receipt-bank">—</strong></div>
@@ -431,7 +430,6 @@ button,.button{border-radius:9px}
     <div><span>Transaction reference</span><strong id="receipt-reference">—</strong></div>
     <div><span>Description</span><strong id="receipt-description">—</strong></div>
   </div>
-  <p class="receipt-footer-note">TopSafeB practice confirmation · No real funds transferred.</p>
   <div class="receipt-actions"><button type="button" id="print-demo-receipt">Print receipt</button><button type="button" id="download-demo-receipt">Save receipt as PDF</button><button type="button" class="secondary" id="close-demo-receipt">Close</button></div><p id="receipt-save-status" class="muted" role="status" aria-live="polite"></p>
 </section>
 
@@ -731,10 +729,7 @@ document.getElementById("download-demo-receipt").addEventListener("click",async(
   pdf.setFontSize(9);pdf.setTextColor(110,125,145);pdf.text("PRACTICE RECEIPT",left,y+7);
   y+=22;pdf.setFontSize(21);pdf.setTextColor(21,62,99);pdf.text(document.getElementById("receipt-amount").textContent,left,y);
   pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(105,119,139);pdf.text("Amount sent · USD practice balance",left,y+7);
-  y+=24;pdf.setFillColor(255,247,230);pdf.setDrawColor(236,216,169);pdf.roundedRect(left,y,pageWidth-36,20,2,2,"FD");
-  pdf.setFont("helvetica","bold");pdf.setFontSize(10);pdf.setTextColor(103,77,27);pdf.text("TOPSAFEB · PRACTICE RECEIPT",left+5,y+8);
-  pdf.setFont("helvetica","normal");pdf.setFontSize(9);pdf.text("Educational simulation confirmation",left+5,y+14);
-  y+=32;
+  y+=24;
   const fields=[["Recipient","receipt-recipient"],["Receiving bank","receipt-bank"],["Destination","receipt-country"],["Demo account","receipt-account"],["Illustrative received amount","receipt-converted"],["Date and time","receipt-date"],["Transaction reference","receipt-reference"],["Description","receipt-description"]];
   for(const [label,id] of fields){
    pdf.setFont("helvetica","normal");pdf.setFontSize(9);pdf.setTextColor(115,128,147);pdf.text(label,left,y);
@@ -745,7 +740,6 @@ document.getElementById("download-demo-receipt").addEventListener("click",async(
    if(y>260){pdf.addPage();y=22;}
   }
   pdf.setFont("helvetica","normal");pdf.setFontSize(8);pdf.setTextColor(105,119,139);
-  pdf.text("TopSafeB educational simulation · No real funds transferred.",left,278);
   const filename="TopSafeB-practice-receipt-"+Date.now()+".pdf";
   const fileBlob=pdf.output("blob");
   const file=new File([fileBlob],filename,{type:"application/pdf"});

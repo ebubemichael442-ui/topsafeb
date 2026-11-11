@@ -1073,7 +1073,7 @@ const customerChatPhoto=document.getElementById("customer-chat-photo");
 const customerChatPhotoPreview=document.getElementById("customer-chat-photo-preview");
 let customerChatPhotoFile=null;
 let customerChatTimer=null;
-function addCopyButton(bubble,text){if(!text)return;const copy=document.createElement("button");copy.type="button";copy.className="chat-copy-button";copy.textContent="Copy message";copy.addEventListener("click",async()=>{try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);else{const field=document.createElement("textarea");field.value=text;field.style.position="fixed";field.style.opacity="0";document.body.append(field);field.select();if(!document.execCommand("copy"))throw new Error("Copy unavailable");field.remove()}copy.textContent="Copied";setTimeout(()=>copy.textContent="Copy message",1600)}catch(e){copy.textContent="Select text to copy"}});bubble.append(copy)}
+function addCopyButton(bubble,text){if(!text)return;const copy=document.createElement("button");copy.type="button";copy.className="chat-copy-button";copy.textContent="Copy message";copy.addEventListener("click",async(event)=>{event.preventDefault();event.stopPropagation();const pageY=window.scrollY,threadY=customerChatThread.scrollTop;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);else{const field=document.createElement("textarea");field.value=text;field.setAttribute("readonly","");field.style.cssText="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px";document.body.append(field);field.focus({preventScroll:true});field.select();if(!document.execCommand("copy"))throw new Error("Copy unavailable");field.remove()}copy.textContent="Copied"}catch(e){copy.textContent="Copy unavailable"}window.scrollTo(0,pageY);customerChatThread.scrollTop=threadY;setTimeout(()=>{copy.textContent="Copy message";window.scrollTo(0,pageY);customerChatThread.scrollTop=threadY},1400)});bubble.append(copy)}
 function appendChatBubble(container,item,own){
  const bubble=document.createElement("article");
  bubble.style.cssText="max-width:88%;justify-self:"+(own?"end":"start")+";padding:11px 13px;border-radius:13px;background:"+(own?"#e6f0fb":"#fff")+";border:1px solid #dce5ef;overflow-wrap:anywhere";
@@ -1082,8 +1082,9 @@ function appendChatBubble(container,item,own){
  const when=document.createElement("small");when.className="muted";when.textContent=new Date(item.created_at).toLocaleString();
  bubble.append(who,body);addCopyButton(bubble,item.message);bubble.append(when);container.append(bubble);
 }
+let lastCustomerChatSignature="";
 async function loadCustomerLiveChat(){
-  if(!currentUserId)return;
+ if(!currentUserId)return;
   const previousTop=customerChatThread.scrollTop;const wasNearBottom=customerChatThread.scrollHeight-customerChatThread.clientHeight-previousTop<90;
  const [chatResult,legacyResult]=await Promise.all([
   supabase.from("support_messages").select("id,sender_id,sender_role,message,attachment_path,created_at").eq("user_id",currentUserId).order("created_at",{ascending:true}).limit(100),
@@ -1098,7 +1099,8 @@ async function loadCustomerLiveChat(){
   if(item.owner_reply)timeline.push({message:item.owner_reply,created_at:item.replied_at||item.created_at,own:false,source:"previous"});
  }
  timeline.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
- customerChatThread.replaceChildren();
+  const chatSignature=JSON.stringify(timeline.map(x=>[x.message,x.created_at,x.attachment_path||"",x.own]));if(chatSignature===lastCustomerChatSignature){customerChatStatus.textContent="Message centre updated "+new Date().toLocaleTimeString()+". Previous owner replies are included above.";return;}lastCustomerChatSignature=chatSignature;
+  customerChatThread.replaceChildren();
  if(!timeline.length){const empty=document.createElement("p");empty.className="muted";empty.textContent="No messages yet. Send a message to start your private conversation.";customerChatThread.append(empty);}
  let lastDay="";
  for(const item of timeline){

@@ -236,6 +236,9 @@ declare
   v_note text;
 begin
   if v_user_id is null then raise exception 'Please sign in to make a demo transfer'; end if;
+  if coalesce((select c.is_blocked from public.customer_access_controls c where c.user_id = v_user_id), false) then
+    raise exception 'Transfers are temporarily restricted by the TopSafeB owner. Please contact TopSafeB support.';
+  end if;
   if p_bank_name is null or p_bank_name not in (
     'Oso Local Bank',
     'Rivergate Community Bank',
@@ -313,6 +316,9 @@ declare
   v_note text;
 begin
   if v_user_id is null then raise exception 'Please sign in to make a demo transfer'; end if;
+  if coalesce((select c.is_blocked from public.customer_access_controls c where c.user_id = v_user_id), false) then
+    raise exception 'Transfers are temporarily restricted by the TopSafeB owner. Please contact TopSafeB support.';
+  end if;
   if p_country = 'United Kingdom' then v_currency := 'GBP'; v_rate := 0.79;
   elsif p_country = 'United States' then v_currency := 'USD'; v_rate := 1;
   elsif p_country = 'Canada' then v_currency := 'CAD'; v_rate := 1.36;

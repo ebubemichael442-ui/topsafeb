@@ -668,9 +668,9 @@ async function loadAdmin(){
   const accessButton=document.createElement("button");
   accessButton.type="button";
   accessButton.className=customer.access_blocked?"secondary":"";
-  accessButton.textContent=customer.access_blocked?"Unblock customer":"Block customer";
+  accessButton.textContent=customer.access_blocked?"Unblock transfers":"Block transfers";
   accessButton.disabled=!customerAccessReady;
-  accessButton.title=customerAccessReady?"Change this customer's dashboard access":"Run the customer access SQL setup first";
+  accessButton.title=customerAccessReady?"Restrict or restore this customer's demo transfers":"Run the customer access SQL setup first";
   accessButton.addEventListener("click",()=>changeCustomerAccess(customer,!customer.access_blocked,accessButton,accessLabel));
   accessCell.append(accessLabel,accessButton);
   const action=document.createElement("td");const viewButton=document.createElement("button");viewButton.type="button";viewButton.className="secondary";viewButton.textContent="View details";
@@ -802,12 +802,12 @@ async function changeCustomerAccess(customer,nextBlocked,button,label){
  if(!customerAccessReady){statusEl.textContent="Run supabase/customer-access-controls.sql in Supabase before changing customer access.";return;}
  const action=nextBlocked?"block":"unblock";
  const verb=nextBlocked?"Block":"Unblock";
- if(!window.confirm(verb+" "+(customer.full_name||"this customer")+"? "+(nextBlocked?"They will be signed out of the customer dashboard.":"They will be able to access the customer dashboard again.")))return;
+ if(!window.confirm((nextBlocked?"Block transfers for ":"Restore transfers for ")+(customer.full_name||"this customer")+"? "+(nextBlocked?"They can still sign in and use the dashboard, but cannot make demo transfers.":"They can make demo transfers again.")))return;
  button.disabled=true;button.textContent=nextBlocked?"Blocking…":"Unblocking…";
  const {error}=await supabase.rpc("admin_set_customer_access",{p_user_id:customer.user_id,p_is_blocked:nextBlocked,p_reason:nextBlocked?"Access restricted by TopSafeB owner":""});
  if(error){
   statusEl.textContent="Could not "+action+" customer: "+error.message;
-  button.disabled=false;button.textContent=customer.access_blocked?"Unblock customer":"Block customer";
+  button.disabled=false;button.textContent=customer.access_blocked?"Unblock transfers":"Block transfers";
   return;
  }
  customer.access_blocked=nextBlocked;
@@ -817,8 +817,8 @@ async function changeCustomerAccess(customer,nextBlocked,button,label){
  button.textContent=nextBlocked?"Unblock customer":"Block customer";
  button.className=nextBlocked?"secondary":"";
  button.disabled=false;
- statusEl.textContent=(customer.full_name||"Customer")+" dashboard access "+(nextBlocked?"blocked.":"restored.")+" Other customers are unaffected.";
- await recordOwnerAction(nextBlocked?"Blocked customer dashboard":"Unblocked customer dashboard",customer.user_id,"Individual customer access changed by owner");
+ statusEl.textContent=(customer.full_name||"Customer")+" demo transfers "+(nextBlocked?"blocked.":"restored.")+" Dashboard access remains available. Other customers are unaffected.";
+ await recordOwnerAction(nextBlocked?"Blocked customer transfers":"Unblocked customer transfers",customer.user_id,"Individual customer access changed by owner");
  await loadOwnerActivityLog();
 }
 async function saveManagedCustomerName(){

@@ -29,7 +29,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <form id="auth-form">
 <div id="name-wrap" hidden><label for="full-name">Full name</label><input id="full-name" type="text" autocomplete="name" placeholder="Full name"></div>
 <label for="email">Email address</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-<label for="password">Password</label><div class="password-row"><input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="Enter your password" required><button type="button" id="toggle-password" class="toggle-password" aria-label="Show password" aria-pressed="false">Show</button></div>
+<label for="password">Password</label><div class="password-row"><input id="password" type="text" autocomplete="current-password" minlength="8" placeholder="Enter your password" required><button type="button" id="toggle-password" class="toggle-password" aria-label="Hide password" aria-pressed="true">Hide</button></div>
 <div class="actions"><button type="submit" id="submit-button">Sign in</button><button type="button" class="secondary" id="signup-button">Create account</button></div>
 <button type="button" class="secondary" id="reset-button">Forgot password?</button>
 </form>

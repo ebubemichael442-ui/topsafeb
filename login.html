@@ -25,22 +25,23 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="index.html">Home</a><a href="online-banking-demo.html">Demo</a></nav></header>
 <main><section class="panel">
 <p class="muted">CUSTOMER ACCESS</p><h1>Welcome to TopSafeB</h1>
-<p class="muted">Enter your email address. We will send you a verification code—no password needed.</p>
+<p class="muted">Sign in to your learning account, or create an account to get started.</p>
 <form id="auth-form">
 <div id="name-wrap" hidden><label for="full-name">Full name</label><input id="full-name" type="text" autocomplete="name" placeholder="Full name"></div>
 <label for="email">Email address</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-<div id="code-wrap" hidden><label for="email-code">Verification code</label><input id="email-code" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the code sent to your email" maxlength="10"></div>
-<div class="actions"><button type="submit" id="submit-button">Send verification code</button><button type="button" class="secondary" id="signup-button">Sign Up</button></div>
-<button type="button" class="secondary" id="back-button" hidden>Change email</button>
+<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required>
+<div class="actions"><button type="submit" id="submit-button">Sign in</button><button type="button" class="secondary" id="signup-button">Create account</button></div>
+<button type="button" class="secondary" id="reset-button">Forgot password?</button>
 </form>
 <div id="message" role="status" aria-live="polite">Connecting securely…</div>
-<div class="notice"><strong>Important:</strong> TopSafeB is an educational platform, not a bank. Only enter the one-time verification code sent to your own email. Never share that code with anyone.</div>
+<div class="notice"><strong>Important:</strong> This is customer access for the TopSafeB educational website only. It is not a bank account and does not store deposits, balances or payment details. Never enter your bank password, PIN, card details or OTP here.</div>
+<p class="small muted">Use an email address you control. Keep your password private.</p>
 </section></main>
 <footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
 <script>
 const loadingMessage=document.getElementById("message");
 const supabaseLibrary=document.createElement("script");
-supabaseLibrary.src="supabase.js?tsb_build=20261113_email_otp";
+supabaseLibrary.src="supabase.js?tsb_build=20261111e";
 supabaseLibrary.async=true;
 let supabaseLibraryLoaded=false;
 supabaseLibrary.onload=()=>{
@@ -49,57 +50,38 @@ supabaseLibrary.onload=()=>{
   loadingMessage.textContent="The sign-in library loaded incorrectly. Please refresh and try again.";
   return;
  }
- const supabase=window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- const form=document.getElementById("auth-form"),message=document.getElementById("message");
- const nameWrap=document.getElementById("name-wrap"),nameInput=document.getElementById("full-name");
- const emailInput=document.getElementById("email"),codeWrap=document.getElementById("code-wrap"),codeInput=document.getElementById("email-code");
- const submitButton=document.getElementById("submit-button"),signupButton=document.getElementById("signup-button"),backButton=document.getElementById("back-button");
- let mode="login",codeSent=false;
- const say=text=>message.textContent=text;
- const withTimeout=(promise,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your internet connection and try again.")),15000))]);
- function setMode(next){
-  mode=next;codeSent=false;codeWrap.hidden=true;codeInput.required=false;codeInput.value="";
-  nameWrap.hidden=mode!=="signup";nameInput.required=mode==="signup";
-  emailInput.readOnly=false;emailInput.required=true;signupButton.hidden=mode==="signup";backButton.hidden=true;
-  submitButton.textContent="Send verification code";
-  say(mode==="signup"?"Enter your name and email. We will email you a verification code.":"Enter your email address to receive a sign-in verification code.");
- }
- function showCodeStep(){
-  codeSent=true;codeWrap.hidden=false;codeInput.required=true;emailInput.readOnly=true;
-  nameWrap.hidden=true;submitButton.textContent="Verify code and continue";
-  signupButton.hidden=true;backButton.hidden=false;codeInput.focus();
-  say("A verification code has been sent to "+emailInput.value.trim()+". Enter it below to continue.");
- }
- signupButton.addEventListener("click",()=>setMode("signup"));
- backButton.addEventListener("click",()=>{codeSent=false;codeWrap.hidden=true;codeInput.required=false;emailInput.readOnly=false;backButton.hidden=true;signupButton.hidden=mode==="signup";submitButton.textContent="Send verification code";say("You can change your email address and request a new code.");});
- if(window.location.hash==="#signup")setMode("signup");
- form.addEventListener("submit",async event=>{
-  event.preventDefault();submitButton.disabled=true;
-  const email=emailInput.value.trim();
-  try{
-   if(!codeSent){
-    if(mode==="signup"&&!nameInput.value.trim())throw new Error("Please enter your full name.");
-    say("Sending your email verification code…");
-    const {error}=await withTimeout(supabase.auth.signInWithOtp({email,options:{shouldCreateUser:mode==="signup",...(mode==="signup"?{data:{full_name:nameInput.value.trim()}}:{})}}),"Email verification");
-    if(error)throw error;
-    showCodeStep();
-   }else{
-    const token=codeInput.value.trim();
-    if(!token)throw new Error("Enter the verification code from your email.");
-    say("Checking your verification code…");
-    const {error}=await withTimeout(supabase.auth.verifyOtp({email,token,type:"email"}),"Code verification");
-    if(error)throw error;
-    say("Email verified. Opening your TopSafeB dashboard…");
-    window.location.assign("dashboard.html?tsb_build=20261113_email_otp");
-   }
-  }catch(error){say(error.message||"Something went wrong. Please try again.");}
-  finally{submitButton.disabled=false;}
- });
- withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{
-  if(error)throw error;
-  if(session){say("You are already signed in. Opening your dashboard…");window.location.assign("dashboard.html?tsb_build=20261113_email_otp");}
-  else say("Connection ready. Sign in or sign up using an email verification code.");
- }).catch(error=>say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again.")));
+const supabase=window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const form=document.getElementById("auth-form"),message=document.getElementById("message");
+const nameWrap=document.getElementById("name-wrap"),nameInput=document.getElementById("full-name");
+const submitButton=document.getElementById("submit-button"),signupButton=document.getElementById("signup-button"),resetButton=document.getElementById("reset-button");
+let mode="login";
+const say=text=>message.textContent=text;
+const withTimeout=(promise,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your internet connection and try again.")),12000))]);
+function setMode(next){mode=next;const signup=mode==="signup";nameWrap.hidden=!signup;nameInput.required=signup;document.getElementById("password").autocomplete=signup?"new-password":"current-password";submitButton.textContent=signup?"Create account":"Sign in";signupButton.hidden=signup;resetButton.hidden=signup;say(signup?"Enter your name, email and password to register.":"Enter your email and password to sign in.");}
+signupButton.addEventListener("click",()=>setMode("signup"));
+if(window.location.hash==="#signup")setMode("signup");
+form.addEventListener("submit",async event=>{
+ event.preventDefault();submitButton.disabled=true;
+ const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
+ try{
+  say(mode==="signup"?"Connecting to the registration service…":"Connecting securely to sign in…");
+  if(mode==="signup"){
+   const {error}=await withTimeout(supabase.auth.signUp({email,password,options:{data:{full_name:nameInput.value.trim()},emailRedirectTo:window.location.origin+window.location.pathname}}),"Registration service");
+   if(error)throw error;say("Registration request received. Check your email for a confirmation link before signing in.");
+  }else{
+   const {error}=await withTimeout(supabase.auth.signInWithPassword({email,password}),"Sign-in request");
+   if(error)throw error;window.location.assign("dashboard.html?tsb_build=20261111e");
+  }
+ }catch(error){say(error.message||"Something went wrong. Please try again.");}
+ finally{submitButton.disabled=false;}
+});
+resetButton.addEventListener("click",async()=>{
+ const email=document.getElementById("email").value.trim();
+ if(!email){say("Enter your email address first, then choose Forgot password.");return;}
+ try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error)throw error;say("If an account exists for that email, a password reset link will be sent.");}
+ catch(error){say(error.message||"Unable to request a password reset.");}
+});
+withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your learning account.");if(session)window.location.assign("dashboard.html?tsb_build=20261111e");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
 };
 supabaseLibrary.onerror=()=>{loadingMessage.textContent="Could not load the secure sign-in service. Check your internet connection or try again later.";};
 setTimeout(()=>{if(!supabaseLibraryLoaded)loadingMessage.textContent="Still connecting to the secure sign-in service. Please allow up to 30 seconds on a slower mobile connection.";},15000);

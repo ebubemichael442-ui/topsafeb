@@ -1237,6 +1237,10 @@ supabase.auth.onAuthStateChange((_event,session)=>{
 const sessionCheckStarted=Date.now();
 const sessionWatchdog=setTimeout(()=>{if(Date.now()-sessionCheckStarted>=12000&&statusEl.textContent==="Checking your sign-in session…"){statusEl.textContent="Sign-in is taking too long. Tap the menu and open Sign in, then sign in again. If this continues, contact TopSafeB support.";console.error("TopSafeB sign-in check exceeded 12 seconds.");}},12000);
 loadSession().then(()=>clearTimeout(sessionWatchdog)).catch(error=>{clearTimeout(sessionWatchdog);console.error("TopSafeB session loading failed:",error);statusEl.textContent="Could not finish sign-in check: "+(error.message||"Please refresh the page or sign in again.");});
+
+ }
+ loadNext();
+})();
 </script>
 <button type="button" class="support-chat-fab" id="open-customer-support" aria-label="Open TopSafeB private message chat" aria-expanded="false" aria-controls="customer-support" title="Message TopSafeB support"><span class="support-chat-icon" aria-hidden="true">✉</span><span>Message support</span></button>
 
@@ -1298,11 +1302,7 @@ loadSession().then(()=>clearTimeout(sessionWatchdog)).catch(error=>{clearTimeout
    link.classList.toggle("active",url.searchParams.get("view")===view || (view==="home" && url.searchParams.get("view")==="home"));
   });
  }
-})();
- }
- loadNext();
-})();
-</script>
+})();</script>
 
 </body>
 </html>

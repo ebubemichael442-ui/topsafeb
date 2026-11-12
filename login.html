@@ -12,7 +12,7 @@ header{background:var(--navy);color:white;padding:18px 5%;display:flex;justify-c
 .brand{font-size:24px;font-weight:800}.brand span{color:var(--gold)}nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:white;text-decoration:none;font-weight:bold}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #b18a3e;outline-offset:3px}
 main{max-width:520px;margin:42px auto;padding:0 18px 55px}.panel{background:white;padding:28px;border-radius:16px;box-shadow:0 8px 30px #102b5012}
 h1{color:var(--navy);font-size:34px;line-height:1.2;margin:8px 0}.muted{color:var(--muted)}
-label{display:block;font-weight:700;margin:16px 0 6px}input{width:100%;padding:13px;border:1px solid #cbd4df;border-radius:8px;font-size:16px}
+label{display:block;font-weight:700;margin:16px 0 6px}input{width:100%;padding:13px;border:1px solid #cbd4df;border-radius:8px;font-size:16px}.password-row{display:flex;align-items:stretch;gap:8px}.password-row input{flex:1;min-width:0}.password-row .toggle-password{width:auto;min-width:76px;margin:0;padding:0 14px;background:#edf1f6;color:var(--ink);border:1px solid #cbd4df;font-size:14px}
 button{width:100%;padding:13px;background:var(--gold);color:var(--navy);border:0;border-radius:8px;font-size:16px;font-weight:800;cursor:pointer;margin-top:16px}
 button.secondary{background:#edf1f6;margin-top:10px}.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}.actions button{width:auto;flex:1}
 #message{padding:12px;border-radius:8px;background:#f3f6fa;min-height:44px;margin-top:16px;overflow-wrap:anywhere}
@@ -29,7 +29,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <form id="auth-form">
 <div id="name-wrap" hidden><label for="full-name">Full name</label><input id="full-name" type="text" autocomplete="name" placeholder="Full name"></div>
 <label for="email">Email address</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required>
+<label for="password">Password</label><div class="password-row"><input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="Enter your password" required><button type="button" id="toggle-password" class="toggle-password" aria-label="Show password" aria-pressed="false">Show</button></div>
 <div class="actions"><button type="submit" id="submit-button">Sign in</button><button type="button" class="secondary" id="signup-button">Create account</button></div>
 <button type="button" class="secondary" id="reset-button">Forgot password?</button>
 </form>
@@ -54,6 +54,8 @@ const supabase=window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supaba
 const form=document.getElementById("auth-form"),message=document.getElementById("message");
 const nameWrap=document.getElementById("name-wrap"),nameInput=document.getElementById("full-name");
 const submitButton=document.getElementById("submit-button"),signupButton=document.getElementById("signup-button"),resetButton=document.getElementById("reset-button");
+const passwordInput=document.getElementById("password"),togglePassword=document.getElementById("toggle-password");
+togglePassword.addEventListener("click",()=>{const reveal=passwordInput.type==="password";passwordInput.type=reveal?"text":"password";togglePassword.textContent=reveal?"Hide":"Show";togglePassword.setAttribute("aria-label",reveal?"Hide password":"Show password");togglePassword.setAttribute("aria-pressed",String(reveal));});
 let mode="login";
 const say=text=>message.textContent=text;
 const withTimeout=(promise,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your internet connection and try again.")),12000))]);

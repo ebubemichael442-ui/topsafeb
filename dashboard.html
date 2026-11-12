@@ -460,7 +460,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <a class="menu-link" href="dashboard.html?view=cards">Cards</a>
 <a class="menu-link" href="dashboard.html?view=savings">Savings &amp; Budgeting</a>
 <a class="menu-link" href="dashboard.html?view=learning">Learning</a>
-<a class="menu-link" href="#change-password">Change password</a>
+<a class="menu-link" href="dashboard.html?view=password">Change password</a>
 <a class="menu-link" href="messages.html">Messages &amp; Support</a>
 <button id="menu-logout" class="menu-logout" type="button">Logout</button>
 <p class="menu-disclaimer">All account features are simulated. No real deposits, cards, loans, crypto or bank transfers are provided.</p>
@@ -1322,7 +1322,8 @@ loadSession().then(()=>clearTimeout(sessionWatchdog)).catch(error=>{clearTimeout
   cards:{title:"Cards learning",targets:["#virtual-cards-info"]},
   savings:{title:"Savings & budgeting",targets:["#savings-learning"]},
   learning:{title:"Learning",targets:["#learning-progress","#certificate","#savings-learning"]},
-  messages:{title:"Messages & support",targets:["#customer-support"]}
+  messages:{title:"Messages & support",targets:["#customer-support"]},
+  password:{title:"Change password",targets:["#change-password"]}
  };
  const chosen=config[view]||config.home;
  const heading=main.querySelector("h1");

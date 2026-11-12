@@ -662,7 +662,7 @@ async function loadAdmin(){
   const updatedOn=document.createElement("td");updatedOn.textContent=formatDate(record?.updated_at);
   const accessCell=document.createElement("td");
   const accessLabel=document.createElement("strong");
-  accessLabel.textContent=customer.access_blocked?"Blocked":"Active";
+  accessLabel.textContent=customer.access_blocked?"Transfers blocked":"Transfers active";
   accessLabel.style.color=customer.access_blocked?"#a13d42":"#197451";
   accessLabel.style.display="block";
   const accessButton=document.createElement("button");
@@ -812,9 +812,9 @@ async function changeCustomerAccess(customer,nextBlocked,button,label){
  }
  customer.access_blocked=nextBlocked;
  customer.access_reason=nextBlocked?"Access restricted by TopSafeB owner":"";
- label.textContent=nextBlocked?"Blocked":"Active";
+ label.textContent=nextBlocked?"Transfers blocked":"Transfers active";
  label.style.color=nextBlocked?"#a13d42":"#197451";
- button.textContent=nextBlocked?"Unblock customer":"Block customer";
+ button.textContent=nextBlocked?"Unblock transfers":"Block transfers";
  button.className=nextBlocked?"secondary":"";
  button.disabled=false;
  statusEl.textContent=(customer.full_name||"Customer")+" demo transfers "+(nextBlocked?"blocked.":"restored.")+" Dashboard access remains available. Other customers are unaffected.";

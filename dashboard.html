@@ -698,7 +698,7 @@ if(!window.supabase || typeof window.supabase.createClient!=="function"){
  if(status)status.textContent="The secure sign-in service could not load. Please check your internet connection and refresh this page.";
  throw new Error("TopSafeB sign-in library did not load.");
 }
-const supabase = window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const supabase = window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,lock:async(_name,_acquireTimeout,fn)=>await fn()}});
 const nameEl=document.getElementById("customer-name");
 const emailEl=document.getElementById("customer-email");
 const statusEl=document.getElementById("status");

@@ -125,7 +125,6 @@ main>h1{font-size:clamp(29px,4vw,39px);letter-spacing:-1.2px;color:#102a48;margi
 #customer-home>.panel:first-of-type h2{margin:2px 0;font-size:20px}
 #customer-home>.panel:first-of-type #customer-email{margin:0;font-size:13px}
 #status{grid-column:1/-1;margin:12px 0 0;background:#f3f6fa;border:1px solid #e7edf4;font-size:13px}
-#admin-entry{grid-column:1/-1;margin:10px 0 0}
 .bank-dashboard{margin:22px 0 28px;border:1px solid #e0e7ef;border-radius:20px;background:#fff;box-shadow:0 16px 40px #102b5012;padding-bottom:26px}
 .bank-dashboard-top{background:linear-gradient(115deg,#071b33 0%,#123c68 62%,#1c527b 100%);padding:27px 30px;position:relative;overflow:hidden}
 .bank-dashboard-top:after{content:"";position:absolute;width:240px;height:240px;border:1px solid #ffffff18;border-radius:50%;right:-60px;top:-125px;box-shadow:0 0 0 28px #ffffff08,0 0 0 58px #ffffff06}
@@ -218,7 +217,7 @@ input,select,textarea{font-size:16px}
   #customer-home>.panel:first-of-type{gap:7px;padding:16px;border-radius:13px}
   #customer-home>.panel:first-of-type h2{font-size:19px}
   #status{font-size:12px;line-height:1.5;padding:10px}
-  #admin-entry .button,#signout{width:100%;text-align:center}
+  #signout{width:100%;text-align:center}
   .bank-dashboard{margin:15px 0 22px;border-radius:15px;padding-bottom:17px}
   .bank-dashboard-top{padding:19px 16px;gap:9px}
   .bank-dashboard-top h2{font-size:25px}
@@ -473,7 +472,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <h2 id="customer-name">Loading your profile…</h2>
 <p id="customer-email" class="muted" hidden></p>
 <p id="status" role="status" aria-live="polite">Checking your sign-in session…</p>
-<p id="admin-entry" hidden><a class="button" href="admin.html">Open Owner / Admin Dashboard</a></p><button id="signout" class="secondary" type="button">Sign out</button></section>
+<button id="signout" class="secondary" type="button">Sign out</button></section>
 <section class="bank-dashboard" id="customer-demo-funds">
 <div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB • DEMO ACCOUNT</p><h2>Demo Account Overview</h2><p class="bank-subtitle">Welcome back, <span id="bank-customer-name">Customer</span></p></div><span class="demo-pill">SIMULATION ONLY</span></div>
 <div class="market-strip" aria-label="Financial learning indicators"><div><span>Market learning</span><strong>Risk &amp; return</strong><small>Understand market movement</small></div><div><span>Money skills</span><strong>Budgeting</strong><small>Plan and track spending</small></div><div><span>Account safety</span><strong>Privacy basics</strong><small>Learn safe account habits</small></div></div>
@@ -1073,8 +1072,6 @@ async function loadSession(){
   if(customerChatTimer)clearInterval(customerChatTimer);
   customerChatTimer=setInterval(loadCustomerLiveChat,5000);
   await loadCustomerDemoFunds(user.id);
-  const {data:adminRecord}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
-  if(adminRecord) document.getElementById("admin-entry").hidden=false;
 }
 async function loadCustomerReplies(userId){
   const replyStatus=document.getElementById("owner-replies-status");

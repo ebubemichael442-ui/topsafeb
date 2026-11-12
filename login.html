@@ -59,6 +59,7 @@ const say=text=>message.textContent=text;
 const withTimeout=(promise,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your internet connection and try again.")),12000))]);
 function setMode(next){mode=next;const signup=mode==="signup";nameWrap.hidden=!signup;nameInput.required=signup;document.getElementById("password").autocomplete=signup?"new-password":"current-password";submitButton.textContent=signup?"Create account":"Sign in";signupButton.hidden=signup;resetButton.hidden=signup;say(signup?"Enter your name, email and password to register.":"Enter your email and password to sign in.");}
 signupButton.addEventListener("click",()=>setMode("signup"));
+if(window.location.hash==="#signup")setMode("signup");
 form.addEventListener("submit",async event=>{
  event.preventDefault();submitButton.disabled=true;
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;

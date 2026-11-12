@@ -814,6 +814,11 @@ function updateDemoConversion(){
 }
 countrySelect.addEventListener("change",updateDemoConversion);
 amountInput.addEventListener("input",updateDemoConversion);
+async function checkCustomerTransferPermission(){
+ const {data:restricted,error}=await supabase.rpc("customer_access_is_blocked");
+ if(error)throw error;
+ if(restricted)throw new Error("Transfers are temporarily restricted by the TopSafeB owner. Please contact TopSafeB support.");
+}
 async function submitLocalDemoTransfer(event){
  event.preventDefault();
  const form=document.getElementById("local-demo-transfer-form");
@@ -829,6 +834,7 @@ async function submitLocalDemoTransfer(event){
   return;
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
+ try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
  if(!window.confirm("TopSafeB demo transaction: no real funds will be transferred and no bank will be contacted. Continue?"))return;
  button.disabled=true;button.textContent="Processing demo transfer…";status.textContent="Recording your demo transfer…";
  try{
@@ -875,6 +881,7 @@ async function submitOsoLocalTransfer(event){
   return;
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
+ try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
  if(!window.confirm("TopSafeB demo transaction: no real funds will be transferred and no bank will be contacted. Continue?"))return;
  button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated international transfer…";
  try{
@@ -1042,24 +1049,7 @@ async function loadSession(){
   if(error) throw error;
   if(!session){window.location.replace("login.html");return;}
   const user=session.user;
-  const {data:accessBlocked,error:accessError}=await supabase.rpc("customer_access_is_blocked");
-  if(!accessError&&accessBlocked){
-    statusEl.textContent="Customer dashboard access is paused by the TopSafeB owner.";
-    await supabase.auth.signOut();
-    window.location.replace("access-paused.html");
-    return;
-  }
-  if(accessError)console.warn("Customer access control check is unavailable:",accessError.message);
-  if(customerAccessTimer)clearInterval(customerAccessTimer);
-  customerAccessTimer=setInterval(async()=>{
-    const {data:blocked,error}=await supabase.rpc("customer_access_is_blocked");
-    if(!error&&blocked){
-      clearInterval(customerAccessTimer);
-      statusEl.textContent="Customer dashboard access has been paused.";
-      await supabase.auth.signOut();
-      window.location.replace("access-paused.html");
-    }
-  },15000);
+  // Transfer restrictions do not affect customer dashboard sign-in or access.
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
   document.getElementById("bank-customer-name").textContent=nameEl.textContent;
   document.getElementById("bank-account-holder").textContent=nameEl.textContent;

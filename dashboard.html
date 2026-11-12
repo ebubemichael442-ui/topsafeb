@@ -496,10 +496,24 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <div id="transfer-centre">
 <h3 class="bank-section-title">Transfer Centre</h3>
 <div class="transfer-type-grid" aria-label="Choose a demo transfer type">
+<a class="transfer-type-card" href="#owner-demo-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🏛️</span><span class="transfer-type-title">Transfer to Owner</span><span class="transfer-type-description">Move demo USD to the verified TopSafeB owner account</span><span class="transfer-type-action">Open owner transfer →</span></a>
 <a class="transfer-type-card" href="#local-demo-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🏦</span><span class="transfer-type-title">Local Transfer</span><span class="transfer-type-description">Domestic USD demo transfer</span><span class="transfer-type-action">Open local transfer →</span></a>
 <a class="transfer-type-card international" href="#oso-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🌍</span><span class="transfer-type-title">International Transfer</span><span class="transfer-type-description">Demo sending to another country</span><span class="transfer-type-action">Open international transfer →</span></a>
 </div>
 <p>Choose a demo transfer type. These options use fictional banks and sample account details only.</p>
+<section class="topup-card" id="owner-demo-transfer-form">
+<h3>🏛️ Transfer to TopSafeB Owner</h3>
+<p>Send simulated USD from your customer demo balance to the verified owner demo account. No real money or external bank is involved.</p>
+<form id="customer-owner-transfer-form" class="transfer-form">
+<label for="customer-owner-transfer-amount">Amount (USD)</label>
+<input id="customer-owner-transfer-amount" type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="Enter amount" required>
+<label for="customer-owner-transfer-note">Description (optional)</label>
+<input id="customer-owner-transfer-note" maxlength="200" placeholder="e.g. Practice transfer to owner">
+<button id="customer-owner-transfer-submit" type="submit">Transfer demo funds to owner</button>
+<p id="customer-owner-transfer-status" role="status" aria-live="polite"></p>
+</form>
+<p class="topup-disclaimer">SIMULATION ONLY — this moves fictional balances inside TopSafeB.</p>
+</section>
 <h3 class="bank-section-title">Local bank transfer</h3>
 <p>Practise a domestic USD transfer between fictional banks in the TopSafeB learning environment.</p>
 <form id="local-demo-transfer-form" class="transfer-form">
@@ -864,6 +878,29 @@ async function submitLocalDemoTransfer(event){
  }
 }
 document.getElementById("local-demo-transfer-form").addEventListener("submit",submitLocalDemoTransfer);
+document.getElementById("customer-owner-transfer-form").addEventListener("submit",async(event)=>{
+ event.preventDefault();
+ const form=event.currentTarget;
+ const button=document.getElementById("customer-owner-transfer-submit");
+ const status=document.getElementById("customer-owner-transfer-status");
+ const amount=Number(document.getElementById("customer-owner-transfer-amount").value);
+ const description=document.getElementById("customer-owner-transfer-note").value.trim();
+ if(!currentUserId){status.textContent="Please sign in again before making this demo transfer.";return;}
+ if(!Number.isFinite(amount)||amount<=0||amount>1000000000){status.textContent="Enter a valid amount greater than zero.";return;}
+ try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
+ if(!window.confirm("Transfer "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(amount)+" of simulated demo funds to the TopSafeB owner account? No real money will move."))return;
+ button.disabled=true;button.textContent="Processing…";status.textContent="Recording the customer-to-owner demo transfer…";
+ try{
+  const {data,error}=await supabase.rpc("customer_demo_transfer_to_owner",{p_amount:amount,p_description:description});
+  if(error)throw error;
+  const result=Array.isArray(data)?data[0]:data;
+  const reference="OWNER-"+String(result.transaction_id||"").slice(0,8).toUpperCase();
+  status.textContent="Demo transfer completed. Reference: "+reference+". Customer balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result.customer_balance))+". No real funds transferred.";
+  form.reset();
+  await loadCustomerDemoFunds(currentUserId);
+ }catch(error){status.textContent="Transfer not completed: "+(error.message||"Please try again.");}
+ finally{button.disabled=false;button.textContent="Transfer demo funds to owner";}
+});
 
 async function submitOsoLocalTransfer(event){
  event.preventDefault();

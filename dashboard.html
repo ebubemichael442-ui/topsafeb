@@ -460,6 +460,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <a class="menu-link" href="dashboard.html?view=cards">Cards</a>
 <a class="menu-link" href="dashboard.html?view=savings">Savings &amp; Budgeting</a>
 <a class="menu-link" href="dashboard.html?view=learning">Learning</a>
+<a class="menu-link" href="#change-password">Change password</a>
 <a class="menu-link" href="messages.html">Messages &amp; Support</a>
 <button id="menu-logout" class="menu-logout" type="button">Logout</button>
 <p class="menu-disclaimer">All account features are simulated. No real deposits, cards, loans, crypto or bank transfers are provided.</p>
@@ -472,7 +473,20 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <h2 id="customer-name">Loading your profile…</h2>
 <p id="customer-email" class="muted" hidden></p>
 <p id="status" role="status" aria-live="polite">Checking your sign-in session…</p>
-<button id="signout" class="secondary" type="button">Sign out</button></section>
+<button id="signout" class="secondary" type="button">Sign out</button>
+</section>
+<section class="panel" id="change-password" style="margin-top:18px">
+<h2>Change password</h2>
+<p class="muted">Update the password for your TopSafeB customer account.</p>
+<form id="change-password-form">
+<label for="new-customer-password">New password</label>
+<input id="new-customer-password" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters" style="width:100%;padding:13px;border:1px solid #cbd4df;border-radius:8px;font-size:16px">
+<label for="confirm-customer-password">Confirm new password</label>
+<input id="confirm-customer-password" type="password" autocomplete="new-password" minlength="8" required placeholder="Enter the new password again" style="width:100%;padding:13px;border:1px solid #cbd4df;border-radius:8px;font-size:16px">
+<button id="change-password-submit" type="submit" class="secondary">Save new password</button>
+<p id="change-password-status" role="status" aria-live="polite" class="muted">You must be signed in to change your password.</p>
+</form>
+</section>
 <section class="bank-dashboard" id="customer-demo-funds">
 <div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB • DEMO ACCOUNT</p><h2>Demo Account Overview</h2><p class="bank-subtitle">Welcome back, <span id="bank-customer-name">Customer</span></p></div><span class="demo-pill">SIMULATION ONLY</span></div>
 <div class="market-strip" aria-label="Financial learning indicators"><div><span>Market learning</span><strong>Risk &amp; return</strong><small>Understand market movement</small></div><div><span>Money skills</span><strong>Budgeting</strong><small>Plan and track spending</small></div><div><span>Account safety</span><strong>Privacy basics</strong><small>Learn safe account habits</small></div></div>
@@ -1254,6 +1268,31 @@ signoutButton.addEventListener("click",async()=>{
   const {error}=await supabase.auth.signOut();
   if(error){statusEl.textContent=error.message;signoutButton.disabled=false;return;}
   window.location.replace("login.html");
+});
+const changePasswordForm=document.getElementById("change-password-form");
+const changePasswordStatus=document.getElementById("change-password-status");
+const changePasswordButton=document.getElementById("change-password-submit");
+changePasswordForm.addEventListener("submit",async(event)=>{
+ event.preventDefault();
+ const newPassword=document.getElementById("new-customer-password").value;
+ const confirmPassword=document.getElementById("confirm-customer-password").value;
+ if(newPassword.length<8){changePasswordStatus.textContent="Your new password must be at least 8 characters.";return;}
+ if(newPassword!==confirmPassword){changePasswordStatus.textContent="The two passwords do not match. Please check them.";return;}
+ changePasswordButton.disabled=true;
+ changePasswordButton.textContent="Updating password…";
+ changePasswordStatus.textContent="Securely updating your password…";
+ try{
+  const {data,error}=await supabase.auth.updateUser({password:newPassword});
+  if(error)throw error;
+  document.getElementById("new-customer-password").value="";
+  document.getElementById("confirm-customer-password").value="";
+  changePasswordStatus.textContent="Your password has been changed successfully. Use your new password next time you sign in.";
+ }catch(error){
+  changePasswordStatus.textContent="Password not changed: "+(error.message||"Please try again while signed in.");
+ }finally{
+  changePasswordButton.disabled=false;
+  changePasswordButton.textContent="Save new password";
+ }
 });
 supabase.auth.onAuthStateChange((_event,session)=>{
   if(!session) window.location.replace("login.html");

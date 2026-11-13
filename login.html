@@ -29,7 +29,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <form id="auth-form">
 <div id="name-wrap" hidden><label for="full-name">Full name</label><input id="full-name" type="text" autocomplete="name" placeholder="Full name"></div>
 <label for="email">Email address</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-<label for="login-password-visible">Password (visible while typing)</label><input id="login-password-visible" name="login_password_visible" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" minlength="8" placeholder="Enter your password" required>
+<label for="login-password-visible">Password</label><input id="login-password-visible" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Enter your password" required>
 <div class="actions"><button type="submit" id="submit-button">Sign in</button><button type="button" class="secondary" id="signup-button">Create account</button></div>
 <button type="button" class="secondary" id="reset-button">Forgot password?</button>
 </form>

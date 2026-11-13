@@ -145,13 +145,13 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 </style>
 </head>
 <body>
-<header><div class="brand"><span>◆</span> TopSafeB</div><a class="messages-logo" href="support.html" aria-label="Open live customer messages" title="Live customer messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 11.5h8M8 14.5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Messages</span><b id="messages-logo-unread" hidden>0</b></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#topup-requests">Top-up Requests</a><a href="#demo-funds-manager">Demo Funds</a><a href="#feedback-management">Feedback</a><a href="#owner-activity-log">Owner log</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
+<header><div class="brand"><span>◆</span> TopSafeB</div><a class="messages-logo" href="support.html" aria-label="Open live customer messages" title="Live customer messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 11.5h8M8 14.5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Messages</span><b id="messages-logo-unread" hidden>0</b></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><nav id="owner-nav"><a href="#registered-customers">Customers</a><a href="#feedback-management">Feedback</a><a href="#owner-activity-log">Owner log</a><a href="dashboard.html">Customer Area</a><a href="index.html">Home</a></nav></header>
 <main>
 <section class="owner-hero" aria-label="Owner dashboard welcome">
   <div><p class="hero-kicker">PRIVATE OWNER ACCESS · TOPSAFEB</p><h1>Welcome to your Control Centre</h1><p>Manage your customer community, review activity and oversee practice accounts from one place.</p></div>
   <div class="hero-status"><span class="hero-orb">◆</span><strong>Practice platform</strong><small>Simulation only · No real funds</small></div>
 </section>
-<nav class="owner-shortcuts" aria-label="Owner dashboard shortcuts"><a href="#registered-customers"><span>♙</span>Customers</a><a href="#topup-requests"><span>＋</span>Top-up requests</a><a href="#demo-funds-manager"><span>＄</span>Practice funds</a><a href="#feedback-management"><span>☆</span>Customer feedback</a><a href="#owner-activity-log"><span>◷</span>Owner activity log</a><a href="#live-support-inbox"><span>▤</span>Customer messages</a></nav>
+<nav class="owner-shortcuts" aria-label="Owner dashboard shortcuts"><a href="#registered-customers"><span>♙</span>Customers</a><a href="#feedback-management"><span>☆</span>Customer feedback</a><a href="#owner-activity-log"><span>◷</span>Owner activity log</a><a href="#live-support-inbox"><span>▤</span>Customer messages</a></nav>
 <div class="dashboard-grid" aria-label="Practice operations overview"><article class="summary-card"><h2>Customer portfolio</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p><span class="metric-foot">Customer profiles</span></article><article class="summary-card"><h2>Total practice funds</h2><p class="muted">Illustrative USD balances</p><p class="stat" id="total-demo-funds">—</p><span class="metric-foot">Not real deposits or cash</span></article><article class="summary-card"><h2 class="section-heading"><span class="section-icon feedback" aria-hidden="true">★</span><span>Customer Feedback<small>Ratings and feedback submissions</small></span></h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p><span class="metric-foot">Private support records</span></article><article class="summary-card"><h2>Owner demo balance</h2><p class="muted">Funds received from customer demo transfers</p><p class="stat" id="owner-demo-balance">—</p><span class="metric-foot">Illustrative USD balance</span></article><article class="summary-card"><h2>Learning progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p><span class="metric-foot">Across customer accounts</span></article></div>
 <section class="panel">
 <p class="muted">SIGNED-IN OWNER</p>
@@ -187,13 +187,13 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
 </div>
 <section id="customer-details" class="detail-panel" hidden aria-live="polite"><h3 id="detail-heading">Customer details</h3><div class="detail-grid"><div class="detail-item"><strong>Full name</strong><span id="detail-name"></span></div><div class="detail-item"><strong>Email</strong><span id="detail-email"></span></div><div class="detail-item"><strong>Lessons completed</strong><span id="detail-count"></span></div><div class="detail-item"><strong>Completed on</strong><span id="detail-completed"></span></div><div class="detail-item"><strong>Last progress update</strong><span id="detail-updated"></span></div></div><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Customer Management Centre</h4><p class="muted">Update the customer display name and review access information. Sign-in permissions remain protected by the authentication service.</p><label for="manage-customer-name"><strong>Customer display name</strong></label><input id="manage-customer-name" maxlength="100" autocomplete="off" style="display:block;width:100%;max-width:420px;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin:7px 0 12px"><button id="save-customer-name" type="button">Save profile name</button><p id="manage-customer-status" class="muted" role="status" aria-live="polite">Select a customer to manage their profile.</p><div class="detail-grid"><div class="detail-item"><strong>Sign-in access</strong><span>Managed by secure account authentication</span></div><div class="detail-item"><strong>Learning access</strong><span>Available; progress shown below</span></div></div></div><h4>Lesson-by-lesson progress</h4><ul id="detail-lessons" class="lesson-list"></ul><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Practice account overview</h4><p id="detail-account-status" class="muted" role="status">Loading illustrative practice account…</p><div class="detail-grid"><div class="detail-item"><strong>Illustrative practice balance</strong><span id="detail-account-balance">—</span></div><div class="detail-item"><strong>Currency</strong><span id="detail-account-currency">—</span></div><div class="detail-item"><strong>Last account update</strong><span id="detail-account-updated">—</span></div></div><h4>Recent practice transactions</h4><div class="table-wrap"><table><thead><tr><th>Date</th><th>Activity</th><th>Amount</th><th>Balance after</th><th>Note</th></tr></thead><tbody id="detail-account-transactions"><tr><td colspan="5">Loading practice history…</td></tr></tbody></table></div><p class="muted">All balances and entries shown here are fictional learning records. No real funds are held or transferred.</p></div><div class="detail-panel" style="background:#fff;margin:18px 0"><h4>Customer activity timeline</h4><p class="muted">A chronological view of practice account changes, simulated transfers, support messages and learning progress.</p><p id="customer-timeline-status" class="muted" role="status">Loading activity…</p><ol id="customer-activity-timeline" style="display:grid;gap:12px;padding-left:22px;margin:12px 0"></ol><p class="muted">This timeline records educational activity only. No real funds or external banking services are involved.</p></div><button id="open-customer-support" class="secondary" type="button">Open customer support conversation</button> <button id="print-customer-report" type="button">Print / Save customer report (PDF)</button> <button id="print-full-activity-report" class="secondary" type="button">Print full activity report</button> <button id="close-details" class="secondary" type="button">Close details</button></section>
 </section>
-<section class="panel" id="topup-requests">
+<section class="panel" id="topup-requests" hidden>
 <h2>Customer demo top-up requests</h2>
 <p class="notice"><strong>SIMULATION ONLY:</strong> Approving a request adds fictional practice funds to the customer's TopSafeB demo balance. It does not confirm or collect a payment.</p>
 <p id="topup-admin-status" class="muted" role="status" aria-live="polite">Loading requests…</p>
 <div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Amount (USD)</th><th>Customer note</th><th>Status</th><th>Owner note</th><th>Decision</th></tr></thead><tbody id="topup-admin-rows"><tr><td colspan="7">Loading requests…</td></tr></tbody></table></div>
 </section>
-<section class="panel" id="demo-funds-manager">
+<section class="panel" id="demo-funds-manager" hidden>
 <h2>Demo Funds Manager</h2>
 <p class="notice"><strong>SIMULATED FUNDS ONLY:</strong> These are fictional USD balances for learning demonstrations. They are not deposits, cash, or transferable money.</p>
 <p id="demo-funds-status" class="muted" role="status" aria-live="polite">Loading demo accounts…</p>
@@ -369,6 +369,7 @@ function filterCustomers(){
 
 async function loadTopupRequests(customers){
  const status=document.getElementById("topup-admin-status"),body=document.getElementById("topup-admin-rows");
+ if(!status||!body||document.getElementById("topup-requests")?.hidden)return;
  const {data:requests,error}=await supabase.from("demo_topup_requests").select("id,user_id,amount,note,status,owner_note,created_at").order("created_at",{ascending:false}).limit(100);
  if(error){status.textContent="Top-up request setup is not complete. Run the updated demo-funds SQL file in Supabase, then refresh.";body.replaceChildren();return;}
  const names=new Map(customers.map(c=>[c.user_id,(c.full_name||"Customer")+" · "+(c.email||"")]));
@@ -401,6 +402,7 @@ async function loadTopupRequests(customers){
  status.textContent=requests.length+" request(s) shown · "+pending+" awaiting your decision.";
 }
 async function loadDemoFunds(customers){
+ if(document.getElementById("demo-funds-manager")?.hidden)return;
  const status=document.getElementById("demo-funds-status");
  const body=document.getElementById("demo-funds-rows");
  const historyBody=document.getElementById("demo-history-rows");
@@ -667,7 +669,7 @@ async function loadAdmin(){
  if(adminError)throw adminError;
  if(!adminRecord){statusEl.textContent="Access denied. This account is not registered as a TopSafeB administrator.";return;}
  statusEl.textContent="Administrator access confirmed.";
- if(window.loadTopSafeBTrackingRecords)await window.loadTopSafeBTrackingRecords();
+
  const {data:customers,error:customerError}=await supabase.from("profiles").select("user_id,full_name,email").order("full_name",{ascending:true});
  if(customerError)throw customerError;
  const list=customers||[];
@@ -881,7 +883,7 @@ async function saveManagedCustomerName(){
 /* Owner-only tracking manager backed by Supabase so public code lookups can see records. */
 (()=>{
  const form=document.getElementById("tracking-create-form");
- if(!form)return;
+ if(!form||document.getElementById("tracking-manager")?.hidden)return;
  const list=document.getElementById("tracking-record-list");
  const status=document.getElementById("tracking-manager-status");
  const states=["Shipment Created","Processing","In Transit","Arrived at Facility","Out for Delivery","Delivered","Delivery Exception"];

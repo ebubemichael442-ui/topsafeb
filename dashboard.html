@@ -467,10 +467,9 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 </aside>
 <main id="customer-home">
 
-<h1>Welcome to your dashboard</h1>
+<h1>Dashboard</h1>
 <section class="panel">
-<p class="muted">SIGNED-IN CUSTOMER</p>
-<h2 id="customer-name">Loading your profile…</h2>
+
 <p id="customer-email" class="muted" hidden></p>
 <p id="status" role="status" aria-live="polite">Checking your sign-in session…</p>
 <button id="signout" class="secondary" type="button">Sign out</button>
@@ -1299,7 +1298,7 @@ loadSession().then(()=>clearTimeout(sessionWatchdog)).catch(error=>{clearTimeout
  const main=document.getElementById("customer-home");
  if(!main)return;
  const config={
-  home:{title:"Your demo account",targets:["#customer-demo-funds"]},
+  home:{title:"Dashboard",targets:["#customer-demo-funds"]},
   transfers:{title:"Transfers",targets:["#transfer-centre"]},
   transactions:{title:"Transactions",targets:["#customer-demo-history"]},
   cards:{title:"Cards learning",targets:["#virtual-cards-info"]},

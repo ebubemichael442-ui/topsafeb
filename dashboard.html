@@ -1114,7 +1114,8 @@ async function loadSession(){
   const user=session.user;
   // Transfer restrictions do not affect customer dashboard sign-in or access.
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
-  document.getElementById("bank-customer-name").textContent=nameEl.textContent;
+  const bankCustomerName=document.getElementById("bank-customer-name");
+   if(bankCustomerName)bankCustomerName.textContent=nameEl.textContent;
   document.getElementById("bank-account-holder").textContent=nameEl.textContent;
   document.getElementById("header-customer-name").textContent=nameEl.textContent;
   emailEl.textContent="";

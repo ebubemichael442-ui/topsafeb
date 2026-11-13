@@ -103,6 +103,13 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 .customer-menu{position:fixed;z-index:49;top:0;right:0;bottom:0;width:min(82vw,340px);overflow-y:auto;background:linear-gradient(160deg,#3026a8,#172c88);color:#fff;padding:22px 16px 30px;transform:translateX(105%);transition:transform .22s ease;box-shadow:-12px 0 35px #101c4a35}
 .customer-menu.open{transform:translateX(0)}
 .menu-brand{font-size:23px;font-weight:900;padding:8px 10px 22px;border-bottom:1px solid #ffffff30;margin-bottom:10px}.menu-brand span{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#c9d2ff;font-weight:600}
+.language-picker{margin:14px 8px 18px;padding:14px;border:1px solid #ffffff35;border-radius:12px;background:#ffffff12}
+.language-picker label{display:block;margin-bottom:8px;color:#fff;font-size:13px;font-weight:800}
+.language-picker select{width:100%;padding:12px;border:1px solid #ffffff55;border-radius:9px;background:#fff;color:#173d32;font:inherit;font-size:14px}
+.language-note{margin:8px 0 0;color:#d8eee3;font-size:11px}
+.google-translate-engine{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.goog-te-banner-frame{z-index:99999!important}
+body{top:0!important}
 .menu-link{display:block;color:#fff;text-decoration:none;padding:13px 14px;border-radius:7px;margin:3px 0;font-size:15px}.menu-link:hover,.menu-link:focus,.menu-link.active{background:#f08a00;color:#fff}.menu-link small{display:block;font-size:10px;opacity:.8;margin-top:2px}
 .menu-logout{display:block;width:100%;text-align:left;background:transparent;color:#fff;border:0;padding:14px;margin-top:8px;font-size:15px}
 .menu-disclaimer{font-size:11px;line-height:1.5;color:#d9e0ff;padding:15px 10px;border-top:1px solid #ffffff30}
@@ -454,6 +461,29 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <div id="customer-menu-backdrop" class="menu-backdrop" hidden></div>
 <aside id="customer-menu" class="customer-menu" aria-label="Customer navigation" aria-hidden="true">
 <div class="menu-brand">TopSafeB <span>Demo menu</span></div>
+<div class="language-picker">
+<label for="topsafeb-language">🌐 Language / Idioma</label>
+<select id="topsafeb-language" aria-label="Choose display language">
+<option value="en">English</option>
+<option value="es">Español — Spanish</option>
+<option value="fr">Français — French</option>
+<option value="pt">Português — Portuguese</option>
+<option value="de">Deutsch — German</option>
+<option value="it">Italiano — Italian</option>
+<option value="nl">Nederlands — Dutch</option>
+<option value="tr">Türkçe — Turkish</option>
+<option value="ar">العربية — Arabic</option>
+<option value="ha">Hausa</option>
+<option value="yo">Yorùbá — Yoruba</option>
+<option value="sw">Kiswahili — Swahili</option>
+<option value="hi">हिन्दी — Hindi</option>
+<option value="zh-CN">简体中文 — Chinese</option>
+<option value="ja">日本語 — Japanese</option>
+<option value="ru">Русский — Russian</option>
+</select>
+<p class="language-note">Choose a language to translate the dashboard.</p>
+</div>
+<div id="google_translate_element" class="google-translate-engine" aria-hidden="true"></div>
 <a class="menu-link" href="dashboard.html?view=home">Home</a>
 <a class="menu-link" href="dashboard.html?view=transfers">Transfers</a>
 <a class="menu-link" href="dashboard.html?view=transactions">Transactions</a>
@@ -1350,5 +1380,47 @@ loadSession().then(()=>clearTimeout(sessionWatchdog)).catch(error=>{clearTimeout
  }
 })();</script>
 
+
+<script>
+/* Optional Google Website Translator powers the customer language selector. */
+(function(){
+ const picker=document.getElementById("topsafeb-language");
+ if(!picker)return;
+ window.googleTranslateElementInit=function(){
+  if(!window.google||!google.translate||!google.translate.TranslateElement)return;
+  new google.translate.TranslateElement({
+   pageLanguage:"en",
+   includedLanguages:"es,fr,pt,de,it,nl,tr,ar,ha,yo,sw,hi,zh-CN,ja,ru",
+   autoDisplay:false
+  },"google_translate_element");
+  const saved=localStorage.getItem("topsafeb-language")||"en";
+  picker.value=saved;
+  if(saved!=="en")setTimeout(()=>applyLanguage(saved),700);
+ };
+ function applyLanguage(language){
+  const combo=document.querySelector(".goog-te-combo");
+  if(!combo){picker.value=localStorage.getItem("topsafeb-language")||"en";return;}
+  combo.value=language;
+  combo.dispatchEvent(new Event("change"));
+ }
+ picker.value=localStorage.getItem("topsafeb-language")||"en";
+ picker.addEventListener("change",()=>{
+  const language=picker.value;
+  try{localStorage.setItem("topsafeb-language",language);}catch{}
+  if(language==="en"){
+   const reset=document.querySelector(".goog-te-combo");
+   if(reset){reset.value="";reset.dispatchEvent(new Event("change"));}
+   else{document.cookie="googtrans=/en/en;path=/";document.cookie="googtrans=/en/en;path=/;domain="+location.hostname;}
+   return;
+  }
+  applyLanguage(language);
+ });
+ const translator=document.createElement("script");
+ translator.src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+ translator.async=true;
+ translator.onerror=()=>{const note=document.querySelector(".language-note");if(note)note.textContent="Translation service is unavailable. Please try again later.";};
+ document.head.appendChild(translator);
+})();
+</script>
 </body>
 </html>

@@ -548,21 +548,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <h3 class="bank-section-title">International demo transfer</h3>
 <p>Practise sending simulated USD to a fictional receiving bank in another country. Exchange rates are fixed teaching examples, not live rates.</p>
 <form id="oso-transfer-form" class="transfer-form">
-<label for="oso-country">Destination country</label>
-<select id="oso-country" required style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<option value="">Choose a country</option>
-<optgroup label="Africa">
-<option value="Nigeria">Nigeria (NGN)</option><option value="Ghana">Ghana (GHS)</option><option value="South Africa">South Africa (ZAR)</option><option value="Kenya">Kenya (KES)</option><option value="Uganda">Uganda (UGX)</option><option value="Tanzania">Tanzania (TZS)</option><option value="Rwanda">Rwanda (RWF)</option><option value="Zambia">Zambia (ZMW)</option><option value="Botswana">Botswana (BWP)</option><option value="Egypt">Egypt (EGP)</option><option value="Morocco">Morocco (MAD)</option><option value="Ethiopia">Ethiopia (ETB)</option><option value="Senegal">Senegal (XOF)</option><option value="Ivory Coast">Côte d’Ivoire (XOF)</option><option value="Cameroon">Cameroon (XAF)</option>
-</optgroup><optgroup label="Europe">
-<option value="United Kingdom">United Kingdom (GBP)</option><option value="Eurozone">Eurozone (EUR)</option><option value="Switzerland">Switzerland (CHF)</option><option value="Sweden">Sweden (SEK)</option><option value="Norway">Norway (NOK)</option><option value="Denmark">Denmark (DKK)</option><option value="Poland">Poland (PLN)</option><option value="Turkey">Türkiye (TRY)</option>
-</optgroup><optgroup label="Americas">
-<option value="United States">United States (USD)</option><option value="Canada">Canada (CAD)</option><option value="Mexico">Mexico (MXN)</option><option value="Brazil">Brazil (BRL)</option>
-</optgroup><optgroup label="Asia and Middle East">
-<option value="India">India (INR)</option><option value="China">China (CNY)</option><option value="Japan">Japan (JPY)</option><option value="Singapore">Singapore (SGD)</option><option value="Malaysia">Malaysia (MYR)</option><option value="Indonesia">Indonesia (IDR)</option><option value="Philippines">Philippines (PHP)</option><option value="Thailand">Thailand (THB)</option><option value="United Arab Emirates">United Arab Emirates (AED)</option><option value="Saudi Arabia">Saudi Arabia (SAR)</option>
-</optgroup><optgroup label="Oceania">
-<option value="Australia">Australia (AUD)</option><option value="New Zealand">New Zealand (NZD)</option>
-</optgroup>
-</select>
+<p class="muted">Destination country is not required. This practice transfer uses a fixed USD-only teaching example; no country or real bank is contacted.</p>
 <label for="oso-bank">Receiving bank name (type it yourself)</label>
 <input id="oso-bank" type="text" required minlength="2" maxlength="100" autocomplete="off" placeholder="Enter a fictional bank name" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
 <small class="muted">Enter any fictional receiving bank name for this demo transfer. No real bank is contacted.</small>
@@ -829,16 +815,15 @@ const demoFxRates={
  "China":{currency:"CNY",rate:7.2},"Japan":{currency:"JPY",rate:150},"Singapore":{currency:"SGD",rate:1.35},"Malaysia":{currency:"MYR",rate:4.7},"Indonesia":{currency:"IDR",rate:15600},"Philippines":{currency:"PHP",rate:56},"Thailand":{currency:"THB",rate:36},"United Arab Emirates":{currency:"AED",rate:3.67},"Saudi Arabia":{currency:"SAR",rate:3.75},
  "Australia":{currency:"AUD",rate:1.52},"New Zealand":{currency:"NZD",rate:1.65}
 };
-const countrySelect=document.getElementById("oso-country");
+const defaultDemoDestination="United States";
 const amountInput=document.getElementById("oso-amount");
 const conversionPreview=document.getElementById("oso-conversion-preview");
 function updateDemoConversion(){
- const country=demoFxRates[countrySelect.value];
+ const country=demoFxRates[defaultDemoDestination];
  const amount=Number(amountInput.value);
  if(!country||!Number.isFinite(amount)||amount<=0){conversionPreview.textContent="Choose a country and enter an amount to see the illustrative conversion.";return;}
  conversionPreview.textContent="Teaching example only: $"+amount.toFixed(2)+" USD ≈ "+new Intl.NumberFormat("en-US",{style:"currency",currency:country.currency}).format(amount*country.rate)+" "+country.currency+". This fixed example is not a live exchange rate.";
 }
-countrySelect.addEventListener("change",updateDemoConversion);
 amountInput.addEventListener("input",updateDemoConversion);
 async function checkCustomerTransferPermission(){
  const {data:restricted,error}=await supabase.rpc("customer_access_is_blocked");
@@ -943,7 +928,7 @@ async function submitOsoLocalTransfer(event){
   document.getElementById("receipt-amount").textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(amount);
   document.getElementById("receipt-recipient").textContent=recipient;
   document.getElementById("receipt-bank").textContent=bank+" (fictional demo bank)";
-  document.getElementById("receipt-country").textContent=country;
+  document.getElementById("receipt-country").textContent="International destination (country not specified)";
   document.getElementById("receipt-account").textContent="•••• "+accountNumber.slice(-4);
   document.getElementById("receipt-converted").textContent=converted+" (illustrative)";
   document.getElementById("receipt-date").textContent=new Date().toLocaleString();

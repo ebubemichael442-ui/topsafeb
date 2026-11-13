@@ -22,10 +22,10 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 </style>
 </head>
 <body>
-<header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="index.html">Home</a><a href="online-banking-demo.html">Demo</a></nav></header>
+<header><div class="brand"><span>◆</span> TopSafeB</div><nav><a href="index.html">Home</a><a href="online-banking-demo.html">Banking</a></nav></header>
 <main><section class="panel">
 <p class="muted">CUSTOMER ACCESS</p><h1>Welcome to TopSafeB</h1>
-<p class="muted">Sign in to your learning account, or create an account to get started.</p>
+<p class="muted">Sign in to your account, or create an account to get started.</p>
 <form id="auth-form">
 <div id="name-wrap" hidden><label for="full-name">Full name</label><input id="full-name" type="text" autocomplete="name" placeholder="Full name"></div>
 <label for="email">Email address</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
@@ -34,10 +34,10 @@ footer{background:var(--navy);color:#e4ebf3;padding:26px 5%;font-size:14px}
 <button type="button" class="secondary" id="reset-button">Forgot password?</button>
 </form>
 <div id="message" role="status" aria-live="polite">Connecting securely…</div>
-<div class="notice"><strong>Important:</strong> This is customer access for the TopSafeB educational website only. It is not a bank account and does not store deposits, balances or payment details. Never enter your bank password, PIN, card details or OTP here.</div>
+<div class="notice"><strong>Important:</strong> This is your TopSafeB customer sign-in. TopSafeB is not a bank and does not accept deposits or process real payments. Never enter your bank password, PIN, card details or OTP here.</div>
 <p class="small muted">Use an email address you control. Keep your password private.</p>
 </section></main>
-<footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
+<footer><strong>TopSafeB</strong><p>Financial information for everyday life.</p><p>TopSafeB is not a bank. It does not accept deposits or process real payments.</p><p>© 2026 TopSafeB.</p></footer>
 <script>
 const loadingMessage=document.getElementById("message");
 const supabaseLibrary=document.createElement("script");
@@ -82,7 +82,7 @@ resetButton.addEventListener("click",async()=>{
  try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error)throw error;say("If an account exists for that email, a password reset link will be sent.");}
  catch(error){say(error.message||"Unable to request a password reset.");}
 });
-withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your learning account.");if(session)window.location.assign("dashboard.html?tsb_build=20261111e");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
+withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your account.");if(session)window.location.assign("dashboard.html?tsb_build=20261111e");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
 };
 supabaseLibrary.onerror=()=>{loadingMessage.textContent="Could not load the secure sign-in service. Check your internet connection or try again later.";};
 setTimeout(()=>{if(!supabaseLibraryLoaded)loadingMessage.textContent="Still connecting to the secure sign-in service. Please allow up to 30 seconds on a slower mobile connection.";},15000);

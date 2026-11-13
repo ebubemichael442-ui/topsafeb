@@ -239,16 +239,9 @@ begin
   if coalesce((select c.is_blocked from public.customer_access_controls c where c.user_id = v_user_id), false) then
     raise exception 'Transfers are temporarily restricted by the TopSafeB owner. Please contact TopSafeB support.';
   end if;
-  if p_bank_name is null or p_bank_name not in (
-    'Oso Local Bank',
-    'Rivergate Community Bank',
-    'Maple Street Savings Bank',
-    'Harborlight Local Bank',
-    'Pioneer Town Bank',
-    'Greenfield Neighbourhood Bank',
-    'Unity Corner Bank',
-    'Westbridge Local Bank'
-  ) then raise exception 'Choose one of the listed fictional demo banks'; end if;
+  if p_bank_name is null or length(trim(p_bank_name)) < 2 or length(trim(p_bank_name)) > 100 then
+    raise exception 'Enter a fictional bank name between 2 and 100 characters';
+  end if;
   if p_recipient_name is null or length(trim(p_recipient_name)) < 2 or length(p_recipient_name) > 100 then
     raise exception 'Enter a valid recipient name';
   end if;

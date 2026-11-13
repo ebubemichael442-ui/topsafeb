@@ -151,7 +151,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
   <div><p class="hero-kicker">PRIVATE OWNER ACCESS · TOPSAFEB</p><h1>Welcome to your Control Centre</h1><p>Manage your customer community, review activity and oversee practice accounts from one place.</p></div>
   <div class="hero-status"><span class="hero-orb">◆</span><strong>Practice platform</strong><small>Simulation only · No real funds</small></div>
 </section>
-<nav class="owner-shortcuts" aria-label="Owner dashboard shortcuts"><a href="#registered-customers"><span>♙</span>Customers</a><a href="#topup-requests"><span>＋</span>Top-up requests</a><a href="#demo-funds-manager"><span>＄</span>Practice funds</a><a href="#feedback-management"><span>☆</span>Customer feedback</a><a href="#owner-activity-log"><span>◷</span>Owner activity log</a><a href="#live-support-inbox"><span>▤</span>Customer messages</a><a href="#account-notices"><span>▧</span>Account notices</a><a href="#tracking-manager"><span>⌖</span>Tracking Manager</a><a href="track.html" target="_blank" rel="noopener"><span>↗</span>Public Tracker</a></nav>
+<nav class="owner-shortcuts" aria-label="Owner dashboard shortcuts"><a href="#registered-customers"><span>♙</span>Customers</a><a href="#topup-requests"><span>＋</span>Top-up requests</a><a href="#demo-funds-manager"><span>＄</span>Practice funds</a><a href="#feedback-management"><span>☆</span>Customer feedback</a><a href="#owner-activity-log"><span>◷</span>Owner activity log</a><a href="#live-support-inbox"><span>▤</span>Customer messages</a><a href="#account-notices"><span>▧</span>Account notices</a><a href="#tracking-manager"><span>⌖</span>Tracking Manager</a></nav>
 <div class="dashboard-grid" aria-label="Practice operations overview"><article class="summary-card"><h2>Customer portfolio</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p><span class="metric-foot">Customer profiles</span></article><article class="summary-card"><h2>Total practice funds</h2><p class="muted">Illustrative USD balances</p><p class="stat" id="total-demo-funds">—</p><span class="metric-foot">Not real deposits or cash</span></article><article class="summary-card"><h2 class="section-heading"><span class="section-icon feedback" aria-hidden="true">★</span><span>Customer Feedback<small>Ratings and feedback submissions</small></span></h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p><span class="metric-foot">Private support records</span></article><article class="summary-card"><h2>Owner demo balance</h2><p class="muted">Funds received from customer demo transfers</p><p class="stat" id="owner-demo-balance">—</p><span class="metric-foot">Illustrative USD balance</span></article><article class="summary-card"><h2>Learning progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p><span class="metric-foot">Across customer accounts</span></article></div>
 <section class="panel">
 <p class="muted">SIGNED-IN OWNER</p>
@@ -893,7 +893,7 @@ async function saveManagedCustomerName(){
   const {data,error}=await supabase.from("shipment_tracking").select("*,shipment_tracking_updates(*)").eq("owner_id",currentOwnerId).order("created_at",{ascending:false});
   if(error){status.textContent="Tracking database is not ready. Open supabase/shipment-tracking-setup.sql in your repository and run it in Supabase SQL Editor. Details: "+error.message;list.replaceChildren();return;}
   render(data||[]);
-  status.textContent=(data||[]).length+" tracking record(s) loaded. Public lookup page: track.html";
+  status.textContent=(data||[]).length+" tracking record(s) loaded. Tracking records loaded.";
  }
  function render(records){
   list.replaceChildren();
@@ -924,7 +924,7 @@ async function saveManagedCustomerName(){
    const copy=node("button","Copy code");copy.type="button";copy.className="secondary";copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(record.tracking_code);status.textContent="Tracking code copied.";}catch(_){status.textContent="Copy unavailable. Code: "+record.tracking_code;}});
    const open=node("button","Open public tracker");open.type="button";open.className="secondary";open.addEventListener("click",()=>window.open("track.html?code="+encodeURIComponent(record.tracking_code),"_blank"));
    const remove=node("button","Delete");remove.type="button";remove.className="secondary";remove.addEventListener("click",async()=>{if(!window.confirm("Delete tracking record "+record.tracking_code+"?"))return;remove.disabled=true;const {error:deleteError}=await supabase.from("shipment_tracking").delete().eq("id",record.id).eq("owner_id",currentOwnerId);if(deleteError){status.textContent="Could not delete tracking record: "+deleteError.message;remove.disabled=false;return;}status.textContent="Tracking record deleted.";await loadTrackingRecords();});
-   actions.append(save,copy,open,remove);card.append(actions);list.append(card);
+   actions.append(save,copy,remove);card.append(actions);list.append(card);
   }
  }
  form.addEventListener("submit",async event=>{
@@ -939,7 +939,7 @@ async function saveManagedCustomerName(){
   const {error:historyError}=await supabase.from("shipment_tracking_updates").insert({shipment_id:data.id,owner_id:currentOwnerId,status:record.status,location:"",note:"Tracking record created"});
   form.reset();button.disabled=false;button.textContent="Generate tracking code";
   if(historyError)status.textContent="Tracking code created, but initial history could not be saved: "+historyError.message;
-  else status.textContent="Created tracking code "+record.tracking_code+". Public tracking page: track.html";
+  else status.textContent="Created tracking code "+record.tracking_code+". Tracking record saved in your owner dashboard.";
   await loadTrackingRecords();
  });
  document.getElementById("tracking-export").addEventListener("click",async()=>{

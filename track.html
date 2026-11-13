@@ -45,7 +45,7 @@ const el=(tag,value,cls)=>{const n=document.createElement(tag);if(value!==undefi
 const date=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?"—":d.toLocaleString();};
 function show(record){
  result.replaceChildren();result.hidden=false;
- const head=el("div","Current status","muted");result.append(head,el("p",record.status,"#status"));
+ const head=el("div","Current status","muted");const current=el("p",record.status);current.id="status";result.append(head,current);
  const grid=el("div",undefined,"grid");
  for(const [label,value] of [["Tracking code",record.tracking_code],["Parcel",record.parcel_description||"—"],["Sender",record.sender_name],["Recipient",record.recipient_name],["From",record.origin_address],["To",record.destination_address],["Created",date(record.created_at)],["Last updated",date(record.updated_at)]]){const item=el("div",undefined,"item");item.append(el("strong",label),el("span",value));grid.append(item);}
  result.append(grid,el("h2","Tracking history"));

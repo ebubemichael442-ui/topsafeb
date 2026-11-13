@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="TopSafeB customer learning dashboard.">
+<meta name="description" content="TopSafeB customer dashboard.">
 <title>Customer Dashboard | TopSafeB</title>
 <style>
 /* Respect the hidden attribute even when component styles set display. */
@@ -455,12 +455,12 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <a href="dashboard.html?view=transactions">Activity</a>
 <a href="dashboard.html?view=cards">Cards</a>
 <a href="dashboard.html?view=savings">Savings</a>
-<a href="dashboard.html?view=learning">Learning</a>
+<a href="dashboard.html?view=learning">Resources</a>
 <a href="messages.html">Messages</a>
 </nav>
 <div id="customer-menu-backdrop" class="menu-backdrop" hidden></div>
 <aside id="customer-menu" class="customer-menu" aria-label="Customer navigation" aria-hidden="true">
-<div class="menu-brand">TopSafeB <span>Demo menu</span></div>
+<div class="menu-brand">TopSafeB <span>Account menu</span></div>
 <div class="language-picker">
 <label for="topsafeb-language">🌐 Language / Idioma</label>
 <select id="topsafeb-language" aria-label="Choose display language">
@@ -489,11 +489,11 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <a class="menu-link" href="dashboard.html?view=transactions">Transactions</a>
 <a class="menu-link" href="dashboard.html?view=cards">Cards</a>
 <a class="menu-link" href="dashboard.html?view=savings">Savings &amp; Budgeting</a>
-<a class="menu-link" href="dashboard.html?view=learning">Learning</a>
+<a class="menu-link" href="dashboard.html?view=learning">Resources</a>
 <a class="menu-link" href="dashboard.html?view=password">Change password</a>
 <a class="menu-link" href="messages.html">Messages &amp; Support</a>
 <button id="menu-logout" class="menu-logout" type="button">Logout</button>
-<p class="menu-disclaimer">All account features are simulated. No real deposits, cards, loans, crypto or bank transfers are provided.</p>
+<p class="menu-disclaimer">TopSafeB is not a bank and does not process real deposits or payments.</p>
 </aside>
 <main id="customer-home">
 
@@ -517,94 +517,94 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 </form>
 </section>
 <section class="bank-dashboard" id="customer-demo-funds">
-<div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB • DEMO ACCOUNT</p><h2>Demo Account Overview</h2><p class="bank-subtitle">Your practice account</p></div><span class="demo-pill">SIMULATION ONLY</span></div>
-<div class="market-strip" aria-label="Financial learning indicators"><div><span>Market learning</span><strong>Risk &amp; return</strong><small>Understand market movement</small></div><div><span>Money skills</span><strong>Budgeting</strong><small>Plan and track spending</small></div><div><span>Account safety</span><strong>Privacy basics</strong><small>Learn safe account habits</small></div></div>
-<div class="account-card"><div class="account-card-head"><div><span class="account-label">DEMO CHECKING ACCOUNT</span><h3>Available Demo Balance</h3></div><span class="account-symbol" aria-hidden="true">◆</span></div><p id="customer-demo-balance" class="bank-balance">$0.00</p><div class="account-meta"><span>Account holder: <strong id="bank-account-holder">TopSafeB Customer</strong></span><span>Currency: <strong>USD</strong></span></div><div class="account-meta"><span>Account number: <strong>DEMO •••• 0000</strong></span></div><p id="demo-account-status" class="bank-account-status" role="status" aria-live="polite" hidden></p></div>
+<div class="bank-dashboard-top"><div><p class="eyebrow">TOPSAFEB ACCOUNT</p><h2>Account Overview</h2><p class="bank-subtitle">Your account</p></div><span class="demo-pill"></span></div>
+<div class="market-strip" aria-label="Account information"><div><span>Markets</span><strong>Risk &amp; return</strong><small>Understand market movement</small></div><div><span>Money management</span><strong>Budgeting</strong><small>Plan and track spending</small></div><div><span>Account safety</span><strong>Privacy basics</strong><small>Account safety</small></div></div>
+<div class="account-card"><div class="account-card-head"><div><span class="account-label">CHECKING ACCOUNT</span><h3>Available Balance</h3></div><span class="account-symbol" aria-hidden="true">◆</span></div><p id="customer-demo-balance" class="bank-balance">$0.00</p><div class="account-meta"><span>Account holder: <strong id="bank-account-holder">TopSafeB Customer</strong></span><span>Currency: <strong>USD</strong></span></div><div class="account-meta"><span>Account number: <strong>•••• 0000</strong></span></div><p id="demo-account-status" class="bank-account-status" role="status" aria-live="polite" hidden></p></div>
 <section class="topup-card" id="demo-add-money">
-<h3>＋ Add demo money</h3>
-<p>Request an illustrative USD balance top-up. Your owner must approve it before your demo balance changes.</p>
+<h3>＋ Request funds</h3>
+<p>Request a USD balance adjustment. Your owner must approve it before your balance changes.</p>
 <form id="demo-topup-form" class="transfer-form">
 <label for="demo-topup-amount">Amount to request (USD)</label>
 <input id="demo-topup-amount" type="number" min="1" max="1000000000" step="0.01" inputmode="decimal" placeholder="Enter amount" required>
 <label for="demo-topup-note">Reason (optional)</label>
-<input id="demo-topup-note" maxlength="200" placeholder="e.g. Demo account funding">
+<input id="demo-topup-note" maxlength="200" placeholder="e.g. Account funding">
 <button type="submit" id="demo-topup-submit">Submit top-up request</button>
 <p id="demo-topup-status" role="status" aria-live="polite"></p>
 </form>
 <div class="topup-history"><strong>Your top-up requests</strong><div id="demo-topup-history" aria-live="polite"><p class="muted">Loading requests…</p></div></div>
 
 </section>
-<div class="quick-actions"><a class="quick-action primary-action" href="#transfer-centre"><span aria-hidden="true">↗</span> Make Demo Transfer</a><a class="quick-action" href="#customer-demo-history"><span aria-hidden="true">▤</span> View Activity</a><a class="quick-action" href="#learning-progress"><span aria-hidden="true">◎</span> Learning</a></div>
-<div class="demo-warning"><strong>Demo funds — not real money.</strong> This fictional balance is only for education. It cannot be withdrawn, redeemed, or transferred outside TopSafeB. No real bank is connected.</div>
+<div class="quick-actions"><a class="quick-action primary-action" href="#transfer-centre"><span aria-hidden="true">↗</span> Make Transfer</a><a class="quick-action" href="#customer-demo-history"><span aria-hidden="true">▤</span> View Activity</a><a class="quick-action" href="#learning-progress"><span aria-hidden="true">◎</span> Learning</a></div>
+<div class="demo-warning"></div>
 <div id="transfer-centre">
 <h3 class="bank-section-title">Transfer Centre</h3>
-<div class="transfer-type-grid" aria-label="Choose a demo transfer type">
-<a class="transfer-type-card" href="#owner-demo-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🏛️</span><span class="transfer-type-title">Transfer to Owner</span><span class="transfer-type-description">Move demo USD to the verified TopSafeB owner account</span><span class="transfer-type-action">Open owner transfer →</span></a>
-<a class="transfer-type-card" href="#local-demo-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🏦</span><span class="transfer-type-title">Local Transfer</span><span class="transfer-type-description">Domestic USD demo transfer</span><span class="transfer-type-action">Open local transfer →</span></a>
-<a class="transfer-type-card international" href="#oso-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🌍</span><span class="transfer-type-title">International Transfer</span><span class="transfer-type-description">Demo sending to another country</span><span class="transfer-type-action">Open international transfer →</span></a>
+<div class="transfer-type-grid" aria-label="Choose a transfer type">
+<a class="transfer-type-card" href="#owner-demo-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🏛️</span><span class="transfer-type-title">Transfer to Owner</span><span class="transfer-type-description">Move USD to the TopSafeB owner account</span><span class="transfer-type-action">Open owner transfer →</span></a>
+<a class="transfer-type-card" href="#local-demo-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🏦</span><span class="transfer-type-title">Local Transfer</span><span class="transfer-type-description">Domestic USD transfer</span><span class="transfer-type-action">Open local transfer →</span></a>
+<a class="transfer-type-card international" href="#oso-transfer-form"><span class="transfer-type-icon" aria-hidden="true">🌍</span><span class="transfer-type-title">International Transfer</span><span class="transfer-type-description">International transfer</span><span class="transfer-type-action">Open international transfer →</span></a>
 </div>
-<p>Choose a demo transfer type. These options use fictional banks and sample account details only.</p>
+<p>Choose a transfer type.</p>
 <section class="topup-card" id="owner-demo-transfer-form">
 <h3>🏛️ Transfer to TopSafeB Owner</h3>
-<p>Send simulated USD from your customer demo balance to the verified owner demo account. No real money or external bank is involved.</p>
+<p>Send USD from your TopSafeB account to the owner account.</p>
 <form id="customer-owner-transfer-form" class="transfer-form">
 <label for="customer-owner-transfer-amount">Amount (USD)</label>
 <input id="customer-owner-transfer-amount" type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="Enter amount" required>
 <label for="customer-owner-transfer-note">Description (optional)</label>
-<input id="customer-owner-transfer-note" maxlength="200" placeholder="e.g. Practice transfer to owner">
-<button id="customer-owner-transfer-submit" type="submit">Transfer demo funds to owner</button>
+<input id="customer-owner-transfer-note" maxlength="200" placeholder="e.g. Transfer to owner">
+<button id="customer-owner-transfer-submit" type="submit">Transfer funds to owner</button>
 <p id="customer-owner-transfer-status" role="status" aria-live="polite"></p>
 </form>
-<p class="topup-disclaimer">SIMULATION ONLY — this moves fictional balances inside TopSafeB.</p>
+<p class="topup-disclaimer"> — this moves fictional balances inside TopSafeB.</p>
 </section>
 <h3 class="bank-section-title">Local bank transfer</h3>
-<p>Practise a domestic USD transfer between fictional banks in the TopSafeB learning environment.</p>
+<p>Make a domestic USD transfer.</p>
 <form id="local-demo-transfer-form" class="transfer-form">
 <label for="local-demo-bank">Receiving bank name (type it yourself)</label>
 <input id="local-demo-bank" type="text" required minlength="2" maxlength="100" autocomplete="off" placeholder="Enter the receiving bank name">
-<small class="muted">Type the fictional receiving bank name for this local demo transfer. No real bank is contacted.</small>
+<small class="muted">Enter the receiving bank name.</small>
 <label for="local-demo-recipient">Recipient name</label>
 <input id="local-demo-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample">
 <label for="local-demo-account">Fictional account number (8–16 digits)</label>
 <input id="local-demo-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678">
-<label for="local-demo-amount">Amount to practise sending (USD)</label>
+<label for="local-demo-amount">Amount to send (USD)</label>
 <input id="local-demo-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00">
 <label for="local-demo-description">Transfer description (optional)</label>
-<input id="local-demo-description" maxlength="120" autocomplete="off" placeholder="Demo local transfer">
-<button id="local-demo-transfer-submit" type="submit">Make local demo transfer</button>
+<input id="local-demo-description" maxlength="120" autocomplete="off" placeholder="Local transfer">
+<button id="local-demo-transfer-submit" type="submit">Make local transfer</button>
 <p id="local-demo-transfer-status" class="muted" role="status" aria-live="polite"></p>
 </form>
-<h3 class="bank-section-title">International demo transfer</h3>
-<p>Practise sending simulated USD to a fictional receiving bank in another country. Exchange rates are fixed teaching examples, not live rates.</p>
+<h3 class="bank-section-title">International transfer</h3>
+<p>Send USD to a receiving bank in another country. Exchange rates shown are estimates.</p>
 <form id="oso-transfer-form" class="transfer-form">
-<p class="muted">Destination country is not required. This practice transfer uses a fixed USD-only teaching example; no country or real bank is contacted.</p>
+<p class="muted">Destination country is optional.</p>
 <label for="oso-bank">Receiving bank name (type it yourself)</label>
 <input id="oso-bank" type="text" required minlength="2" maxlength="100" autocomplete="off" placeholder="Enter a fictional bank name" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<small class="muted">Enter any fictional receiving bank name for this demo transfer. No real bank is contacted.</small>
+<small class="muted">Enter the receiving bank name.</small>
 <label for="oso-recipient">Recipient name</label>
 <input id="oso-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
 <label for="oso-account">Fictional account number (8–16 digits)</label>
 <input id="oso-account" required minlength="8" maxlength="16" inputmode="numeric" pattern="[0-9]{8,16}" autocomplete="off" placeholder="12345678" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<label for="oso-amount">Amount to practise sending (USD)</label>
+<label for="oso-amount">Amount to send (USD)</label>
 <input id="oso-amount" required type="number" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<p id="oso-conversion-preview" class="conversion-preview" aria-live="polite">Choose a country and enter an amount to see the illustrative conversion.</p>
+<p id="oso-conversion-preview" class="conversion-preview" aria-live="polite">Enter an amount to see the estimated conversion.</p>
 <label for="oso-description">Transfer description (optional)</label>
-<input id="oso-description" maxlength="120" autocomplete="off" placeholder="Demo international transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
-<button id="oso-transfer-submit" type="submit">Make simulated international transfer</button>
+<input id="oso-description" maxlength="120" autocomplete="off" placeholder="International transfer" style="padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">
+<button id="oso-transfer-submit" type="submit">Make international transfer</button>
 <p id="oso-transfer-status" class="muted" role="status" aria-live="polite"></p>
 </form>
 
 
 <section id="demo-transfer-receipt" class="panel" hidden aria-labelledby="receipt-title">
-  <div class="receipt-head"><div><p class="receipt-brand">◆ TOPSAFEB</p><p class="receipt-kicker">DEMO RECEIPT</p></div><span class="receipt-status">SUCCESSFUL</span></div>
+  <div class="receipt-head"><div><p class="receipt-brand">◆ TOPSAFEB</p><p class="receipt-kicker">TRANSFER RECEIPT</p></div><span class="receipt-status">SUCCESSFUL</span></div>
   <h2 id="receipt-title">Transfer completed</h2>
   <p class="receipt-amount" id="receipt-amount">$0.00</p>
-  <p class="receipt-caption">Amount sent · USD demo balance</p>
+  <p class="receipt-caption">Amount sent · USD</p>
   <div class="receipt-details">
     <div><span>Recipient</span><strong id="receipt-recipient">—</strong></div>
     <div><span>Receiving bank</span><strong id="receipt-bank">—</strong></div>
     <div><span>Destination</span><strong id="receipt-country">—</strong></div>
-    <div><span>Demo account</span><strong id="receipt-account">—</strong></div>
+    <div><span>Account</span><strong id="receipt-account">—</strong></div>
     <div><span>Illustrative received amount</span><strong id="receipt-converted">—</strong></div>
     <div><span>Date and time</span><strong id="receipt-date">—</strong></div>
     <div><span>Transaction reference</span><strong id="receipt-reference">—</strong></div>
@@ -613,15 +613,15 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
   <div class="receipt-actions"><button type="button" id="print-demo-receipt">Print receipt</button><button type="button" id="download-demo-receipt">Save receipt as PDF</button><button type="button" class="secondary" id="close-demo-receipt">Close</button></div><p id="receipt-save-status" class="muted" role="status" aria-live="polite"></p>
 </section>
 
-<div class="activity-heading-row"><div><h3 class="bank-section-title">Recent demo activity</h3><p class="activity-subtitle">Your latest demo account entries</p></div><button type="button" id="download-demo-statement" class="secondary activity-download-button">↓ Download activity statement</button></div>
+<div class="activity-heading-row"><div><h3 class="bank-section-title">Recent activity</h3><p class="activity-subtitle">Your latest account entries</p></div><button type="button" id="download-demo-statement" class="secondary activity-download-button">↓ Download activity statement</button></div>
 <p id="demo-statement-status" class="muted" role="status" aria-live="polite"></p>
 <div id="customer-demo-history" class="activity-list"></div>
 </section>
-<section class="panel feature-learning" id="blockchain-learning"><h2>Blockchain transfer learning demo</h2><p>This section explains how blockchain transfers work. TopSafeB does not connect to a blockchain, wallet or cryptocurrency network and cannot send crypto.</p><div class="notice">Demo only: no crypto assets, wallet addresses or blockchain transactions are used here.</div><a class="button" href="#blockchain-history">View sample ledger</a></section>
-<section class="panel feature-learning" id="blockchain-history"><h2>Sample blockchain history</h2><p>This is an educational example, not a real blockchain explorer or transaction record.</p><div class="activity-list"><article class="sample-ledger">Example only · Demo transaction TX-DEMO-001 · Status: Not broadcast</article><article class="sample-ledger">Example only · Demo transaction TX-DEMO-002 · Status: Not broadcast</article></div></section>
-<section class="panel feature-learning" id="demo-deposit-info"><h2>Demo deposits</h2><p>TopSafeB does not accept deposits. Only the owner can add clearly labelled demo funds through the owner dashboard. Customers cannot deposit real money here.</p><a class="button" href="#customer-demo-funds">View demo account</a></section>
-<section class="panel feature-learning" id="virtual-cards-info"><h2>Virtual card learning</h2><p>Learn how virtual cards can help protect online purchases. TopSafeB does not issue cards, card numbers, payment credentials or spending access.</p></section>
-<section class="panel feature-learning" id="quick-loan-info"><h2>Loan learning guide</h2><p>Explore loan interest, repayment schedules, affordability and the risks of borrowing. TopSafeB does not offer loans or approve credit.</p></section>
+<section class="panel feature-learning" id="blockchain-learning"><h2>Blockchain transfers</h2><p>This section explains how blockchain transfers work. TopSafeB does not connect to a blockchain, wallet or cryptocurrency network and cannot send crypto.</p><div class="notice">No crypto assets, wallet addresses or blockchain transactions are used here.</div><a class="button" href="#blockchain-history">View sample ledger</a></section>
+<section class="panel feature-learning" id="blockchain-history"><h2>Sample blockchain history</h2><p>This is an example, not a blockchain explorer or transaction record.</p><div class="activity-list"><article class="sample-ledger">Example · Transaction TX-DEMO-001 · Status: Not broadcast</article><article class="sample-ledger">Example · Transaction TX-DEMO-002 · Status: Not broadcast</article></div></section>
+<section class="panel feature-learning" id="demo-deposit-info"><h2>Deposits</h2><p>TopSafeB does not accept deposits. Only the owner can adjust account balances through the owner dashboard.</p><a class="button" href="#customer-demo-funds">View account</a></section>
+<section class="panel feature-learning" id="virtual-cards-info"><h2>Virtual cards</h2><p>Learn how virtual cards can help protect online purchases. TopSafeB does not issue cards, card numbers, payment credentials or spending access.</p></section>
+<section class="panel feature-learning" id="quick-loan-info"><h2>Loan information</h2><p>Explore loan interest, repayment schedules, affordability and the risks of borrowing. TopSafeB does not offer loans or approve credit.</p></section>
 <section class="panel" id="customer-support" style="margin-top:22px">
 <button type="button" class="support-chat-close" id="close-customer-support" aria-label="Close messages">Close ✕</button>
 <div class="message-centre-heading"><div><p class="message-centre-kicker">PRIVATE CUSTOMER SUPPORT</p><h2>Message Centre</h2><p class="muted">A private conversation between you and TopSafeB Support.</p></div><span class="message-online"><i></i> Secure inbox</span></div>
@@ -642,16 +642,16 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 
 </section>
 
-<section class="panel feature-learning" id="savings-learning" style="margin:20px 0"><h2>Savings &amp; budgeting demo</h2><p>Build a simple spending plan, set a savings goal and learn how regular contributions can add up over time.</p><div class="grid"><article class="tile"><h3>Plan your spending</h3><p>Separate needs, wants and savings before deciding how to use a monthly budget.</p></article><article class="tile"><h3>Set a savings goal</h3><p>Choose a target amount, a time frame and a realistic regular contribution.</p></article><article class="tile"><h3>Review progress</h3><p>Check your plan regularly and adjust it when your circumstances change.</p></article></div><p class="muted">Educational guidance only. This page does not open a savings account or accept deposits.</p></section>
+<section class="panel feature-learning" id="savings-learning" style="margin:20px 0"><h2>Savings &amp; budgeting</h2><p>Build a simple spending plan, set a savings goal and track regular contributions over time.</p><div class="grid"><article class="tile"><h3>Plan your spending</h3><p>Separate needs, wants and savings before deciding how to use a monthly budget.</p></article><article class="tile"><h3>Set a savings goal</h3><p>Choose a target amount, a time frame and a realistic regular contribution.</p></article><article class="tile"><h3>Review progress</h3><p>Check your plan regularly and adjust it when your circumstances change.</p></article></div><p class="muted">This page does not open a savings account or accept deposits.</p></section>
 <section class="panel" id="learning-progress" style="margin-top:22px">
-<h2>Your learning progress</h2>
-<p class="muted">Tick each lesson when you finish it. Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>
+<h2>Your progress</h2>
+<p class="muted">Your progress is saved to your TopSafeB account and can be viewed in the Owner Dashboard.</p>
 <div id="progress-summary" role="status" aria-live="polite">0 of 4 lessons completed</div>
 <div style="height:10px;background:#e9eef5;border-radius:99px;overflow:hidden;margin:12px 0 20px"><div id="progress-bar" style="height:100%;width:0%;background:#194875;transition:width .2s"></div></div>
 <div style="display:grid;gap:12px">
 <label><input class="lesson-check" type="checkbox" data-lesson="investing"> Investment Basics — risk, return and diversification</label>
 <label><input class="lesson-check" type="checkbox" data-lesson="safety"> Financial Safety — scams and protecting information</label>
-<label><input class="lesson-check" type="checkbox" data-lesson="banking"> Banking Demonstration — understanding a sample account</label>
+<label><input class="lesson-check" type="checkbox" data-lesson="banking"> Banking account overview</label>
 <label><input class="lesson-check" type="checkbox" data-lesson="research"> Research and fees — checking products before investing</label>
 </div>
 <button id="reset-progress" class="secondary" type="button" style="margin-top:18px">Reset progress</button>
@@ -661,15 +661,15 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <h2 style="font-size:30px">Certificate of Achievement</h2>
 <p>This certificate is proudly presented to</p>
 <h2 id="certificate-name" style="font-size:28px;border-bottom:2px solid var(--gold);display:inline-block;padding:0 18px 8px">TopSafeB Customer</h2>
-<p>for completing all four lessons in the TopSafeB financial education programme.</p>
+<p>for completing the four TopSafeB programme topics.</p>
 <p><strong>Topics completed:</strong> Investment Basics, Financial Safety, Banking Demonstration, and Research and Fees.</p>
 <p id="certificate-date" class="muted"></p>
-<p style="margin-top:28px;font-weight:bold;color:var(--navy)">TopSafeB Learning Programme</p>
+<p style="margin-top:28px;font-weight:bold;color:var(--navy)">TopSafeB Programme</p>
 <button id="download-certificate" type="button">Download Certificate PDF</button> <button id="print-certificate" class="secondary" type="button">Print Certificate</button>
-<p class="muted" style="font-size:12px">Educational recognition only. This is not a professional qualification, licence or financial accreditation.</p>
+<p class="muted" style="font-size:12px">This certificate is not a professional qualification, licence or financial accreditation.</p>
 </section>
 <section class="panel" style="margin-top:22px">
-<h2>Learning topics</h2>
+<h2>Financial topics</h2>
 <div class="grid">
 <article class="tile"><h2>Saving and budgeting</h2><p>Understand spending plans, emergency savings and financial goals.</p></article>
 <article class="tile"><h2>Understanding credit</h2><p>Learn about borrowing, interest, repayments and responsible credit use.</p></article>
@@ -677,7 +677,7 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 </div>
 </section>
 </main>
-<footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is an educational platform, not a bank. It does not accept deposits or process payments.</p><p>© 2026 TopSafeB.</p></footer>
+<footer><strong>TopSafeB</strong><p>Financial knowledge for everyday life.</p><p>TopSafeB is not a bank and does not accept deposits or process real payments.</p><p>© 2026 TopSafeB.</p></footer>
 <script>
 /* Runs before the external Supabase library: never leave the customer on a silent loading screen. */
  setTimeout(()=>{const status=document.getElementById("status");if(status&&status.textContent==="Checking your sign-in session…")status.textContent="TopSafeB is still connecting to the secure sign-in service. Please keep this page open while the backup connection is checked.";},75000);
@@ -773,7 +773,7 @@ async function saveProgress(ids){
   const now=new Date().toISOString();
   const {error}=await supabase.from("learning_progress").upsert({user_id:currentUserId,completed_lessons:ids,updated_at:now,completed_at:ids.length===lessonIds.length?now:null},{onConflict:"user_id"});
   if(error){statusEl.textContent="Your change is saved on this device, but account sync failed: "+error.message;}
-  else{statusEl.textContent="Your learning progress is saved to your TopSafeB account.";}
+  else{statusEl.textContent="Your progress is saved to your TopSafeB account.";}
 }
 async function loadProgress(userId){
   currentUserId=userId;
@@ -819,13 +819,13 @@ document.getElementById("download-certificate").addEventListener("click",async()
     pdf.text(customerName,width/2,101,{align:"center"});
     pdf.setDrawColor(223,189,112);pdf.setLineWidth(.8);pdf.line(55,106,width-55,106);
     pdf.setTextColor(24,50,82);pdf.setFont("helvetica","normal");pdf.setFontSize(13);
-    pdf.text("for completing all four lessons in the TopSafeB financial education programme.",width/2,121,{align:"center"});
+    pdf.text("for completing the four TopSafeB programme topics.",width/2,121,{align:"center"});
     pdf.setFontSize(11);
     pdf.text("Topics completed: Investment Basics, Financial Safety, Banking Demonstration, and Research and Fees.",width/2,135,{align:"center"});
     pdf.text(certificateDate.textContent,width/2,149,{align:"center"});
-    pdf.setFont("helvetica","bold");pdf.text("TopSafeB Learning Programme",width/2,165,{align:"center"});
+    pdf.setFont("helvetica","bold");pdf.text("TopSafeB Programme",width/2,165,{align:"center"});
     pdf.setFont("helvetica","normal");pdf.setFontSize(8);
-    pdf.text("Educational recognition only. This is not a professional qualification, licence or financial accreditation.",width/2,180,{align:"center"});
+    pdf.text("This certificate is not a professional qualification, licence or financial accreditation.",width/2,180,{align:"center"});
     const safeName=customerName.replace(/[^a-z0-9_-]+/gi,"_").replace(/^_+|_+$/g,"")||"Customer";
     pdf.save("TopSafeB_Certificate_"+safeName+".pdf");
   }catch(error){
@@ -850,7 +850,7 @@ const conversionPreview=document.getElementById("oso-conversion-preview");
 function updateDemoConversion(){
  const country=demoFxRates[defaultDemoDestination];
  const amount=Number(amountInput.value);
- if(!country||!Number.isFinite(amount)||amount<=0){conversionPreview.textContent="Choose a country and enter an amount to see the illustrative conversion.";return;}
+ if(!country||!Number.isFinite(amount)||amount<=0){conversionPreview.textContent="Enter an amount to see the estimated conversion.";return;}
  conversionPreview.textContent="Teaching example only: $"+amount.toFixed(2)+" USD ≈ "+new Intl.NumberFormat("en-US",{style:"currency",currency:country.currency}).format(amount*country.rate)+" "+country.currency+". This fixed example is not a live exchange rate.";
 }
 amountInput.addEventListener("input",updateDemoConversion);
@@ -900,7 +900,7 @@ async function submitLocalDemoTransfer(event){
  }catch(error){
   status.textContent="Demo transfer not completed: "+(error.message||"Please try again.");
  }finally{
-  button.disabled=false;button.textContent="Make local demo transfer";
+  button.disabled=false;button.textContent="Make local transfer";
  }
 }
 document.getElementById("local-demo-transfer-form").addEventListener("submit",submitLocalDemoTransfer);
@@ -925,7 +925,7 @@ document.getElementById("customer-owner-transfer-form").addEventListener("submit
   form.reset();
   await loadCustomerDemoFunds(currentUserId);
  }catch(error){status.textContent="Transfer not completed: "+(error.message||"Please try again.");}
- finally{button.disabled=false;button.textContent="Transfer demo funds to owner";}
+ finally{button.disabled=false;button.textContent="Transfer funds to owner";}
 });
 
 async function submitOsoLocalTransfer(event){
@@ -962,7 +962,7 @@ async function submitOsoLocalTransfer(event){
   document.getElementById("receipt-converted").textContent=converted+" (illustrative)";
   document.getElementById("receipt-date").textContent=new Date().toLocaleString();
   document.getElementById("receipt-reference").textContent=reference;
-  document.getElementById("receipt-description").textContent=description||"International demo transfer";
+  document.getElementById("receipt-description").textContent=description||"International transfer";
   receipt.hidden=false;
   status.textContent="Demo transfer recorded. Reference: "+reference+". No real funds transferred.";
   receipt.scrollIntoView({behavior:"smooth",block:"center"});
@@ -971,7 +971,7 @@ async function submitOsoLocalTransfer(event){
  }catch(error){
   status.textContent="Transfer not completed: "+(error.message||"Please try again.");
  }finally{
-  button.disabled=false;button.textContent="Make simulated international transfer";
+  button.disabled=false;button.textContent="Make international transfer";
  }
 }
 document.getElementById("oso-transfer-form").addEventListener("submit",submitOsoLocalTransfer);
@@ -992,11 +992,11 @@ document.getElementById("download-demo-receipt").addEventListener("click",async(
   let y=22;
   pdf.setDrawColor(18,60,104);pdf.setLineWidth(1.2);pdf.roundedRect(12,12,pageWidth-24,273,3,3);
   pdf.setTextColor(18,60,104);pdf.setFont("helvetica","bold");pdf.setFontSize(18);pdf.text("TOPSAFEB",left,y);
-  pdf.setFontSize(9);pdf.setTextColor(110,125,145);pdf.text("DEMO RECEIPT",left,y+7);
+  pdf.setFontSize(9);pdf.setTextColor(110,125,145);pdf.text("TRANSFER RECEIPT",left,y+7);
   y+=22;pdf.setFontSize(21);pdf.setTextColor(21,62,99);pdf.text(document.getElementById("receipt-amount").textContent,left,y);
-  pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(105,119,139);pdf.text("Amount sent · USD demo balance",left,y+7);
+  pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(105,119,139);pdf.text("Amount sent · USD",left,y+7);
   y+=24;
-  const fields=[["Recipient","receipt-recipient"],["Receiving bank","receipt-bank"],["Destination","receipt-country"],["Demo account","receipt-account"],["Illustrative received amount","receipt-converted"],["Date and time","receipt-date"],["Transaction reference","receipt-reference"],["Description","receipt-description"]];
+  const fields=[["Recipient","receipt-recipient"],["Receiving bank","receipt-bank"],["Destination","receipt-country"],["Account","receipt-account"],["Illustrative received amount","receipt-converted"],["Date and time","receipt-date"],["Transaction reference","receipt-reference"],["Description","receipt-description"]];
   for(const [label,id] of fields){
    pdf.setFont("helvetica","normal");pdf.setFontSize(9);pdf.setTextColor(115,128,147);pdf.text(label,left,y);
    pdf.setFont("helvetica","bold");pdf.setFontSize(11);pdf.setTextColor(25,58,90);
@@ -1065,7 +1065,7 @@ async function loadCustomerDemoFunds(userId){
  if(historyError){const p=document.createElement("p");p.className="muted";p.textContent="Recent activity is temporarily unavailable.";historyEl.append(p);return;}
  for(const item of items||[]){
   const card=document.createElement("article");card.style.cssText="padding:12px;border:1px solid #dbe3ed;border-radius:8px;background:#f8fafc";
-  const title=document.createElement("strong");title.textContent=({add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted",transfer:"Simulated transfer"})[item.action]||"Demo account update";
+  const title=document.createElement("strong");title.textContent=({add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted",transfer:"Simulated transfer"})[item.action]||"Account update";
   const amount=document.createElement("p");amount.style.margin="4px 0";amount.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.amount))+" • Balance after: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(item.balance_after));
   const date=document.createElement("p");date.className="muted";date.style.margin="0";date.textContent=new Date(item.created_at).toLocaleString()+(item.note?" — "+item.note:"");
   card.append(title,amount,date);historyEl.append(card);
@@ -1087,7 +1087,7 @@ document.getElementById("download-demo-statement").addEventListener("click",asyn
   const labels={add:"Demo funds added",deduct:"Demo funds deducted",set:"Demo balance adjusted",transfer:"Simulated transfer"};
   const lines=[columns,...rows.map(row=>[
    new Date(row.created_at).toLocaleString(),
-   labels[row.action]||"Demo account update",
+   labels[row.action]||"Account update",
    Number(row.amount||0).toFixed(2),
    Number(row.balance_after||0).toFixed(2),
    row.note||""
@@ -1123,7 +1123,7 @@ async function loadSession(){
   emailEl.textContent="";
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);
-  statusEl.textContent="Signed in. Your learning progress is saved to your account.";
+  statusEl.textContent="Signed in. Your progress is saved to your account.";
   await loadCustomerLiveChat();
   if(customerChatTimer)clearInterval(customerChatTimer);
   customerChatTimer=setInterval(loadCustomerLiveChat,5000);

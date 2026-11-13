@@ -922,7 +922,6 @@ async function saveManagedCustomerName(){
     status.textContent="Tracking update saved for "+record.tracking_code+".";await loadTrackingRecords();
    });
    const copy=node("button","Copy code");copy.type="button";copy.className="secondary";copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(record.tracking_code);status.textContent="Tracking code copied.";}catch(_){status.textContent="Copy unavailable. Code: "+record.tracking_code;}});
-   const open=node("button","Open public tracker");open.type="button";open.className="secondary";open.addEventListener("click",()=>window.open("track.html?code="+encodeURIComponent(record.tracking_code),"_blank"));
    const remove=node("button","Delete");remove.type="button";remove.className="secondary";remove.addEventListener("click",async()=>{if(!window.confirm("Delete tracking record "+record.tracking_code+"?"))return;remove.disabled=true;const {error:deleteError}=await supabase.from("shipment_tracking").delete().eq("id",record.id).eq("owner_id",currentOwnerId);if(deleteError){status.textContent="Could not delete tracking record: "+deleteError.message;remove.disabled=false;return;}status.textContent="Tracking record deleted.";await loadTrackingRecords();});
    actions.append(save,copy,remove);card.append(actions);list.append(card);
   }

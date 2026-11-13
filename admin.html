@@ -151,7 +151,7 @@ footer{background:var(--navy);color:#e4ebf3;padding:30px 5%;font-size:14px}foote
   <div><p class="hero-kicker">PRIVATE OWNER ACCESS · TOPSAFEB</p><h1>Welcome to your Control Centre</h1><p>Manage your customer community, review activity and oversee practice accounts from one place.</p></div>
   <div class="hero-status"><span class="hero-orb">◆</span><strong>Practice platform</strong><small>Simulation only · No real funds</small></div>
 </section>
-<nav class="owner-shortcuts" aria-label="Owner dashboard shortcuts"><a href="#registered-customers"><span>♙</span>Customers</a><a href="#topup-requests"><span>＋</span>Top-up requests</a><a href="#demo-funds-manager"><span>＄</span>Practice funds</a><a href="#feedback-management"><span>☆</span>Customer feedback</a><a href="#owner-activity-log"><span>◷</span>Owner activity log</a><a href="#live-support-inbox"><span>▤</span>Customer messages</a><a href="#account-notices"><span>▧</span>Account notices</a></nav>
+<nav class="owner-shortcuts" aria-label="Owner dashboard shortcuts"><a href="#registered-customers"><span>♙</span>Customers</a><a href="#topup-requests"><span>＋</span>Top-up requests</a><a href="#demo-funds-manager"><span>＄</span>Practice funds</a><a href="#feedback-management"><span>☆</span>Customer feedback</a><a href="#owner-activity-log"><span>◷</span>Owner activity log</a><a href="#live-support-inbox"><span>▤</span>Customer messages</a><a href="#account-notices"><span>▧</span>Account notices</a><a href="#tracking-manager"><span>⌖</span>Tracking Manager</a><a href="track.html" target="_blank" rel="noopener"><span>↗</span>Public Tracker</a></nav>
 <div class="dashboard-grid" aria-label="Practice operations overview"><article class="summary-card"><h2>Customer portfolio</h2><p class="muted">Registered customers</p><p class="stat" id="customer-count">—</p><span class="metric-foot">Customer profiles</span></article><article class="summary-card"><h2>Total practice funds</h2><p class="muted">Illustrative USD balances</p><p class="stat" id="total-demo-funds">—</p><span class="metric-foot">Not real deposits or cash</span></article><article class="summary-card"><h2 class="section-heading"><span class="section-icon feedback" aria-hidden="true">★</span><span>Customer Feedback<small>Ratings and feedback submissions</small></span></h2><p class="muted">Feedback submissions</p><p class="stat" id="feedback-count">—</p><span class="metric-foot">Private support records</span></article><article class="summary-card"><h2>Owner demo balance</h2><p class="muted">Funds received from customer demo transfers</p><p class="stat" id="owner-demo-balance">—</p><span class="metric-foot">Illustrative USD balance</span></article><article class="summary-card"><h2>Learning progress</h2><p class="muted">Lessons completed</p><p class="stat" id="dashboard-completed-count">—</p><span class="metric-foot">Across customer accounts</span></article></div>
 <section class="panel">
 <p class="muted">SIGNED-IN OWNER</p>
@@ -667,6 +667,7 @@ async function loadAdmin(){
  if(adminError)throw adminError;
  if(!adminRecord){statusEl.textContent="Access denied. This account is not registered as a TopSafeB administrator.";return;}
  statusEl.textContent="Administrator access confirmed.";
+ if(window.loadTopSafeBTrackingRecords)await window.loadTopSafeBTrackingRecords();
  const {data:customers,error:customerError}=await supabase.from("profiles").select("user_id,full_name,email").order("full_name",{ascending:true});
  if(customerError)throw customerError;
  const list=customers||[];
@@ -877,56 +878,81 @@ async function saveManagedCustomerName(){
  activeManagedCustomer.full_name=fullName;
  const row=customerTableRows.find(item=>item.dataset.userId===activeManagedCustomer.user_id);
  if(row){row.cells[0].textContent=fullName;row.dataset.search=(fullName+" "+(activeManagedCustomer
-/* Owner-only fictional tracking manager. Records are stored locally in this browser. */
+/* Owner-only tracking manager backed by Supabase so public code lookups can see records. */
 (()=>{
  const form=document.getElementById("tracking-create-form");
  if(!form)return;
  const list=document.getElementById("tracking-record-list");
  const status=document.getElementById("tracking-manager-status");
- const storageKey="topsafeb_owner_fictional_tracking_v1";
  const states=["Shipment Created","Processing","In Transit","Arrived at Facility","Out for Delivery","Delivered","Delivery Exception"];
- let records=[];
- try{const saved=JSON.parse(localStorage.getItem(storageKey)||"[]");if(Array.isArray(saved))records=saved;}catch(_){records=[];}
- const persist=()=>{try{localStorage.setItem(storageKey,JSON.stringify(records));status.textContent="Saved "+records.length+" tracking record(s) in this browser.";return true;}catch(_){status.textContent="Could not save records in this browser. Check available browser storage.";return false;}};
- const makeCode=()=>{let code;do{const bytes=new Uint8Array(6);crypto.getRandomValues(bytes);code="TSB-"+Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("").toUpperCase();}while(records.some(r=>r.code===code));return code;};
+ const makeCode=()=>{const bytes=new Uint8Array(6);crypto.getRandomValues(bytes);return "TSB-"+Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("").toUpperCase();};
  const node=(tag,txt,cls)=>{const el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el;};
- const render=()=>{
+ async function loadTrackingRecords(){
+  if(!currentOwnerId){status.textContent="Confirming owner access before loading tracking records…";return;}
+  status.textContent="Loading tracking records…";
+  const {data,error}=await supabase.from("shipment_tracking").select("*,shipment_tracking_updates(*)").eq("owner_id",currentOwnerId).order("created_at",{ascending:false});
+  if(error){status.textContent="Tracking database is not ready. Open supabase/shipment-tracking-setup.sql in your repository and run it in Supabase SQL Editor. Details: "+error.message;list.replaceChildren();return;}
+  render(data||[]);
+  status.textContent=(data||[]).length+" tracking record(s) loaded. Public lookup page: track.html";
+ }
+ function render(records){
   list.replaceChildren();
   if(!records.length){list.append(node("p","No tracking records created yet.","muted"));return;}
-  for(const record of [...records].reverse()){
-   const card=node("article",undefined,"tracking-record");
-   const head=node("div",undefined,"tracking-record-head");
-   const code=node("div",record.code,"tracking-code");
-   const pill=node("span",record.status,"tracking-pill");
-   head.append(code,pill);card.append(head);
+  for(const record of records){
+   const card=node("article",undefined,"tracking-record"),head=node("div",undefined,"tracking-record-head");
+   head.append(node("div",record.tracking_code,"tracking-code"),node("span",record.status,"tracking-pill"));card.append(head);
    const grid=node("div",undefined,"tracking-record-grid");
-   for(const [label,value] of [["Sender",record.sender],["Recipient",record.recipient],["From address",record.origin],["To address",record.destination],["Parcel",record.parcel||"—"],["Created",new Date(record.createdAt).toLocaleString()]]){const cell=node("div");cell.append(node("strong",label),node("span",value));grid.append(cell);}
+   for(const [label,value] of [["Sender",record.sender_name],["Recipient",record.recipient_name],["From address",record.origin_address],["To address",record.destination_address],["Parcel",record.parcel_description||"—"],["Created",new Date(record.created_at).toLocaleString()]]){const cell=node("div");cell.append(node("strong",label),node("span",value));grid.append(cell);}
    card.append(grid);
-   if(record.note)card.append(node("p","Update: "+record.note,"muted"));
-   const controls=node("div",undefined,"tracking-actions");
-   const select=node("select");select.setAttribute("aria-label","Update status for "+record.code);
-   states.forEach(value=>{const opt=node("option",value);opt.value=value;if(value===record.status)opt.selected=true;select.append(opt);});
-   select.addEventListener("change",()=>{record.status=select.value;record.updatedAt=new Date().toISOString();persist();render();});
-   const copy=node("button","Copy code");copy.type="button";copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(record.code);status.textContent="Tracking code copied.";}catch(_){status.textContent="Copy is unavailable in this browser. Tracking code: "+record.code;}});
-   const print=node("button","Print record");print.type="button";print.className="secondary";print.addEventListener("click",()=>{const w=window.open("","_blank");if(!w){status.textContent="Allow pop-ups to print this record.";return;}const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));w.document.write("<!doctype html><html><head><meta charset='utf-8'><title>Fictional Tracking Record</title><style>body{font:16px Arial;max-width:700px;margin:35px auto;padding:0 20px;color:#183451}h1{color:#176d43}.notice{padding:12px;background:#fff4d8}p{overflow-wrap:anywhere}</style></head><body><h1>TopSafeB · Fictional Tracking Record</h1><p class='notice'><strong>SIMULATOR ONLY:</strong> This is a fictional shipment record and is not a genuine courier confirmation.</p><h2>"+esc(record.code)+"</h2><p><b>Status:</b> "+esc(record.status)+"</p><p><b>Sender:</b> "+esc(record.sender)+"<br>"+esc(record.origin)+"</p><p><b>Recipient:</b> "+esc(record.recipient)+"<br>"+esc(record.destination)+"</p><p><b>Parcel:</b> "+esc(record.parcel||"—")+"</p><p><b>Created:</b> "+esc(new Date(record.createdAt).toLocaleString())+"</p><p><b>Update:</b> "+esc(record.note||"—")+"</p><script>window.onload=()=>window.print()<\/script></body></html>");w.document.close();});
-   const remove=node("button","Delete");remove.type="button";remove.className="secondary";remove.addEventListener("click",()=>{if(!window.confirm("Delete tracking record "+record.code+"?"))return;records=records.filter(r=>r.code!==record.code);persist();render();});
-   controls.append(select,copy,print,remove);card.append(controls);list.append(card);
+   const history=Array.isArray(record.shipment_tracking_updates)?record.shipment_tracking_updates:[];history.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+   if(history.length){const details=node("details"),summary=node("summary","View tracking history ("+history.length+")");details.append(summary);for(const item of history){const p=node("p",(item.status||"")+" · "+(item.location||"Location not provided")+" · "+(item.note||"")+" · "+new Date(item.created_at).toLocaleString(),"muted");details.append(p);}card.append(details);}
+   const controls=node("div",undefined,"tracking-form-grid");
+   const statusWrap=node("div",undefined,"tracking-field"),statusLabel=node("label","New status");const select=node("select");states.forEach(value=>{const opt=node("option",value);opt.value=value;if(value===record.status)opt.selected=true;select.append(opt);});statusWrap.append(statusLabel,select);
+   const locationWrap=node("div",undefined,"tracking-field"),locationLabel=node("label","Update location");const location=node("input");location.placeholder="Enter a location";location.maxLength=250;locationWrap.append(locationLabel,location);
+   const noteWrap=node("div",undefined,"tracking-field full"),noteLabel=node("label","Update note");const note=node("input");note.placeholder="Optional status update";note.maxLength=500;noteWrap.append(noteLabel,note);
+   controls.append(statusWrap,locationWrap,noteWrap);card.append(controls);
+   const actions=node("div",undefined,"tracking-actions");
+   const save=node("button","Save tracking update");save.type="button";save.addEventListener("click",async()=>{
+    save.disabled=true;save.textContent="Saving…";
+    const next=select.value,place=location.value.trim(),message=note.value.trim();
+    const {error:updateError}=await supabase.from("shipment_tracking").update({status:next,updated_at:new Date().toISOString()}).eq("id",record.id).eq("owner_id",currentOwnerId);
+    if(updateError){status.textContent="Could not update shipment: "+updateError.message;save.disabled=false;save.textContent="Save tracking update";return;}
+    const {error:historyError}=await supabase.from("shipment_tracking_updates").insert({shipment_id:record.id,owner_id:currentOwnerId,status:next,location:place,note:message});
+    if(historyError){status.textContent="Status changed, but tracking history could not be saved: "+historyError.message;save.disabled=false;save.textContent="Save tracking update";return;}
+    status.textContent="Tracking update saved for "+record.tracking_code+".";await loadTrackingRecords();
+   });
+   const copy=node("button","Copy code");copy.type="button";copy.className="secondary";copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(record.tracking_code);status.textContent="Tracking code copied.";}catch(_){status.textContent="Copy unavailable. Code: "+record.tracking_code;}});
+   const open=node("button","Open public tracker");open.type="button";open.className="secondary";open.addEventListener("click",()=>window.open("track.html?code="+encodeURIComponent(record.tracking_code),"_blank"));
+   const remove=node("button","Delete");remove.type="button";remove.className="secondary";remove.addEventListener("click",async()=>{if(!window.confirm("Delete tracking record "+record.tracking_code+"?"))return;remove.disabled=true;const {error:deleteError}=await supabase.from("shipment_tracking").delete().eq("id",record.id).eq("owner_id",currentOwnerId);if(deleteError){status.textContent="Could not delete tracking record: "+deleteError.message;remove.disabled=false;return;}status.textContent="Tracking record deleted.";await loadTrackingRecords();});
+   actions.append(save,copy,open,remove);card.append(actions);list.append(card);
   }
- };
- form.addEventListener("submit",event=>{
+ }
+ form.addEventListener("submit",async event=>{
   event.preventDefault();
+  if(!currentOwnerId){status.textContent="Owner access is not confirmed yet. Refresh the dashboard and try again.";return;}
   const get=id=>document.getElementById(id).value.trim();
-  const record={code:makeCode(),sender:get("tracking-sender"),recipient:get("tracking-recipient"),origin:get("tracking-origin"),destination:get("tracking-destination"),parcel:get("tracking-parcel"),status:get("tracking-status"),note:get("tracking-note"),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-  if(!record.sender||!record.recipient||!record.origin||!record.destination){status.textContent="Complete the sender, recipient and address fields.";return;}
-  records.push(record);persist();form.reset();render();status.textContent="Created "+record.code+". Saved in this browser only.";
+  const record={tracking_code:makeCode(),owner_id:currentOwnerId,sender_name:get("tracking-sender"),recipient_name:get("tracking-recipient"),origin_address:get("tracking-origin"),destination_address:get("tracking-destination"),parcel_description:get("tracking-parcel"),status:get("tracking-status")};
+  if(!record.sender_name||!record.recipient_name||!record.origin_address||!record.destination_address){status.textContent="Complete the sender, recipient and address fields.";return;}
+  const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent="Creating…";
+  const {data,error}=await supabase.from("shipment_tracking").insert(record).select("id").single();
+  if(error){status.textContent="Could not create tracking code: "+error.message+" Check that the tracking SQL setup has been run.";button.disabled=false;button.textContent="Generate tracking code";return;}
+  const {error:historyError}=await supabase.from("shipment_tracking_updates").insert({shipment_id:data.id,owner_id:currentOwnerId,status:record.status,location:"",note:"Tracking record created"});
+  form.reset();button.disabled=false;button.textContent="Generate tracking code";
+  if(historyError)status.textContent="Tracking code created, but initial history could not be saved: "+historyError.message;
+  else status.textContent="Created tracking code "+record.tracking_code+". Public tracking page: track.html";
+  await loadTrackingRecords();
  });
- document.getElementById("tracking-export").addEventListener("click",()=>{
-  const rows=[["Tracking code","Sender","Recipient","Sender address","Recipient address","Parcel","Status","Note","Created"],...records.map(r=>[r.code,r.sender,r.recipient,r.origin,r.destination,r.parcel,r.status,r.note,r.createdAt])];
-  const csv="\uFEFF"+rows.map(row=>row.map(value=>'"'+String(value??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ document.getElementById("tracking-export").addEventListener("click",async()=>{
+  if(!currentOwnerId){status.textContent="Owner access is not confirmed.";return;}
+  const {data,error}=await supabase.from("shipment_tracking").select("*").eq("owner_id",currentOwnerId).order("created_at",{ascending: false});
+  if(error){status.textContent="Could not export tracking records: "+error.message;return;}
+  const rows=[["Tracking code","Sender","Recipient","Sender address","Recipient address","Parcel","Status","Created"],...(data||[]).map(r=>[r.tracking_code,r.sender_name,r.recipient_name,r.origin_address,r.destination_address,r.parcel_description,r.status,r.created_at])];
+  const csv="\\uFEFF"+rows.map(row=>row.map(value=>'"'+String(value??"").replace(/"/g,'""')+'"').join(",")).join("\\r\\n");
   const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="topsafeb-fictional-tracking-records.csv";a.click();URL.revokeObjectURL(url);
  });
- render();
-})();
+ window.loadTopSafeBTrackingRecords=loadTrackingRecords;
+ if(currentOwnerId)loadTrackingRecords();
+})();;
 
 .email||"")).toLocaleLowerCase();filterCustomers();}
  const cached=customerProfiles.find(item=>item.user_id===activeManagedCustomer.user_id);

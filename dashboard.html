@@ -861,7 +861,7 @@ async function submitLocalDemoTransfer(event){
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
  try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
- if(!window.confirm("TopSafeB demo transaction: no real funds will be transferred and no bank will be contacted. Continue?"))return;
+
  button.disabled=true;button.textContent="Processing demo transfer…";status.textContent="Recording your demo transfer…";
  try{
   const {data,error}=await supabase.rpc("customer_demo_transfer_fictional_bank",{p_bank_name:bank,p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});
@@ -900,7 +900,7 @@ document.getElementById("customer-owner-transfer-form").addEventListener("submit
  if(!currentUserId){status.textContent="Please sign in again before making this demo transfer.";return;}
  if(!Number.isFinite(amount)||amount<=0||amount>1000000000){status.textContent="Enter a valid amount greater than zero.";return;}
  try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
- if(!window.confirm("Transfer "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(amount)+" of simulated demo funds to the TopSafeB owner account? No real money will move."))return;
+
  button.disabled=true;button.textContent="Processing…";status.textContent="Recording the customer-to-owner demo transfer…";
  try{
   const {data,error}=await supabase.rpc("customer_demo_transfer_to_owner",{p_amount:amount,p_description:description});
@@ -931,7 +931,7 @@ async function submitOsoLocalTransfer(event){
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
  try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
- if(!window.confirm("TopSafeB demo transaction: no real funds will be transferred and no bank will be contacted. Continue?"))return;
+
  button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated international transfer…";
  try{
   const {data,error}=await supabase.rpc("customer_demo_transfer_international",{p_country:country,p_bank_name:bank,p_amount:amount,p_recipient_name:recipient,p_account_number:accountNumber,p_description:description});

@@ -23,6 +23,7 @@ button{padding:13px 20px;border:0;border-radius:9px;background:var(--green);colo
 .item strong{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
 .timeline{list-style:none;padding:0;margin:12px 0}.timeline li{position:relative;border-left:2px solid #b8d9c6;margin-left:8px;padding:0 0 18px 19px}.timeline li:before{content:"";position:absolute;left:-7px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid white}
 .timeline strong{display:block}.timeline small{color:var(--muted)}.muted{color:var(--muted)}
+.support-box{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}.support-box h2{margin:0 0 6px}.support-box a{color:var(--green);font-weight:700;overflow-wrap:anywhere}.support-box form{display:grid;gap:8px;margin-top:14px}.support-box label{font-size:13px;font-weight:700}.support-box input,.support-box textarea{width:100%;padding:12px;border:1px solid #cbd6e0;border-radius:9px;font:inherit;min-width:0}.support-box textarea{resize:vertical}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.panel{padding:17px}header{padding:14px 18px}}
 </style>
 </head>
@@ -35,6 +36,19 @@ button{padding:13px 20px;border:0;border-radius:9px;background:var(--green);colo
 <div class="notice"><strong>Fictional tracking simulator.</strong> Records shown here are created by the TopSafeB owner and are not connected to a real courier, postal service or live delivery network.</div>
 <p id="lookup-status" class="muted" role="status" aria-live="polite"></p>
 <div id="result" hidden></div>
+<div class="support-box" aria-labelledby="support-title">
+ <h2 id="support-title">Contact TopSafeB Support</h2>
+ <p class="muted">Need help with this tracking record? Send a message to our support email.</p>
+ <p><strong>Support email:</strong> <a href="mailto:ebubemichael442@gmail.com">ebubemichael442@gmail.com</a></p>
+ <form id="support-form">
+  <label for="support-name">Your name</label>
+  <input id="support-name" maxlength="100" placeholder="Your name" required>
+  <label for="support-message">Your message</label>
+  <textarea id="support-message" rows="4" maxlength="2000" placeholder="Tell us how we can help…" required></textarea>
+  <button type="submit">Email Support</button>
+ </form>
+ <p class="muted" style="font-size:12px">This opens your email app with the tracking code and message filled in. You must press Send in your email app.</p>
+</div>
 </section>
 </main>
 <script type="module">
@@ -61,6 +75,15 @@ form.addEventListener("submit",async event=>{
  if(error){status.textContent="Tracking lookup is temporarily unavailable. Please try again later.";return;}
  if(!data){status.textContent="No shipment record was found for that tracking code.";return;}
  status.textContent="Tracking record found.";show(data);
+});
+document.getElementById("support-form").addEventListener("submit",event=>{
+ event.preventDefault();
+ const code=input.value.trim()||"Not provided";
+ const name=document.getElementById("support-name").value.trim();
+ const message=document.getElementById("support-message").value.trim();
+ const subject=encodeURIComponent("TopSafeB tracking support — "+code);
+ const body=encodeURIComponent("Name: "+name+"\nTracking code: "+code+"\n\nMessage:\n"+message);
+ window.location.href="mailto:ebubemichael442@gmail.com?subject="+subject+"&body="+body;
 });
 const params=new URLSearchParams(location.search);const preset=params.get("code");if(preset){input.value=preset;form.requestSubmit();}
 </script>

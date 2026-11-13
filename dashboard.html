@@ -531,11 +531,9 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 <h3 class="bank-section-title">Local bank transfer</h3>
 <p>Practise a domestic USD transfer between fictional banks in the TopSafeB learning environment.</p>
 <form id="local-demo-transfer-form" class="transfer-form">
-<label for="local-demo-bank">Receiving fictional bank</label>
-<select id="local-demo-bank" required>
-<option value="">Choose a demo bank</option>
-<option>Oso Local Bank</option><option>Rivergate Community Bank</option><option>Maple Street Savings Bank</option><option>Harborlight Local Bank</option><option>Pioneer Town Bank</option><option>Greenfield Neighbourhood Bank</option><option>Unity Corner Bank</option><option>Westbridge Local Bank</option>
-</select>
+<label for="local-demo-bank">Receiving bank name (type it yourself)</label>
+<input id="local-demo-bank" type="text" required minlength="2" maxlength="100" autocomplete="off" placeholder="Enter the receiving bank name">
+<small class="muted">Type the fictional receiving bank name for this local demo transfer. No real bank is contacted.</small>
 <label for="local-demo-recipient">Recipient name</label>
 <input id="local-demo-recipient" required maxlength="100" autocomplete="off" placeholder="Example: Taylor Sample">
 <label for="local-demo-account">Fictional account number (8–16 digits)</label>

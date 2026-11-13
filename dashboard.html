@@ -1115,9 +1115,11 @@ async function loadSession(){
   // Transfer restrictions do not affect customer dashboard sign-in or access.
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
   const bankCustomerName=document.getElementById("bank-customer-name");
-   if(bankCustomerName)bankCustomerName.textContent=nameEl.textContent;
-  document.getElementById("bank-account-holder").textContent=nameEl.textContent;
-  document.getElementById("header-customer-name").textContent=nameEl.textContent;
+  if(bankCustomerName)bankCustomerName.textContent=nameEl.textContent;
+  const bankAccountHolder=document.getElementById("bank-account-holder");
+  if(bankAccountHolder)bankAccountHolder.textContent=nameEl.textContent;
+  const headerCustomerName=document.getElementById("header-customer-name");
+  if(headerCustomerName)headerCustomerName.textContent=nameEl.textContent;
   emailEl.textContent="";
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);

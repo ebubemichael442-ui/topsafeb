@@ -16,20 +16,57 @@ h1{margin:0 0 10px;color:#102b50;font-size:28px}
 p{line-height:1.6}
 .email-link{display:inline-block;margin-top:10px;padding:13px 18px;background:#dfbd70;color:#102b50;text-decoration:none;font-weight:700;border-radius:9px;overflow-wrap:anywhere}
 .small{color:#657286;font-size:14px}
+.language-row{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:14px;font-size:14px}
+select{padding:8px;border:1px solid #cbd4df;border-radius:8px;background:#fff;color:#183252;font:inherit}
 @media(max-width:480px){main{margin:28px auto}.panel{padding:22px}}
 </style>
 </head>
 <body>
 <header><span class="brand-mark" aria-hidden="true">T</span>TopSafeB</header>
 <main>
+<div class="language-row"><label for="language-choice" id="language-label">Language</label><select id="language-choice" aria-label="Choose language"><option value="auto">Automatic</option><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="de">Deutsch</option><option value="ar">العربية</option></select></div>
 <section class="panel" aria-labelledby="support-title">
 <h1 id="support-title">Customer Support</h1>
-<p>Need help? Start a live chat using the chat bubble on this page, or contact TopSafeB by email.</p>
-<p><a class="email-link" href="mailto:ebubemichael442@gmail.com?subject=TopSafeB%20Customer%20Support">Email TopSafeB Support</a></p>
-<p class="small">Email: ebubemichael442@gmail.com</p>
-<p class="small">Please do not send passwords, PINs, one-time passcodes, card details or bank login information.</p>
+<p id="intro">Need help? Start a live chat using the chat bubble on this page, or contact TopSafeB by email.</p>
+<p><a class="email-link" id="email-button" href="mailto:ebubemichael442@gmail.com?subject=TopSafeB%20Customer%20Support">Email TopSafeB Support</a></p>
+<p class="small" id="email-label">Email: ebubemichael442@gmail.com</p>
+<p class="small" id="safety-note">Please do not send passwords, PINs, one-time passcodes, card details or bank login information.</p>
 </section>
 </main>
+<script>
+(function(){
+const translations={
+en:{title:"Customer Support",intro:"Need help? Start a live chat using the chat bubble on this page, or contact TopSafeB by email.",button:"Email TopSafeB Support",email:"Email:",safety:"Please do not send passwords, PINs, one-time passcodes, card details or bank login information.",language:"Language",subject:"TopSafeB Customer Support"},
+es:{title:"Atención al cliente",intro:"¿Necesitas ayuda? Inicia un chat en directo con el icono de chat de esta página o contacta con TopSafeB por correo electrónico.",button:"Enviar un correo a TopSafeB",email:"Correo electrónico:",safety:"No envíes contraseñas, PIN, códigos de un solo uso, datos de tarjetas ni datos de acceso bancario.",language:"Idioma",subject:"Atención al cliente de TopSafeB"},
+fr:{title:"Assistance clientèle",intro:"Besoin d’aide ? Lancez une conversation avec la bulle de chat sur cette page ou contactez TopSafeB par e-mail.",button:"Envoyer un e-mail à TopSafeB",email:"E-mail :",safety:"N’envoyez pas de mots de passe, codes PIN, codes à usage unique, coordonnées de carte ou identifiants bancaires.",language:"Langue",subject:"Assistance clientèle TopSafeB"},
+pt:{title:"Suporte ao cliente",intro:"Precisa de ajuda? Inicie uma conversa pelo balão de chat nesta página ou contacte a TopSafeB por e-mail.",button:"Enviar e-mail para a TopSafeB",email:"E-mail:",safety:"Não envie senhas, PINs, códigos de uso único, dados de cartões ou informações de acesso bancário.",language:"Idioma",subject:"Suporte ao cliente TopSafeB"},
+de:{title:"Kundensupport",intro:"Benötigen Sie Hilfe? Starten Sie über die Chat-Blase auf dieser Seite einen Live-Chat oder kontaktieren Sie TopSafeB per E-Mail.",button:"E-Mail an TopSafeB",email:"E-Mail:",safety:"Bitte senden Sie keine Passwörter, PINs, Einmalcodes, Kartendaten oder Bankzugangsdaten.",language:"Sprache",subject:"TopSafeB Kundensupport"},
+ar:{title:"دعم العملاء",intro:"هل تحتاج إلى مساعدة؟ ابدأ محادثة مباشرة عبر فقاعة الدردشة في هذه الصفحة أو تواصل مع TopSafeB عبر البريد الإلكتروني.",button:"راسل دعم TopSafeB",email:"البريد الإلكتروني:",safety:"يرجى عدم إرسال كلمات المرور أو أرقام PIN أو رموز الاستخدام لمرة واحدة أو بيانات البطاقات أو بيانات الدخول المصرفية.",language:"اللغة",subject:"دعم عملاء TopSafeB"}
+};
+const choice=document.getElementById("language-choice");
+function browserLanguage(){
+ const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||"en"];
+ for(const raw of langs){const code=String(raw).toLowerCase().split("-")[0];if(translations[code])return code;}
+ return "en";
+}
+function applyLanguage(code){
+ const t=translations[code]||translations.en;
+ document.documentElement.lang=code;
+ document.documentElement.dir=code==="ar"?"rtl":"ltr";
+ document.getElementById("support-title").textContent=t.title;
+ document.getElementById("intro").textContent=t.intro;
+ document.getElementById("email-button").textContent=t.button;
+ document.getElementById("email-label").textContent=t.email+" ebubemichael442@gmail.com";
+ document.getElementById("safety-note").textContent=t.safety;
+ document.getElementById("language-label").textContent=t.language;
+ document.getElementById("email-button").href="mailto:ebubemichael442@gmail.com?subject="+encodeURIComponent(t.subject);
+}
+const detected=browserLanguage();
+choice.value="auto";
+applyLanguage(detected);
+choice.addEventListener("change",function(){applyLanguage(this.value==="auto"?browserLanguage():this.value);});
+})();
+</script>
 <!-- TopSafeB live customer support chat -->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();

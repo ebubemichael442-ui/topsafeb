@@ -10,5 +10,15 @@
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:#f1f6f3;color:#173b2d;font-family:Arial,Helvetica,sans-serif}.card{width:min(100%,560px);padding:32px;background:#fff;border:1px solid #dce9e0;border-radius:20px;box-shadow:0 12px 35px #163d2812;text-align:center}.mark{width:58px;height:58px;display:grid;place-items:center;margin:0 auto 16px;border-radius:17px;background:#e8f5ec;color:#187447;font-size:28px}.brand{font-weight:900;letter-spacing:.4px;color:#123b2a;font-size:22px}.brand span{color:#218451}h1{font-size:27px;line-height:1.2;margin:18px 0 10px;color:#123b2a}.muted{color:#617568;line-height:1.7}.notice{margin-top:20px;padding:14px;border-radius:10px;background:#f3f7f4;font-size:13px;color:#53685a}nav{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:22px}a{display:inline-block;padding:12px 18px;border-radius:9px;background:#176b43;color:#fff;text-decoration:none;font-weight:700}a.secondary{background:#eaf2ed;color:#174b32}
 </style>
 </head>
-<body><main class="card"><div class="mark" aria-hidden="true">⌁</div><div class="brand"><span>◆</span> TopSafeB</div><h1>Transfer Centre is temporarily unavailable</h1><p class="muted">TopSafeB has temporarily paused customer sign-in and account features while the website undergoes a security review. Please check back later.</p><div class="notice">This temporary pause does not delete customer accounts or change saved account information. TopSafeB is not a bank and does not provide real banking or payment services.</div><nav><a href="index.html">Return to homepage</a><a class="secondary" href="contact.html">Contact TopSafeB</a></nav></main></body>
+<body><main class="card"><div class="mark" aria-hidden="true">⌁</div><div class="brand"><span>◆</span> TopSafeB</div><h1>Transfer Centre is temporarily unavailable</h1><p class="muted">TopSafeB has temporarily paused customer sign-in and account features while the website undergoes a security review. Please check back later.</p><div class="notice">This temporary pause does not delete customer accounts or change saved account information. TopSafeB is not a bank and does not provide real banking or payment services.</div><nav><a href="index.html">Return to homepage</a><a class="secondary" href="contact.html">Contact TopSafeB</a></nav></main><!-- TopSafeB privacy-conscious page-view counter: path and timestamp only -->
+<script>
+(function(){try{
+var endpoint="https://wivxqaratjrrhpeeeboc.supabase.co/rest/v1/insight_hub_pageviews";
+var key="sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
+var path=window.location.pathname||"/";
+if(path.length>160||!/^\/[A-Za-z0-9_./-]*$/.test(path))return;
+fetch(endpoint,{method:"POST",headers:{"apikey":key,"Authorization":"Bearer "+key,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({page_path:path}),keepalive:true}).catch(function(){});
+}catch(e){}})();
+</script>
+</body>
 </html>

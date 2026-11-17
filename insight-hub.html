@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Private TopSafeB Insight Hub owner portal.">
+<title>TopSafeB Insight Hub</title>
+<style>
+:root{--green:#176b4b;--deep:#123b30;--ink:#20352d;--muted:#6b7d75;--bg:#f3f7f4;--line:#e0e9e3}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Arial,sans-serif}
+header{background:linear-gradient(120deg,#103c30,#176b4b);color:#fff;padding:22px max(20px,calc((100% - 1120px)/2));display:flex;justify-content:space-between;align-items:center;gap:15px}
+.brand{font-size:21px;font-weight:800}.brand span{color:#bce2c8}.sub{font-size:12px;color:#d8eee0}
+main{max-width:1120px;margin:32px auto;padding:0 18px 60px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 8px 28px #163d2b0b;margin:16px 0}
+h1{font-size:clamp(27px,5vw,38px);margin:4px 0;color:#123b30}h2{font-size:18px;margin:0 0 8px;color:#164b38}.muted{color:var(--muted)}
+label{display:block;font-weight:700;margin:13px 0 6px}input{width:100%;padding:13px;border:1px solid #cad9cf;border-radius:9px;font:inherit}
+button{border:0;border-radius:9px;padding:12px 18px;background:#176b4b;color:white;font-weight:800;font-size:14px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+#login{max-width:470px;margin:50px auto}#status{padding:12px;border-radius:9px;background:#f0f6f1;color:#315b43;overflow-wrap:anywhere;margin-top:13px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.metric{background:#f8fbf9;border:1px solid var(--line);border-radius:13px;padding:17px}.metric strong{display:block;font-size:25px;color:#174b37}.metric small{color:var(--muted)}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.tag{display:inline-block;background:#e8f4ec;color:#176b4b;border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800}
+.notice{border-left:4px solid #c79b43;background:#fff9eb;padding:13px 15px;border-radius:8px;color:#665126;font-size:13px}
+[hidden]{display:none!important}
+@media(max-width:650px){header{padding:17px 18px}.grid{grid-template-columns:1fr}main{margin-top:20px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand"><span>◆</span> TopSafeB Insight Hub</div><div class="sub">Your platform. Your insights. Your control.</div></div><button id="logout" hidden>Sign out</button></header>
+<main>
+<section id="login" class="card">
+<p class="tag">PRIVATE OWNER ACCESS</p><h1>Sign in</h1>
+<p class="muted">Use your existing TopSafeB owner account.</p>
+<form id="login-form">
+<label for="email">Owner email</label><input id="email" type="email" autocomplete="username" value="ebubemichael442@gmail.com" required>
+<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+<p><button id="submit" type="submit">Open Insight Hub</button></p>
+</form>
+<div id="login-status" role="status" aria-live="polite">Connecting securely…</div>
+<p class="muted" style="font-size:12px">Your password is sent directly to Supabase Auth over HTTPS. It is not stored by this page. Never share it with anyone.</p>
+</section>
+<section id="workspace" hidden>
+<div class="topline"><div><p class="tag">OWNER WORKSPACE</p><h1>Platform overview</h1><p class="muted">Signed in as <strong id="owner-email"></strong></p></div><span class="tag">Private portal</span></div>
+<div class="card"><h2>Tracking connection</h2><p class="muted">The private portal is connected to your TopSafeB sign-in. Activity collection and reporting still need to be connected to the customer website and secured database policies before live figures can appear.</p><div class="notice">No customer activity, visitor counts, messages or transaction records are being displayed yet. This avoids showing invented or unverified statistics.</div></div>
+<div class="grid">
+<div class="metric"><strong>—</strong><small>Website visitors · awaiting analytics integration</small></div>
+<div class="metric"><strong>—</strong><small>Customer activity · awaiting event integration</small></div>
+<div class="metric"><strong>—</strong><small>Demo activity · awaiting secure data connection</small></div>
+</div>
+<div class="card"><h2>Next integration steps</h2><ol><li>Create owner-only tracking tables and row-level security policies.</li><li>Connect privacy-conscious visitor and customer activity events.</li><li>Display verified counts and activity summaries here.</li></ol><p class="muted" style="font-size:12px">TopSafeB is an educational demonstration platform, not a bank. Demo transactions are not real payments or funds.</p></div>
+</section>
+</main>
+<script>
+const SUPABASE_URL="https://wivxqaratjrrhpeeeboc.supabase.co";
+const SUPABASE_KEY="sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
+const OWNER_EMAIL="ebubemichael442@gmail.com";
+const login=document.getElementById("login"),workspace=document.getElementById("workspace"),status=document.getElementById("login-status"),form=document.getElementById("login-form"),submit=document.getElementById("submit"),logout=document.getElementById("logout");
+let client;
+function showWorkspace(user){if((user.email||"").toLowerCase()!==OWNER_EMAIL){client.auth.signOut();status.textContent="This account is not authorized for the Insight Hub.";return;}login.hidden=true;workspace.hidden=false;logout.hidden=false;document.getElementById("owner-email").textContent=user.email;}
+function loadLibrary(){return new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";s.onload=resolve;s.onerror=()=>reject(new Error("Unable to load secure sign-in library. Check your connection."));document.head.appendChild(s);});}
+(async()=>{try{await loadLibrary();client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});const {data,error}=await client.auth.getSession();if(error)throw error;if(data.session)showWorkspace(data.session.user);else status.textContent="Secure connection ready. Enter your existing owner password.";client.auth.onAuthStateChange((_event,session)=>{if(session)showWorkspace(session.user);else{workspace.hidden=true;login.hidden=false;logout.hidden=true;}});}catch(e){status.textContent=e.message||"Secure sign-in is unavailable.";}})();
+form.addEventListener("submit",async e=>{e.preventDefault();if(!client){status.textContent="The secure sign-in service is still loading. Refresh and try again.";return;}const email=document.getElementById("email").value.trim().toLowerCase(),password=document.getElementById("password").value;if(email!==OWNER_EMAIL){status.textContent="This portal is restricted to the authorized owner email.";return;}submit.disabled=true;status.textContent="Signing in securely…";try{const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;if(!data.user||data.user.email.toLowerCase()!==OWNER_EMAIL){await client.auth.signOut();throw new Error("This account is not authorized for the Insight Hub.");}showWorkspace(data.user);}catch(err){status.textContent=err.message||"Sign-in failed. Check your details and try again.";}finally{submit.disabled=false;}});
+logout.addEventListener("click",async()=>{if(client)await client.auth.signOut();});
+</script>
+</body>
+</html>

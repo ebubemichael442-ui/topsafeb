@@ -1163,9 +1163,9 @@ async function loadSession(){
   statusEl.textContent="You are signed in. Loading your saved learning progress…";
   await loadProgress(user.id);
   statusEl.textContent="Signed in. Your progress is saved to your account.";
-  await loadCustomerLiveChat();
+  await loadCustomerLiveChat().catch(error=>{if(customerChatStatus)customerChatStatus.textContent="Message Centre could not load: "+(error?.message||"Please try again.");console.warn("TopSafeB message refresh failed:",error);});
   if(customerChatTimer)clearInterval(customerChatTimer);
-  customerChatTimer=setInterval(loadCustomerLiveChat,5000);
+  customerChatTimer=setInterval(()=>loadCustomerLiveChat().catch(error=>{if(customerChatStatus)customerChatStatus.textContent="Message refresh failed: "+(error?.message||"Please try again.");console.warn("TopSafeB message refresh failed:",error);}),5000);
   await loadCustomerDemoFunds(user.id);
   try{await checkCustomerTransferPermission();}catch(error){if((error.message||"").includes("Transfers are temporarily restricted"))showTransferRestrictionPopup();else console.warn("Could not check transfer restriction status:",error);}
 }
@@ -1240,6 +1240,8 @@ function appendChatBubble(container,item,own){
 let lastCustomerChatSignature="";
 async function loadCustomerLiveChat(){
  if(!currentUserId)return;
+ if(!customerChatThread||!customerChatStatus){console.warn("Message Centre markup is incomplete.");return;}
+ customerChatStatus.textContent="Loading your private messages…";
   const previousTop=customerChatThread.scrollTop;const wasNearBottom=customerChatThread.scrollHeight-customerChatThread.clientHeight-previousTop<90;
  const [chatResult,legacyResult]=await Promise.all([
   supabase.from("support_messages").select("id,sender_id,sender_role,message,attachment_path,created_at").eq("user_id",currentUserId).order("created_at",{ascending:true}).limit(100),
@@ -1272,7 +1274,7 @@ async function loadCustomerLiveChat(){
  if(wasNearBottom)customerChatThread.scrollTop=customerChatThread.scrollHeight;else customerChatThread.scrollTop=previousTop;
  customerChatStatus.textContent="Message centre updated "+new Date().toLocaleTimeString()+". Previous owner replies are included above.";
 }
-customerChatPhoto.addEventListener("change",()=>{
+if(customerChatPhoto&&customerChatPhotoPreview)customerChatPhoto.addEventListener("change",()=>{
  const file=customerChatPhoto.files?.[0]||null;customerChatPhotoFile=file;customerChatPhotoPreview.replaceChildren();customerChatPhotoPreview.hidden=!file;
  if(!file)return;
  const wrap=document.createElement("div");wrap.className="chat-attach-preview";const img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Selected photo preview";
@@ -1280,7 +1282,7 @@ customerChatPhoto.addEventListener("change",()=>{
  const remove=document.createElement("button");remove.type="button";remove.textContent="Remove";remove.addEventListener("click",()=>{customerChatPhoto.value="";customerChatPhotoFile=null;customerChatPhotoPreview.hidden=true;customerChatPhotoPreview.replaceChildren();});
  wrap.append(img,label,remove);customerChatPhotoPreview.append(wrap);
 });
-customerChatForm.addEventListener("submit",async event=>{
+if(customerChatForm&&customerChatInput&&customerChatStatus)customerChatForm.addEventListener("submit",async event=>{
  event.preventDefault();const message=customerChatInput.value.trim();const file=customerChatPhotoFile;
  if(!message&&!file){customerChatStatus.textContent="Write a message or attach a photo first.";return;}
  if(!currentUserId){customerChatStatus.textContent="Please sign in again to send a message.";return;}
@@ -1301,12 +1303,13 @@ const customerSupportPanel=document.getElementById("customer-support");
 const openCustomerSupport=document.getElementById("open-customer-support");
 const closeCustomerSupport=document.getElementById("close-customer-support");
 function setCustomerSupportOpen(open){
+ if(!customerSupportPanel||!openCustomerSupport)return;
  customerSupportPanel.classList.toggle("support-chat-open",open);
  openCustomerSupport.setAttribute("aria-expanded",String(open));
- if(open){customerChatInput.focus();loadCustomerLiveChat();}
+ if(open){customerChatInput?.focus();loadCustomerLiveChat().catch(error=>{if(customerChatStatus)customerChatStatus.textContent="Message Centre could not load: "+(error?.message||"Please try again.");});}
 }
-openCustomerSupport.addEventListener("click",()=>setCustomerSupportOpen(!customerSupportPanel.classList.contains("support-chat-open")));
-closeCustomerSupport.addEventListener("click",()=>setCustomerSupportOpen(false));
+if(openCustomerSupport)openCustomerSupport.addEventListener("click",()=>setCustomerSupportOpen(!customerSupportPanel?.classList.contains("support-chat-open")));
+if(closeCustomerSupport)closeCustomerSupport.addEventListener("click",()=>setCustomerSupportOpen(false));
 document.addEventListener("keydown",event=>{if(event.key==="Escape")setCustomerSupportOpen(false);});
 // The single Message Centre refreshes both new chat messages and older owner replies together.
 document.getElementById("menu-logout").addEventListener("click",()=>signoutButton.click());

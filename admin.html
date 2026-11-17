@@ -879,7 +879,14 @@ async function saveManagedCustomerName(){
  if(error){status.textContent="Could not update the profile: "+error.message;return;}
  activeManagedCustomer.full_name=fullName;
  const row=customerTableRows.find(item=>item.dataset.userId===activeManagedCustomer.user_id);
- if(row){row.cells[0].textContent=fullName;row.dataset.search=(fullName+" "+(activeManagedCustomer
+ if(row){row.cells[0].textContent=fullName;row.dataset.search=(fullName+" "+(activeManagedCustomer.email||"")).toLocaleLowerCase();filterCustomers();}
+ const cached=customerProfiles.find(item=>item.user_id===activeManagedCustomer.user_id);
+ if(cached)cached.full_name=fullName;
+ document.getElementById("detail-name").textContent=fullName;
+ document.getElementById("detail-heading").textContent="Customer profile: "+fullName;
+ status.textContent="Customer display name updated.";
+}
+document.getElementById("save-customer-name").addEventListener("click",saveManagedCustomerName);
 /* Owner-only tracking manager backed by Supabase so public code lookups can see records. */
 (()=>{
  const form=document.getElementById("tracking-create-form");
@@ -954,15 +961,6 @@ async function saveManagedCustomerName(){
  window.loadTopSafeBTrackingRecords=loadTrackingRecords;
  if(currentOwnerId)loadTrackingRecords();
 })();;
-
-.email||"")).toLocaleLowerCase();filterCustomers();}
- const cached=customerProfiles.find(item=>item.user_id===activeManagedCustomer.user_id);
- if(cached)cached.full_name=fullName;
- document.getElementById("detail-name").textContent=fullName;
- document.getElementById("detail-heading").textContent="Customer profile: "+fullName;
- status.textContent="Customer display name updated.";
-}
-document.getElementById("save-customer-name").addEventListener("click",saveManagedCustomerName);
 function showCustomerDetails(customer,record,formatDate){
  activeManagedCustomer=customer;
  document.getElementById("manage-customer-name").value=customer.full_name||"";

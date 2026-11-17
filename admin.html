@@ -402,7 +402,6 @@ async function loadTopupRequests(customers){
  status.textContent=requests.length+" request(s) shown · "+pending+" awaiting your decision.";
 }
 async function loadDemoFunds(customers){
- if(document.getElementById("demo-funds-manager")?.hidden)return;
  const status=document.getElementById("demo-funds-status");
  const body=document.getElementById("demo-funds-rows");
  const historyBody=document.getElementById("demo-history-rows");
@@ -414,6 +413,7 @@ async function loadDemoFunds(customers){
  if(totalFundsEl)totalFundsEl.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(totalPracticeFunds);
  const ownerBalanceEl=document.getElementById("owner-demo-balance");
  if(ownerBalanceEl)ownerBalanceEl.textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(byUser.get(currentOwnerId)?.balance||0));
+ if(document.getElementById("demo-funds-manager")?.hidden)return;
  body.replaceChildren();
  for(const customer of customers){
   const account=byUser.get(customer.user_id);

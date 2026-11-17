@@ -23,6 +23,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Validate dashboard JavaScript
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const files = ['admin.html', 'dashboard.html', 'login.html'];
+          for (const file of files) {
+            const html = fs.readFileSync(file, 'utf8');
+            const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)];
+            if (!scripts.length) throw new Error(`No JavaScript found in ${file}`);
+            scripts.forEach((match, index) => {
+              const code = match[1].replace(/^\\s*import\\s+\\{[^}]+\\}\\s+from\\s+["'][^"']+["'];?\\s*/m, '');
+              try {
+                new Function(code);
+              } catch (error) {
+                throw new Error(`${file}, script ${index + 1}: ${error.message}`);
+              }
+            });
+            console.log(`JavaScript syntax OK: ${file}`);
+          }
+          NODE
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Bundle Supabase sign-in library locally

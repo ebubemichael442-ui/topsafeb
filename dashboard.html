@@ -448,6 +448,26 @@ button:focus-visible,.button:focus-visible,a:focus-visible,input:focus-visible,s
 </style>
 </head>
 <body>
+
+<style>
+#transfer-restriction-overlay{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,18,35,.72)}
+#transfer-restriction-overlay.is-visible{display:flex}
+#transfer-restriction-dialog{width:min(100%,460px);padding:28px 24px;border-radius:20px;background:#fff;box-shadow:0 24px 80px #0005;text-align:center;border-top:6px solid #c49a4e}
+#transfer-restriction-dialog .restriction-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 14px;border-radius:50%;background:#fff3d9;color:#8a5a09;font-size:28px;font-weight:900}
+#transfer-restriction-dialog h2{margin:0 0 10px;color:#102b50;font-size:23px}
+#transfer-restriction-dialog p{margin:0 0 20px;color:#526174;font-size:15px}
+#transfer-restriction-dialog button{min-width:130px;background:#102b50;color:#fff}
+body.transfer-restriction-open{overflow:hidden}
+</style>
+<div id="transfer-restriction-overlay" role="presentation" aria-hidden="true">
+ <section id="transfer-restriction-dialog" role="alertdialog" aria-modal="true" aria-labelledby="transfer-restriction-title" aria-describedby="transfer-restriction-message">
+  <div class="restriction-icon" aria-hidden="true">!</div>
+  <h2 id="transfer-restriction-title">Transfers temporarily restricted</h2>
+  <p id="transfer-restriction-message">Transfers are temporarily restricted by the TopSafeB owner. Please contact TopSafeB support.</p>
+  <button type="button" id="transfer-restriction-dismiss">Close</button>
+ </section>
+</div>
+
 <header class="customer-header"><div class="brand"><span>◆</span> TopSafeB</div><div class="header-user"><span id="header-customer-name" hidden>Customer</span><button id="customer-menu-toggle" type="button" aria-label="Open customer menu" aria-expanded="false">☰</button></div></header>
 <nav class="customer-feature-nav" aria-label="Customer features">
 <a href="dashboard.html?view=home">Home</a>
@@ -854,10 +874,29 @@ function updateDemoConversion(){
  conversionPreview.textContent="Teaching example only: $"+amount.toFixed(2)+" USD ≈ "+new Intl.NumberFormat("en-US",{style:"currency",currency:country.currency}).format(amount*country.rate)+" "+country.currency+". This fixed example is not a live exchange rate.";
 }
 amountInput.addEventListener("input",updateDemoConversion);
+
+function showTransferRestrictionPopup(){
+ const overlay=document.getElementById("transfer-restriction-overlay");
+ if(!overlay)return;
+ overlay.classList.add("is-visible");
+ overlay.setAttribute("aria-hidden","false");
+ document.body.classList.add("transfer-restriction-open");
+ const close=document.getElementById("transfer-restriction-dismiss");
+ if(close)close.focus();
+}
+function hideTransferRestrictionPopup(){
+ const overlay=document.getElementById("transfer-restriction-overlay");
+ if(!overlay)return;
+ overlay.classList.remove("is-visible");
+ overlay.setAttribute("aria-hidden","true");
+ document.body.classList.remove("transfer-restriction-open");
+}
+document.getElementById("transfer-restriction-dismiss").addEventListener("click",hideTransferRestrictionPopup);
+
 async function checkCustomerTransferPermission(){
  const {data:restricted,error}=await supabase.rpc("customer_access_is_blocked");
  if(error)throw error;
- if(restricted)throw new Error("Transfers are temporarily restricted by the TopSafeB owner. Please contact TopSafeB support.");
+ if(restricted){showTransferRestrictionPopup();throw new Error("Transfers are temporarily restricted by the TopSafeB owner. Please contact TopSafeB support.");}
 }
 async function submitLocalDemoTransfer(event){
  event.preventDefault();
@@ -874,7 +913,7 @@ async function submitLocalDemoTransfer(event){
   return;
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
- try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
+ try{await checkCustomerTransferPermission();}catch(error){showTransferRestrictionPopup();status.textContent=error.message||"Transfers are temporarily restricted.";return;}
 
  button.disabled=true;button.textContent="Processing demo transfer…";status.textContent="Recording your demo transfer…";
  try{
@@ -913,7 +952,7 @@ document.getElementById("customer-owner-transfer-form").addEventListener("submit
  const description=document.getElementById("customer-owner-transfer-note").value.trim();
  if(!currentUserId){status.textContent="Please sign in again before making this demo transfer.";return;}
  if(!Number.isFinite(amount)||amount<=0||amount>1000000000){status.textContent="Enter a valid amount greater than zero.";return;}
- try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
+ try{await checkCustomerTransferPermission();}catch(error){showTransferRestrictionPopup();status.textContent=error.message||"Transfers are temporarily restricted.";return;}
 
  button.disabled=true;button.textContent="Processing…";status.textContent="Recording the customer-to-owner demo transfer…";
  try{
@@ -944,7 +983,7 @@ async function submitOsoLocalTransfer(event){
   return;
  }
  if(!currentUserId){status.textContent="Please sign in again before making a demo transfer.";return;}
- try{await checkCustomerTransferPermission();}catch(error){status.textContent=error.message||"Transfers are temporarily restricted.";return;}
+ try{await checkCustomerTransferPermission();}catch(error){showTransferRestrictionPopup();status.textContent=error.message||"Transfers are temporarily restricted.";return;}
 
  button.disabled=true;button.textContent="Processing simulation…";status.textContent="Recording your simulated international transfer…";
  try{
@@ -1128,6 +1167,7 @@ async function loadSession(){
   if(customerChatTimer)clearInterval(customerChatTimer);
   customerChatTimer=setInterval(loadCustomerLiveChat,5000);
   await loadCustomerDemoFunds(user.id);
+  try{await checkCustomerTransferPermission();}catch(error){if((error.message||"").includes("Transfers are temporarily restricted"))showTransferRestrictionPopup();else console.warn("Could not check transfer restriction status:",error);}
 }
 async function loadCustomerReplies(userId){
   const replyStatus=document.getElementById("owner-replies-status");

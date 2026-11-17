@@ -31,16 +31,16 @@ jobs:
           for (const file of files) {
             const html = fs.readFileSync(file, 'utf8');
             const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
-            if (!scripts.length) throw new Error(\`No JavaScript found in \${file}\`);
+            if (!scripts.length) throw new Error("No JavaScript found in " + file);
             scripts.forEach((match, index) => {
               const code = match[1].replace(/^\s*import\s+\{[^}]+\}\s+from\s+["'][^"']+["'];?\s*/m, '');
               try {
                 new Function(code);
               } catch (error) {
-                throw new Error(\`\${file}, script \${index + 1}: \${error.message}\`);
+                throw new Error(file + ", script " + (index + 1) + ": " + error.message);
               }
             });
-            console.log(\`JavaScript syntax OK: \${file}\`);
+            console.log("JavaScript syntax OK: " + file);
           }
           NODE
       - name: Configure Pages

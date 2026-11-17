@@ -130,5 +130,22 @@ s1.setAttribute('crossorigin','*');
 s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
+<!-- TopSafeB privacy-conscious page-view counter: path and timestamp only -->
+<script>
+(function(){
+  try {
+    var endpoint="https://wivxqaratjrrhpeeeboc.supabase.co/rest/v1/insight_hub_pageviews";
+    var key="sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
+    var path=window.location.pathname || "/";
+    if(path.length>160 || !/^\/[A-Za-z0-9_./-]*$/.test(path)) return;
+    fetch(endpoint,{
+      method:"POST",
+      headers:{"apikey":key,"Authorization":"Bearer "+key,"Content-Type":"application/json","Prefer":"return=minimal"},
+      body:JSON.stringify({page_path:path}),
+      keepalive:true
+    }).catch(function(){});
+  } catch(e) {}
+})();
+</script>
 </body>
 </html>

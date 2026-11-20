@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Track a Package | TopSafeB</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7f4;color:#20352d;font:15px/1.55 Arial,sans-serif}header{background:#123b30;color:white;padding:20px max(18px,calc((100% - 960px)/2));font-weight:800;font-size:21px}main{max-width:960px;margin:34px auto;padding:0 18px 60px}.panel{background:white;border:1px solid #e0e9e3;border-radius:16px;padding:24px;box-shadow:0 8px 28px #163d2b0b}h1{margin:0 0 8px;color:#123b30;font-size:clamp(26px,5vw,36px)}.muted{color:#687d73}.search{display:flex;gap:10px;margin-top:20px}input{min-width:0;flex:1;padding:14px;border:1px solid #cbd8cf;border-radius:9px;font:inherit;text-transform:uppercase}button{border:0;border-radius:9px;padding:13px 18px;background:#176b4b;color:white;font-weight:800;font-size:14px;cursor:pointer}#status{margin-top:18px;padding:13px;border-radius:9px;background:#f1f6f2;color:#315b43;overflow-wrap:anywhere}.result{margin-top:20px}.route{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}.route div,.event{background:#f7faf8;border:1px solid #e3ece5;border-radius:10px;padding:13px}.route small,.event small{display:block;color:#6b7d75}.pill{display:inline-block;padding:5px 10px;border-radius:30px;background:#e5f4e9;color:#176b4b;font-weight:800;font-size:12px}.timeline{display:grid;gap:10px;margin-top:12px}.event strong{display:block}.fine{font-size:12px;color:#718078;margin-top:22px}@media(max-width:560px){.search{flex-direction:column}.route{grid-template-columns:1fr}.panel{padding:19px}}
+</style>
+</head>
+<body>
+<header>TopSafeB · Package Tracking</header>
+<main>
+<section class="panel">
+<h1>Track your package</h1>
+<p class="muted">Enter the TopSafeB tracking number supplied by the sender to view the latest recorded shipment status.</p>
+<form id="lookup-form" class="search"><input id="tracking-number" autocomplete="off" placeholder="Example: TSB-AB12CD34EF" aria-label="Tracking number" required><button id="lookup-button" type="submit">Track package</button></form>
+<div id="status" role="status" aria-live="polite">Enter a tracking number to begin.</div>
+<div id="result" class="result" hidden></div>
+<p class="fine">Tracking updates are displayed as recorded by the shipment manager. TopSafeB does not independently verify carrier scans or operate a delivery fleet.</p>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+ const status=document.getElementById("status"),result=document.getElementById("result"),form=document.getElementById("lookup-form"),input=document.getElementById("tracking-number"),button=document.getElementById("lookup-button");
+ if(!window.supabase||!window.supabase.createClient){status.textContent="The tracking service could not load. Check your connection and refresh.";return;}
+ const client=window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
+ const safe=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+ const date=value=>value?new Date(value+"T00:00:00").toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"Not provided";
+ form.addEventListener("submit",async event=>{
+  event.preventDefault();button.disabled=true;result.hidden=true;status.textContent="Looking up shipment…";
+  try{
+   const code=input.value.trim().toUpperCase();
+   const {data,error}=await client.rpc("track_top_safeb_package",{p_tracking_number:code});
+   if(error)throw error;
+   if(!data){status.textContent="No shipment was found for that tracking number. Check the number and try again.";return;}
+   status.textContent="Shipment record found.";
+   const events=Array.isArray(data.events)?data.events:[];
+   result.innerHTML='<span class="pill">'+safe(data.status)+'</span><h2>Tracking '+safe(data.tracking_number)+'</h2><div class="route"><div><small>Origin</small><strong>'+safe(data.origin)+'</strong></div><div><small>Destination</small><strong>'+safe(data.destination)+'</strong></div><div><small>Dispatch date</small><strong>'+safe(date(data.dispatch_date))+'</strong></div><div><small>Estimated delivery</small><strong>'+safe(date(data.estimated_delivery_date))+'</strong></div></div><h3>Shipment history</h3><div class="timeline">'+(events.length?events.map(item=>'<div class="event"><strong>'+safe(item.status)+'</strong><span>'+safe(item.location||"Location not provided")+'</span><p>'+safe(item.note||"Status updated")+'</p><small>'+safe(new Date(item.created_at).toLocaleString())+'</small></div>').join(""):'<p class="muted">No tracking updates have been added yet.</p>')+'</div>';
+   result.hidden=false;
+  }catch(error){status.textContent="Tracking lookup failed: "+(error.message||"Please try again.");}
+  finally{button.disabled=false;}
+ });
+})();
+</script>
+</body></html>

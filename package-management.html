@@ -36,7 +36,7 @@
 <p><button id="create-button" type="submit">Create shipment</button></p>
 </form>
 </section>
-<section class="panel"><h2>Your shipments</h2><div class="table-wrap"><table><thead><tr><th>Tracking number</th><th>Sender / recipient</th><th>Route</th><th>Status</th><th>Update status</th></tr></thead><tbody id="shipment-rows"><tr><td colspan="5">No shipments loaded.</td></tr></tbody></table></div></section>
+<section class="panel"><h2>Your shipments</h2><label for="shipment-search">Search shipments</label><input id="shipment-search" type="search" placeholder="Tracking number, customer, address or destination"><div class="table-wrap"><table><thead><tr><th>Tracking number</th><th>Sender / recipient</th><th>Route</th><th>Status</th><th>Update status</th></tr></thead><tbody id="shipment-rows"><tr><td colspan="5">No shipments loaded.</td></tr></tbody></table></div></section>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -59,14 +59,14 @@
   owner=session.user;loginPanel.classList.add("hidden");workspace.classList.remove("hidden");say("Owner access verified. Shipment records are stored separately from banking and Insight Hub data.");await loadShipments();
  }
  async function loadShipments(){
-  const {data,error}=await client.from("package_shipments").select("id,tracking_number,sender_name,recipient_name,origin,destination,status,created_at").eq("created_by",owner.id).order("created_at",{ascending:false}).limit(200);
+  const {data,error}=await client.from("package_shipments").select("id,tracking_number,sender_name,recipient_name,recipient_address,origin,destination,status,created_at").eq("created_by",owner.id).order("created_at",{ascending:false}).limit(200);
   if(error)throw error;
   rows.replaceChildren();
   if(!data||!data.length){const tr=document.createElement("tr");tr.innerHTML='<td colspan="5">No shipments created yet.</td>';rows.append(tr);return;}
-  data.forEach(item=>{
+  data.filter(item=>{const q=(document.getElementById("shipment-search").value||"").toLowerCase();return [item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status].join(" ").toLowerCase().includes(q);}).forEach(item=>{
    const tr=document.createElement("tr");
    const options=statuses.map(s=>'<option '+(s===item.status?"selected":"")+'>'+s+'</option>').join("");
-   tr.innerHTML='<td><div class="tracking">'+escapeHtml(item.tracking_number)+'</div><a href="package-tracking.html?tracking='+encodeURIComponent(item.tracking_number)+'" target="_blank" rel="noopener">Public tracking page</a></td><td>'+escapeHtml(item.sender_name)+'<br><span class="small">To: '+escapeHtml(item.recipient_name)+'</span></td><td>'+escapeHtml(item.origin)+'<br>→ '+escapeHtml(item.destination)+'</td><td>'+escapeHtml(item.status)+'</td><td><div class="actions"><select aria-label="New status" data-status="'+item.id+'">'+options+'</select><button data-update="'+item.id+'">Save</button></div></td>';
+   tr.innerHTML='<td><div class="tracking">'+escapeHtml(item.tracking_number)+'</div><a href="package-tracking.html?tracking='+encodeURIComponent(item.tracking_number)+'" target="_blank" rel="noopener">Public tracking page</a></td><td>'+escapeHtml(item.sender_name)+'<br><span class="small">To: '+escapeHtml(item.recipient_name)+'</span><br><span class="small">Delivery: '+escapeHtml(item.recipient_address||"Address not recorded")+'</span></td><td>'+escapeHtml(item.origin)+'<br>→ '+escapeHtml(item.destination)+'</td><td>'+escapeHtml(item.status)+'</td><td><div class="actions"><select aria-label="New status" data-status="'+item.id+'">'+options+'</select><button data-update="'+item.id+'">Save</button></div></td>';
    rows.append(tr);
   });
  }
@@ -94,13 +94,13 @@
   event.target.disabled=true;
   try{
    const select=rows.querySelector('select[data-status="'+id+'"]');const next=select.value;
-   const {error}=await client.from("package_shipments").update({status:next,updated_at:new Date().toISOString(),delivered_at:next==="Delivered"?new Date().toISOString():null}).eq("id",id).eq("created_by",owner.id);if(error)throw error;
+   const updatePayload={status:next,updated_at:new Date().toISOString()};if(next==="Delivered")updatePayload.delivered_at=new Date().toISOString();const {error}=await client.from("package_shipments").update(updatePayload).eq("id",id).eq("created_by",owner.id);if(error)throw error;
    const {error:eventError}=await client.from("package_tracking_events").insert({shipment_id:id,status:next,location:"",public_note:"Shipment status updated to "+next+".",created_by:owner.id});if(eventError)throw eventError;
    say("Shipment status updated.");await loadShipments();
   }catch(error){say("Update failed: "+(error.message||"Please try again."));}
   finally{event.target.disabled=false;}
  });
- document.getElementById("refresh-button").addEventListener("click",()=>loadShipments().then(()=>say("Shipment list refreshed.")).catch(e=>say(e.message)));
+ document.getElementById("shipment-search").addEventListener("input",()=>loadShipments().catch(e=>say(e.message)));\n document.getElementById("refresh-button").addEventListener("click",()=>loadShipments().then(()=>say("Shipment list refreshed.")).catch(e=>say(e.message)));
  document.getElementById("signout-button").addEventListener("click",async()=>{await client.auth.signOut();await checkOwner();});
  client.auth.onAuthStateChange(()=>{setTimeout(()=>checkOwner().catch(e=>say(e.message)),0);});
  checkOwner().catch(error=>{say(error.message||"Unable to verify owner access.");loginPanel.classList.remove("hidden");workspace.classList.add("hidden");});

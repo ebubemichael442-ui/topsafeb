@@ -42,6 +42,13 @@ revoke all on public.insight_hub_activity_events from public;
 grant insert on public.insight_hub_activity_events to authenticated;
 grant select on public.insight_hub_activity_events to authenticated;
 
+
+-- Keep one signup event per customer, including customers who registered before
+-- this tracking feature was installed. This is safe to rerun.
+create unique index if not exists insight_hub_one_signup_per_customer
+  on public.insight_hub_activity_events (user_id)
+  where event_type = 'signup';
+
 -- Record signups without storing email addresses, names, passwords or profile fields.
 create or replace function public.insight_hub_record_customer_signup()
 returns trigger
@@ -51,7 +58,8 @@ set search_path = public
 as $$
 begin
   insert into public.insight_hub_activity_events(user_id, event_type)
-  values (new.id, 'signup');
+  values (new.id, 'signup')
+  on conflict do nothing;
   return new;
 end;
 $$;
@@ -105,3 +113,13 @@ for each row execute function public.insight_hub_record_demo_topup_request();
 
 revoke all on function public.insight_hub_record_demo_transaction() from public;
 revoke all on function public.insight_hub_record_demo_topup_request() from public;
+
+-- Backfill historical customer sign-ups once, using account creation timestamps.
+insert into public.insight_hub_activity_events(user_id, event_type, created_at)
+select u.id, 'signup', u.created_at
+from auth.users u
+where not exists (
+  select 1 from public.insight_hub_activity_events e
+  where e.user_id = u.id and e.event_type = 'signup'
+)
+on conflict do nothing;

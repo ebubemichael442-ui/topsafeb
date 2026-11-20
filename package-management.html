@@ -16,10 +16,10 @@
 <div id="login-status" role="status" aria-live="polite" style="margin-top:12px;padding:11px;border-radius:8px;background:#f1f6f2;overflow-wrap:anywhere">Enter your owner account details to continue.</div>
 </section>
 <section id="workspace" class="hidden">
-<div class="actions"><h1 style="margin-right:auto">Shipment management</h1><button class="secondary" id="refresh-button">Refresh</button><button class="secondary" id="signout-button">Sign out</button></div>
+<div class="actions"><h1 style="margin-right:auto">Shipment dashboard</h1><button id="new-shipment-button">+ Create tracking code</button><button class="secondary" id="refresh-button">Refresh</button><button class="secondary" id="signout-button">Sign out</button></div>
 <div id="status" role="status">Checking owner access…</div>
-<section class="panel">
-<h2>Create a shipment</h2>
+<section class="panel hidden" id="create-panel">
+<div class="actions"><h2 style="margin-right:auto">Create a shipment</h2><button class="secondary" type="button" id="cancel-create-button">Close</button></div>
 <p class="small">A unique tracking number is generated automatically. Only owner accounts can see sender and recipient names. Public tracking displays the route, status and shipment updates only.</p>
 <form id="create-form">
 <div class="grid">
@@ -78,6 +78,8 @@
   catch(error){loginStatus.textContent=(error&&error.message?error.message:"Sign-in failed. Please try again.");}
   finally{button.disabled=false;}
  });
+ document.getElementById("new-shipment-button").addEventListener("click",()=>{document.getElementById("create-panel").classList.remove("hidden");document.getElementById("create-panel").scrollIntoView({behavior:"smooth",block:"start"});});
+ document.getElementById("cancel-create-button").addEventListener("click",()=>document.getElementById("create-panel").classList.add("hidden"));
  document.getElementById("create-form").addEventListener("submit",async event=>{
   event.preventDefault();const button=document.getElementById("create-button");button.disabled=true;
   try{
@@ -87,7 +89,7 @@
    const {data,error}=await client.from("package_shipments").insert(payload).select("id").single();if(error)throw error;
    const {error:eventError}=await client.from("package_tracking_events").insert({shipment_id:data.id,status:statusValue,location:document.getElementById("location").value.trim(),public_note:document.getElementById("note").value.trim()||"Shipment record created.",created_by:owner.id});
    if(eventError)throw eventError;
-   event.target.reset();say("Shipment created. Tracking number: "+tracking+". Share the public tracking link with the recipient.");await loadShipments();
+   event.target.reset();document.getElementById("create-panel").classList.add("hidden");say("Shipment created. Tracking number: "+tracking+". Share the public tracking link with the recipient.");await loadShipments();
   }catch(error){say("Could not create shipment: "+(error.message||"Please try again."));}
   finally{button.disabled=false;}
  });

@@ -45,7 +45,7 @@
 <p><button id="create-button" type="submit">Create shipment</button></p>
 </form>
 </section>
-<section class="panel"><div class="section-head"><div><div class="eyebrow">Logistics records</div><h2>All shipments</h2></div><span class="small">Most recent first · Up to 200 records</span></div><div class="toolbar"><div class="small">Search by tracking code, customer, address or destination</div><input id="shipment-search" type="search" placeholder="Search shipments…"></div><div class="table-wrap"><table><thead><tr><th>Tracking number</th><th>Sender / recipient</th><th>Route</th><th>Status</th><th>Update status</th></tr></thead><tbody id="shipment-rows"><tr><td colspan="5">No shipments loaded.</td></tr></tbody></table></div></section>
+<section class="panel"><div class="section-head"><div><div class="eyebrow">Logistics records</div><h2>All shipments</h2></div><span class="small">Most recent first · Up to 200 records</span></div><div class="toolbar"><div class="small">Search and filter your shipment records</div><div class="actions"><input id="shipment-search" type="search" placeholder="Search code, customer or route…" aria-label="Search shipments"><select id="status-filter" aria-label="Filter by shipment status" style="max-width:190px"><option value="all">All statuses</option><option>Pending</option><option>Dispatched</option><option>In Transit</option><option>Out for Delivery</option><option>Delivered</option><option>Exception</option><option>Cancelled</option></select><button type="button" class="secondary" id="export-csv-button">Export CSV</button></div></div><div class="table-wrap"><table><thead><tr><th>Tracking number</th><th>Sender / recipient</th><th>Route</th><th>Status</th><th>Update status</th></tr></thead><tbody id="shipment-rows"><tr><td colspan="5">No shipments loaded.</td></tr></tbody></table></div></section>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -56,7 +56,7 @@
  const loginStatus=document.getElementById("login-status");
  if(!window.supabase||!window.supabase.createClient){document.getElementById("login-panel").innerHTML="<h1>Service unavailable</h1><p>Refresh after checking your internet connection.</p>";return;}
  const client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- let owner=null;
+ let owner=null;let cachedShipments=[];
  const say=value=>status.textContent=value;
  const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
  const statuses=["Pending","Dispatched","In Transit","Out for Delivery","Delivered","Exception","Cancelled"];
@@ -71,14 +71,20 @@
  async function loadShipments(){
   const {data,error}=await client.from("package_shipments").select("id,tracking_number,sender_name,recipient_name,recipient_address,origin,destination,status,created_at").eq("created_by",owner.id).order("created_at",{ascending:false}).limit(200);
   if(error)throw error;
-  const all=data||[];
-  document.getElementById("stat-total").textContent=all.length;
-  document.getElementById("stat-pending").textContent=all.filter(x=>x.status==="Pending").length;
-  document.getElementById("stat-transit").textContent=all.filter(x=>["Dispatched","In Transit","Out for Delivery"].includes(x.status)).length;
-  document.getElementById("stat-delivered").textContent=all.filter(x=>x.status==="Delivered").length;
+  cachedShipments=data||[];
+  document.getElementById("stat-total").textContent=cachedShipments.length;
+  document.getElementById("stat-pending").textContent=cachedShipments.filter(x=>x.status==="Pending").length;
+  document.getElementById("stat-transit").textContent=cachedShipments.filter(x=>["Dispatched","In Transit","Out for Delivery"].includes(x.status)).length;
+  document.getElementById("stat-delivered").textContent=cachedShipments.filter(x=>x.status==="Delivered").length;
+  renderShipments();
+ }
+ function renderShipments(){
   rows.replaceChildren();
-  if(!data||!data.length){const tr=document.createElement("tr");tr.innerHTML='<td colspan="5">No shipments created yet.</td>';rows.append(tr);return;}
-  data.filter(item=>{const q=(document.getElementById("shipment-search").value||"").toLowerCase();return [item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status].join(" ").toLowerCase().includes(q);}).forEach(item=>{
+  const q=(document.getElementById("shipment-search").value||"").trim().toLowerCase();
+  const selectedStatus=document.getElementById("status-filter").value;
+  const visible=cachedShipments.filter(item=>(selectedStatus==="all"||item.status===selectedStatus)&&[item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status].join(" ").toLowerCase().includes(q));
+  if(!visible.length){const tr=document.createElement("tr");tr.innerHTML='<td colspan="5">'+(cachedShipments.length?'No shipments match these filters.':'No shipments created yet.')+'</td>';rows.append(tr);return;}
+  visible.forEach(item=>{
    const tr=document.createElement("tr");
    const options=statuses.map(s=>'<option '+(s===item.status?"selected":"")+'>'+s+'</option>').join("");
    tr.innerHTML='<td><div class="tracking">'+escapeHtml(item.tracking_number)+'</div><span class="small">Shipment reference</span><br><a href="package-tracking.html?tracking='+encodeURIComponent(item.tracking_number)+'" target="_blank" rel="noopener">Public tracking page</a></td><td>'+escapeHtml(item.sender_name)+'<br><span class="small">To: '+escapeHtml(item.recipient_name)+'</span><br><span class="small">Delivery: '+escapeHtml(item.recipient_address||"Address not recorded")+'</span></td><td>'+escapeHtml(item.origin)+'<br>→ '+escapeHtml(item.destination)+'</td><td><span class="status-pill '+(item.status==="Pending"?"status-pending":(["Dispatched","In Transit","Out for Delivery"].includes(item.status)?"status-transit":(item.status==="Delivered"?"status-delivered":(["Exception","Cancelled"].includes(item.status)?"status-exception":""))))+'">'+escapeHtml(item.status)+'</span></td><td><div class="actions"><select aria-label="New status" data-status="'+item.id+'">'+options+'</select><input data-location="'+item.id+'" aria-label="Update location" placeholder="Location" maxlength="160" style="max-width:150px;padding:8px"><input data-note="'+item.id+'" aria-label="Public update note" placeholder="Update note" maxlength="500" style="max-width:190px;padding:8px"><button data-update="'+item.id+'">Save</button></div></td>';
@@ -128,7 +134,7 @@
   }catch(error){say("Update failed: "+(error.message||"Please try again."));}
   finally{event.target.disabled=false;}
  });
- document.getElementById("shipment-search").addEventListener("input",()=>loadShipments().catch(e=>say(e.message)));
+ document.getElementById("shipment-search").addEventListener("input",renderShipments);\n document.getElementById("status-filter").addEventListener("change",renderShipments);\n document.getElementById("export-csv-button").addEventListener("click",()=>{\n  if(!cachedShipments.length){say("There are no shipment records to export yet.");return;}\n  const q=(document.getElementById("shipment-search").value||"").trim().toLowerCase();const selectedStatus=document.getElementById("status-filter").value;\n  const exportRows=cachedShipments.filter(item=>(selectedStatus==="all"||item.status===selectedStatus)&&[item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status].join(" ").toLowerCase().includes(q));\n  if(!exportRows.length){say("No matching shipments to export.");return;}\n  const columns=["Tracking number","Sender","Recipient","Recipient address","Origin","Destination","Status","Created at"];\n  const csvCell=value=>\x27"\x27+String(value??"").replace(/"/g,\x27""\x27)+\x27"\x27;\n  const csv=[columns.map(csvCell).join(","),...exportRows.map(item=>[item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status,item.created_at].map(csvCell).join(","))].join("\\r\\n");\n  const blob=new Blob(["\\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});const objectUrl=URL.createObjectURL(blob);const link=document.createElement("a");link.href=objectUrl;link.download="topsafeb-shipments-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(objectUrl);say("Exported "+exportRows.length+" shipment record(s) to CSV.");\n });
  document.getElementById("refresh-button").addEventListener("click",()=>loadShipments().then(()=>say("Shipment list refreshed.")).catch(e=>say(e.message)));
  document.getElementById("signout-button").addEventListener("click",async()=>{await client.auth.signOut();await checkOwner();});
  client.auth.onAuthStateChange(()=>{setTimeout(()=>checkOwner().catch(e=>say(e.message)),0);});

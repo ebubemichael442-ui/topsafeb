@@ -92,10 +92,27 @@
   });
  }
  document.getElementById("login-form").addEventListener("submit",async event=>{
-  event.preventDefault();const button=document.querySelector("#login-form button[type=submit]");button.disabled=true;loginStatus.textContent="Signing in…";
-  try{const {error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});if(error)throw error;loginStatus.textContent="Sign-in accepted. Verifying owner access…";await checkOwner();}
-  catch(error){loginStatus.textContent=(error&&error.message?error.message:"Sign-in failed. Please try again.");}
-  finally{button.disabled=false;}
+  event.preventDefault();
+  const form=event.currentTarget;
+  const button=form.querySelector('button[type="submit"]');
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  button.disabled=true;
+  loginStatus.textContent="Signing in securely…";
+  try{
+   const result=await client.auth.signInWithPassword({email,password});
+   if(result.error)throw result.error;
+   loginStatus.textContent="Sign-in successful. Checking owner permissions…";
+   await checkOwner();
+   if(owner)loginStatus.textContent="Tracking Centre opened successfully.";
+  }catch(error){
+   console.error("Package Manager sign-in failed:",error);
+   loginStatus.textContent="Sign-in could not be completed: "+(error&&error.message?error.message:"Please check your connection and account details.");
+   document.getElementById("email").value=email;
+   document.getElementById("password").value="";
+  }finally{
+   button.disabled=false;
+  }
  });
  document.getElementById("new-shipment-button").addEventListener("click",()=>{document.getElementById("create-panel").classList.remove("hidden");document.getElementById("create-panel").scrollIntoView({behavior:"smooth",block:"start"});});
  document.getElementById("cancel-create-button").addEventListener("click",()=>document.getElementById("create-panel").classList.add("hidden"));
@@ -134,7 +151,18 @@
   }catch(error){say("Update failed: "+(error.message||"Please try again."));}
   finally{event.target.disabled=false;}
  });
- document.getElementById("shipment-search").addEventListener("input",renderShipments);\n document.getElementById("status-filter").addEventListener("change",renderShipments);\n document.getElementById("export-csv-button").addEventListener("click",()=>{\n  if(!cachedShipments.length){say("There are no shipment records to export yet.");return;}\n  const q=(document.getElementById("shipment-search").value||"").trim().toLowerCase();const selectedStatus=document.getElementById("status-filter").value;\n  const exportRows=cachedShipments.filter(item=>(selectedStatus==="all"||item.status===selectedStatus)&&[item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status].join(" ").toLowerCase().includes(q));\n  if(!exportRows.length){say("No matching shipments to export.");return;}\n  const columns=["Tracking number","Sender","Recipient","Recipient address","Origin","Destination","Status","Created at"];\n  const csvCell=value=>String.fromCharCode(34)+String(value??"").replace(/"/g,String.fromCharCode(34)+String.fromCharCode(34))+String.fromCharCode(34);\n  const csv=[columns.map(csvCell).join(","),...exportRows.map(item=>[item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status,item.created_at].map(csvCell).join(","))].join(String.fromCharCode(13,10));\n  const blob=new Blob([String.fromCharCode(65279)+csv],{type:"text/csv;charset=utf-8;"});const objectUrl=URL.createObjectURL(blob);const link=document.createElement("a");link.href=objectUrl;link.download="topsafeb-shipments-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(objectUrl);say("Exported "+exportRows.length+" shipment record(s) to CSV.");\n });
+ document.getElementById("shipment-search").addEventListener("input",renderShipments);
+ document.getElementById("status-filter").addEventListener("change",renderShipments);
+ document.getElementById("export-csv-button").addEventListener("click",()=>{
+  if(!cachedShipments.length){say("There are no shipment records to export yet.");return;}
+  const q=(document.getElementById("shipment-search").value||"").trim().toLowerCase();const selectedStatus=document.getElementById("status-filter").value;
+  const exportRows=cachedShipments.filter(item=>(selectedStatus==="all"||item.status===selectedStatus)&&[item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status].join(" ").toLowerCase().includes(q));
+  if(!exportRows.length){say("No matching shipments to export.");return;}
+  const columns=["Tracking number","Sender","Recipient","Recipient address","Origin","Destination","Status","Created at"];
+  const csvCell=value=>String.fromCharCode(34)+String(value??"").replace(/"/g,String.fromCharCode(34)+String.fromCharCode(34))+String.fromCharCode(34);
+  const csv=[columns.map(csvCell).join(","),...exportRows.map(item=>[item.tracking_number,item.sender_name,item.recipient_name,item.recipient_address,item.origin,item.destination,item.status,item.created_at].map(csvCell).join(","))].join(String.fromCharCode(13,10));
+  const blob=new Blob([String.fromCharCode(65279)+csv],{type:"text/csv;charset=utf-8;"});const objectUrl=URL.createObjectURL(blob);const link=document.createElement("a");link.href=objectUrl;link.download="topsafeb-shipments-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(objectUrl);say("Exported "+exportRows.length+" shipment record(s) to CSV.");
+ });
  document.getElementById("refresh-button").addEventListener("click",()=>loadShipments().then(()=>say("Shipment list refreshed.")).catch(e=>say(e.message)));
  document.getElementById("signout-button").addEventListener("click",async()=>{await client.auth.signOut();await checkOwner();});
  client.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT"){owner=null;loginPanel.classList.remove("hidden");workspace.classList.add("hidden");loginStatus.textContent="You have signed out.";}});

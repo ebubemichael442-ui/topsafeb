@@ -99,11 +99,21 @@
    const tracking="TSB-"+Array.from(crypto.getRandomValues(new Uint8Array(12))).map(v=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[v%32]).join("");
    const statusValue=document.getElementById("initial-status").value;
    const payload={tracking_number:tracking,recipient_address:document.getElementById("recipient-address").value.trim(),sender_name:document.getElementById("sender").value.trim(),recipient_name:document.getElementById("recipient").value.trim(),origin:document.getElementById("origin").value.trim(),destination:document.getElementById("destination").value.trim(),dispatch_date:document.getElementById("dispatch").value||null,estimated_delivery_date:document.getElementById("estimate").value||null,carrier_name:document.getElementById("carrier-name").value.trim()||null,carrier_tracking_number:document.getElementById("carrier-tracking-number").value.trim()||null,status:statusValue,created_by:owner.id};
-   const {data,error}=await client.from("package_shipments").insert(payload).select("id").single();if(error)throw error;
+   let {data,error}=await client.from("package_shipments").insert(payload).select("id").single();
+   if(error){
+    const detail=String(error.message||"").toLowerCase();
+    const missingCarrierColumn=(detail.includes("carrier_name")||detail.includes("carrier_tracking_number"))&&(detail.includes("schema cache")||detail.includes("column"));
+    if(!missingCarrierColumn)throw error;
+    const compatiblePayload={...payload};delete compatiblePayload.carrier_name;delete compatiblePayload.carrier_tracking_number;
+    const retry=await client.from("package_shipments").insert(compatiblePayload).select("id").single();
+    if(retry.error)throw retry.error;
+    data=retry.data;
+    window.alert("Shipment saved successfully.\\n\\nCourier details were not saved because the database still needs its carrier-fields update. Your shipment and tracking code are safe. Apply the carrier-fields SQL update in Supabase before using those optional fields.");
+   }
    const {error:eventError}=await client.from("package_tracking_events").insert({shipment_id:data.id,status:statusValue,location:document.getElementById("location").value.trim(),public_note:document.getElementById("note").value.trim()||"Shipment record created.",created_by:owner.id});
    if(eventError)throw eventError;
    event.target.reset();document.getElementById("create-panel").classList.add("hidden");say("Shipment created. Tracking number: "+tracking+". Share the public tracking link with the recipient.");await loadShipments();
-  }catch(error){say("Could not create shipment: "+(error.message||"Please try again."));}
+  }catch(error){console.error("Shipment creation failed:",error);window.alert("We couldn't save this shipment. Please check the required fields and try again. If the problem continues, contact the site owner.");}
   finally{button.disabled=false;}
  });
  rows.addEventListener("click",async event=>{

@@ -78,7 +78,7 @@
  document.getElementById("create-form").addEventListener("submit",async event=>{
   event.preventDefault();const button=document.getElementById("create-button");button.disabled=true;
   try{
-   const tracking="TSB-"+Array.from(crypto.getRandomValues(new Uint8Array(6))).map(v=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[v%32]).join("");
+   const tracking="TSB-"+Array.from(crypto.getRandomValues(new Uint8Array(12))).map(v=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[v%32]).join("");
    const statusValue=document.getElementById("initial-status").value;
    const payload={tracking_number:tracking,sender_name:document.getElementById("sender").value.trim(),recipient_name:document.getElementById("recipient").value.trim(),origin:document.getElementById("origin").value.trim(),destination:document.getElementById("destination").value.trim(),dispatch_date:document.getElementById("dispatch").value||null,estimated_delivery_date:document.getElementById("estimate").value||null,status:statusValue,created_by:owner.id};
    const {data,error}=await client.from("package_shipments").insert(payload).select("id").single();if(error)throw error;

@@ -13,6 +13,7 @@
 <section id="login-panel" class="panel">
 <h1>Owner sign-in</h1><p class="small">Sign in with your existing TopSafeB owner account. Access is checked against the admin_users table.</p>
 <form id="login-form"><label>Email</label><input id="email" type="email" autocomplete="username" required><label>Password</label><input id="password" type="password" autocomplete="current-password" required><button type="submit">Sign in</button></form>
+<div id="login-status" role="status" aria-live="polite" style="margin-top:12px;padding:11px;border-radius:8px;background:#f1f6f2;overflow-wrap:anywhere">Enter your owner account details to continue.</div>
 </section>
 <section id="workspace" class="hidden">
 <div class="actions"><h1 style="margin-right:auto">Shipment management</h1><button class="secondary" id="refresh-button">Refresh</button><button class="secondary" id="signout-button">Sign out</button></div>
@@ -44,6 +45,7 @@
 (function(){
  const url="https://wivxqaratjrrhpeeeboc.supabase.co",key="sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
  const loginPanel=document.getElementById("login-panel"),workspace=document.getElementById("workspace"),status=document.getElementById("status"),rows=document.getElementById("shipment-rows");
+ const loginStatus=document.getElementById("login-status");
  if(!window.supabase||!window.supabase.createClient){document.getElementById("login-panel").innerHTML="<h1>Service unavailable</h1><p>Refresh after checking your internet connection.</p>";return;}
  const client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  let owner=null;
@@ -71,9 +73,9 @@
   });
  }
  document.getElementById("login-form").addEventListener("submit",async event=>{
-  event.preventDefault();const button=event.submitter;button.disabled=true;say("Signing in…");
-  try{const {error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});if(error)throw error;await checkOwner();}
-  catch(error){say(error.message||"Sign-in failed.");}
+  event.preventDefault();const button=document.querySelector("#login-form button[type=submit]");button.disabled=true;loginStatus.textContent="Signing in…";
+  try{const {error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});if(error)throw error;loginStatus.textContent="Sign-in accepted. Verifying owner access…";await checkOwner();}
+  catch(error){loginStatus.textContent=(error&&error.message?error.message:"Sign-in failed. Please try again.");}
   finally{button.disabled=false;}
  });
  document.getElementById("create-form").addEventListener("submit",async event=>{

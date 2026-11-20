@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Package Manager | TopSafeB</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7f4;color:#20352d;font:14px/1.55 Arial,sans-serif}header{background:#123b30;color:#fff;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}header strong{font-size:20px}a{color:#176b4b;font-weight:700}main{max-width:1120px;margin:28px auto;padding:0 16px 60px}h1,h2{color:#123b30}.panel{background:#fff;border:1px solid #e0e9e3;border-radius:15px;padding:22px;margin:16px 0;box-shadow:0 6px 22px #163d2b0a}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;font-weight:700;margin:10px 0 5px}input,select,textarea{width:100%;padding:11px;border:1px solid #cad8cf;border-radius:8px;font:inherit;color:#20352d}textarea{min-height:75px}button{border:0;border-radius:8px;padding:11px 15px;background:#176b4b;color:white;font-weight:800;cursor:pointer}button.secondary{background:#e9f0eb;color:#234535}button:disabled{opacity:.55}#status{padding:12px;border-radius:8px;background:#f1f6f2;margin:12px 0;overflow-wrap:anywhere}.hidden{display:none}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:11px;border-bottom:1px solid #e6eee8;vertical-align:top}th{background:#f5f8f6;color:#607168;font-size:12px}.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tracking{font-weight:800;letter-spacing:.4px}.small{font-size:12px;color:#6b7d75}@media(max-width:620px){.grid{grid-template-columns:1fr}.panel{padding:17px}}
+</style>
+</head>
+<body>
+<header><strong>TopSafeB · Package Manager</strong><a href="package-tracking.html" target="_blank" rel="noopener">Open public tracking page ↗</a></header>
+<main>
+<section id="login-panel" class="panel">
+<h1>Owner sign-in</h1><p class="small">Sign in with your existing TopSafeB owner account. Access is checked against the admin_users table.</p>
+<form id="login-form"><label>Email</label><input id="email" type="email" autocomplete="username" required><label>Password</label><input id="password" type="password" autocomplete="current-password" required><button type="submit">Sign in</button></form>
+</section>
+<section id="workspace" class="hidden">
+<div class="actions"><h1 style="margin-right:auto">Shipment management</h1><button class="secondary" id="refresh-button">Refresh</button><button class="secondary" id="signout-button">Sign out</button></div>
+<div id="status" role="status">Checking owner access…</div>
+<section class="panel">
+<h2>Create a shipment</h2>
+<p class="small">A unique tracking number is generated automatically. Only owner accounts can see sender and recipient names. Public tracking displays the route, status and shipment updates only.</p>
+<form id="create-form">
+<div class="grid">
+<div><label for="sender">Sender name</label><input id="sender" maxlength="120" required></div>
+<div><label for="recipient">Recipient name</label><input id="recipient" maxlength="120" required></div>
+<div><label for="origin">Origin (city/region and country)</label><input id="origin" maxlength="160" required></div>
+<div><label for="destination">Destination (city/region and country)</label><input id="destination" maxlength="160" required></div>
+<div><label for="dispatch">Dispatch date</label><input id="dispatch" type="date"></div>
+<div><label for="estimate">Estimated delivery date</label><input id="estimate" type="date"></div>
+<div><label for="initial-status">Initial status</label><select id="initial-status"><option>Pending</option><option>Dispatched</option><option>In Transit</option></select></div>
+<div><label for="location">Current update location</label><input id="location" maxlength="160" placeholder="City or logistics hub"></div>
+</div>
+<label for="note">Public tracking update</label><textarea id="note" maxlength="500" placeholder="Describe the recorded shipment update. Do not claim a carrier scan unless verified."></textarea>
+<p><button id="create-button" type="submit">Create shipment</button></p>
+</form>
+</section>
+<section class="panel"><h2>Your shipments</h2><div class="table-wrap"><table><thead><tr><th>Tracking number</th><th>Sender / recipient</th><th>Route</th><th>Status</th><th>Update status</th></tr></thead><tbody id="shipment-rows"><tr><td colspan="5">No shipments loaded.</td></tr></tbody></table></div></section>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+ const url="https://wivxqaratjrrhpeeeboc.supabase.co",key="sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
+ const loginPanel=document.getElementById("login-panel"),workspace=document.getElementById("workspace"),status=document.getElementById("status"),rows=document.getElementById("shipment-rows");
+ if(!window.supabase||!window.supabase.createClient){document.getElementById("login-panel").innerHTML="<h1>Service unavailable</h1><p>Refresh after checking your internet connection.</p>";return;}
+ const client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ let owner=null;
+ const say=value=>status.textContent=value;
+ const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+ const statuses=["Pending","Dispatched","In Transit","Out for Delivery","Delivered","Exception","Cancelled"];
+ async function checkOwner(){
+  const {data:{session},error}=await client.auth.getSession();if(error)throw error;
+  if(!session){owner=null;loginPanel.classList.remove("hidden");workspace.classList.add("hidden");return;}
+  const {data,error:adminError}=await client.from("admin_users").select("user_id").eq("user_id",session.user.id).maybeSingle();
+  if(adminError)throw adminError;
+  if(!data){await client.auth.signOut();throw new Error("This account is not listed as a TopSafeB administrator.");}
+  owner=session.user;loginPanel.classList.add("hidden");workspace.classList.remove("hidden");say("Owner access verified. Shipment records are stored separately from banking and Insight Hub data.");await loadShipments();
+ }
+ async function loadShipments(){
+  const {data,error}=await client.from("package_shipments").select("id,tracking_number,sender_name,recipient_name,origin,destination,status,created_at").eq("created_by",owner.id).order("created_at",{ascending:false}).limit(200);
+  if(error)throw error;
+  rows.replaceChildren();
+  if(!data||!data.length){const tr=document.createElement("tr");tr.innerHTML='<td colspan="5">No shipments created yet.</td>';rows.append(tr);return;}
+  data.forEach(item=>{
+   const tr=document.createElement("tr");
+   const options=statuses.map(s=>'<option '+(s===item.status?"selected":"")+'>'+s+'</option>').join("");
+   tr.innerHTML='<td><div class="tracking">'+escapeHtml(item.tracking_number)+'</div><a href="package-tracking.html?tracking='+encodeURIComponent(item.tracking_number)+'" target="_blank" rel="noopener">Public tracking page</a></td><td>'+escapeHtml(item.sender_name)+'<br><span class="small">To: '+escapeHtml(item.recipient_name)+'</span></td><td>'+escapeHtml(item.origin)+'<br>→ '+escapeHtml(item.destination)+'</td><td>'+escapeHtml(item.status)+'</td><td><div class="actions"><select aria-label="New status" data-status="'+item.id+'">'+options+'</select><button data-update="'+item.id+'">Save</button></div></td>';
+   rows.append(tr);
+  });
+ }
+ document.getElementById("login-form").addEventListener("submit",async event=>{
+  event.preventDefault();const button=event.submitter;button.disabled=true;say("Signing in…");
+  try{const {error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});if(error)throw error;await checkOwner();}
+  catch(error){say(error.message||"Sign-in failed.");}
+  finally{button.disabled=false;}
+ });
+ document.getElementById("create-form").addEventListener("submit",async event=>{
+  event.preventDefault();const button=document.getElementById("create-button");button.disabled=true;
+  try{
+   const tracking="TSB-"+Array.from(crypto.getRandomValues(new Uint8Array(6))).map(v=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[v%32]).join("");
+   const statusValue=document.getElementById("initial-status").value;
+   const payload={tracking_number:tracking,sender_name:document.getElementById("sender").value.trim(),recipient_name:document.getElementById("recipient").value.trim(),origin:document.getElementById("origin").value.trim(),destination:document.getElementById("destination").value.trim(),dispatch_date:document.getElementById("dispatch").value||null,estimated_delivery_date:document.getElementById("estimate").value||null,status:statusValue,created_by:owner.id};
+   const {data,error}=await client.from("package_shipments").insert(payload).select("id").single();if(error)throw error;
+   const {error:eventError}=await client.from("package_tracking_events").insert({shipment_id:data.id,status:statusValue,location:document.getElementById("location").value.trim(),public_note:document.getElementById("note").value.trim()||"Shipment record created.",created_by:owner.id});
+   if(eventError)throw eventError;
+   event.target.reset();say("Shipment created. Tracking number: "+tracking+". Share the public tracking link with the recipient.");await loadShipments();
+  }catch(error){say("Could not create shipment: "+(error.message||"Please try again."));}
+  finally{button.disabled=false;}
+ });
+ rows.addEventListener("click",async event=>{
+  const id=event.target&&event.target.getAttribute("data-update");if(!id)return;
+  event.target.disabled=true;
+  try{
+   const select=rows.querySelector('select[data-status="'+id+'"]');const next=select.value;
+   const {error}=await client.from("package_shipments").update({status:next,updated_at:new Date().toISOString(),delivered_at:next==="Delivered"?new Date().toISOString():null}).eq("id",id).eq("created_by",owner.id);if(error)throw error;
+   const {error:eventError}=await client.from("package_tracking_events").insert({shipment_id:id,status:next,location:"",public_note:"Shipment status updated to "+next+".",created_by:owner.id});if(eventError)throw eventError;
+   say("Shipment status updated.");await loadShipments();
+  }catch(error){say("Update failed: "+(error.message||"Please try again."));}
+  finally{event.target.disabled=false;}
+ });
+ document.getElementById("refresh-button").addEventListener("click",()=>loadShipments().then(()=>say("Shipment list refreshed.")).catch(e=>say(e.message)));
+ document.getElementById("signout-button").addEventListener("click",async()=>{await client.auth.signOut();await checkOwner();});
+ client.auth.onAuthStateChange(()=>{setTimeout(()=>checkOwner().catch(e=>say(e.message)),0);});
+ checkOwner().catch(error=>{say(error.message||"Unable to verify owner access.");loginPanel.classList.remove("hidden");workspace.classList.add("hidden");});
+})();
+</script>
+</body></html>

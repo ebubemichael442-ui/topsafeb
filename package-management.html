@@ -102,7 +102,8 @@
   }catch(error){say("Update failed: "+(error.message||"Please try again."));}
   finally{event.target.disabled=false;}
  });
- document.getElementById("shipment-search").addEventListener("input",()=>loadShipments().catch(e=>say(e.message)));\n document.getElementById("refresh-button").addEventListener("click",()=>loadShipments().then(()=>say("Shipment list refreshed.")).catch(e=>say(e.message)));
+ document.getElementById("shipment-search").addEventListener("input",()=>loadShipments().catch(e=>say(e.message)));
+ document.getElementById("refresh-button").addEventListener("click",()=>loadShipments().then(()=>say("Shipment list refreshed.")).catch(e=>say(e.message)));
  document.getElementById("signout-button").addEventListener("click",async()=>{await client.auth.signOut();await checkOwner();});
  client.auth.onAuthStateChange(()=>{setTimeout(()=>checkOwner().catch(e=>say(e.message)),0);});
  checkOwner().catch(error=>{say(error.message||"Unable to verify owner access.");loginPanel.classList.remove("hidden");workspace.classList.add("hidden");});

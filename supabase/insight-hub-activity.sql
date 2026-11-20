@@ -1,6 +1,8 @@
 -- TopSafeB Insight Hub: privacy-minimised customer and demo activity
--- Additive migration. Does not change balances, transfers, support messages or page-view records.
--- Run once in the existing TopSafeB Supabase SQL Editor.
+-- Additive migration. Does not alter balances, transfers, support messages or page-view records.
+-- Safe when optional demo tables are absent: demo tracking triggers are attached only
+-- when the expected table and columns exist. Top-up tracking is deferred until its
+-- actual table schema has been confirmed.
 
 create table if not exists public.insight_hub_activity_events (
   id bigint generated always as identity primary key,
@@ -42,14 +44,10 @@ revoke all on public.insight_hub_activity_events from public;
 grant insert on public.insight_hub_activity_events to authenticated;
 grant select on public.insight_hub_activity_events to authenticated;
 
-
--- Keep one signup event per customer, including customers who registered before
--- this tracking feature was installed. This is safe to rerun.
 create unique index if not exists insight_hub_one_signup_per_customer
   on public.insight_hub_activity_events (user_id)
   where event_type = 'signup';
 
--- Record signups without storing email addresses, names, passwords or profile fields.
 create or replace function public.insight_hub_record_customer_signup()
 returns trigger
 language plpgsql
@@ -71,8 +69,7 @@ for each row execute function public.insight_hub_record_customer_signup();
 
 revoke all on function public.insight_hub_record_customer_signup() from public;
 
-
--- Capture successful simulated transactions and top-up requests server-side.
+-- Capture successful demo transfers only if the expected transaction schema exists.
 create or replace function public.insight_hub_record_demo_transaction()
 returns trigger
 language plpgsql
@@ -88,33 +85,29 @@ begin
 end;
 $$;
 
-drop trigger if exists insight_hub_demo_transaction_event on public.demo_transactions;
-create trigger insight_hub_demo_transaction_event
-after insert on public.demo_transactions
-for each row execute function public.insight_hub_record_demo_transaction();
-
-create or replace function public.insight_hub_record_demo_topup_request()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
+do $$
 begin
-  insert into public.insight_hub_activity_events(user_id,event_type)
-  values(new.user_id,'demo_topup_request');
-  return new;
+  if to_regclass('public.demo_transactions') is not null
+     and exists (
+       select 1 from information_schema.columns
+       where table_schema='public' and table_name='demo_transactions' and column_name='action'
+     )
+     and exists (
+       select 1 from information_schema.columns
+       where table_schema='public' and table_name='demo_transactions' and column_name='user_id'
+     ) then
+    execute 'drop trigger if exists insight_hub_demo_transaction_event on public.demo_transactions';
+    execute 'create trigger insight_hub_demo_transaction_event
+             after insert on public.demo_transactions
+             for each row execute function public.insight_hub_record_demo_transaction()';
+  end if;
 end;
 $$;
 
-drop trigger if exists insight_hub_demo_topup_request_event on public.demo_topup_requests;
-create trigger insight_hub_demo_topup_request_event
-after insert on public.demo_topup_requests
-for each row execute function public.insight_hub_record_demo_topup_request();
-
 revoke all on function public.insight_hub_record_demo_transaction() from public;
-revoke all on function public.insight_hub_record_demo_topup_request() from public;
 
--- Backfill historical customer sign-ups once, using account creation timestamps.
+-- Backfill historical sign-ups once, using account creation timestamps.
+-- No names, email addresses, passwords or profile fields are copied.
 insert into public.insight_hub_activity_events(user_id, event_type, created_at)
 select u.id, 'signup', u.created_at
 from auth.users u

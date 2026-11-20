@@ -27,7 +27,8 @@
  const client=window.supabase.createClient("https://wivxqaratjrrhpeeeboc.supabase.co","sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6");
  const safe=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
  const date=value=>value?new Date(value+"T00:00:00").toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"Not provided";
- const params=new URLSearchParams(location.search);if(params.get("tracking"))input.value=params.get("tracking").toUpperCase();\n form.addEventListener("submit",async event=>{
+ const params=new URLSearchParams(location.search);if(params.get("tracking"))input.value=params.get("tracking").toUpperCase();
+ form.addEventListener("submit",async event=>{
   event.preventDefault();button.disabled=true;result.hidden=true;status.textContent="Looking up shipment…";
   try{
    const code=input.value.trim().toUpperCase();

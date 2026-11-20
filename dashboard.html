@@ -773,6 +773,7 @@ const certificateDate=document.getElementById("certificate-date");
 const progressKey="topsafeb-learning-progress-v1";
 const lessonIds=lessonChecks.map(box=>box.dataset.lesson);
 let currentUserId=null;
+async function recordInsightActivity(eventType){try{if(currentUserId)await supabase.from("insight_hub_activity_events").insert({user_id:currentUserId,event_type:eventType});}catch(error){console.warn("TopSafeB activity tracking unavailable:",error);}}
 let customerAccessTimer=null;
 let progressReady=false;
 function readLocalProgress(){try{return JSON.parse(localStorage.getItem(progressKey)||"{}");}catch{return {};}}
@@ -932,6 +933,7 @@ async function submitLocalDemoTransfer(event){
   document.getElementById("receipt-reference").textContent=reference;
   document.getElementById("receipt-description").textContent=description||"Local demo transfer";
   receipt.hidden=false;
+  await recordInsightActivity("demo_transfer");
   status.textContent="Demo transfer recorded. Reference: "+reference+". No real funds transferred.";
   receipt.scrollIntoView({behavior:"smooth",block:"center"});
   form.reset();
@@ -960,8 +962,8 @@ document.getElementById("customer-owner-transfer-form").addEventListener("submit
   if(error)throw error;
   const result=Array.isArray(data)?data[0]:data;
   const reference="OWNER-"+String(result.transaction_id||"").slice(0,8).toUpperCase();
+  await recordInsightActivity("demo_transfer");
   status.textContent="Demo transfer completed. Reference: "+reference+". Customer balance: "+new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(Number(result.customer_balance))+". No real funds transferred.";
-  form.reset();
   await loadCustomerDemoFunds(currentUserId);
  }catch(error){status.textContent="Transfer not completed: "+(error.message||"Please try again.");}
  finally{button.disabled=false;button.textContent="Transfer funds to owner";}
@@ -1003,6 +1005,7 @@ async function submitOsoLocalTransfer(event){
   document.getElementById("receipt-reference").textContent=reference;
   document.getElementById("receipt-description").textContent=description||"International transfer";
   receipt.hidden=false;
+  await recordInsightActivity("demo_transfer");
   status.textContent="Demo transfer recorded. Reference: "+reference+". No real funds transferred.";
   receipt.scrollIntoView({behavior:"smooth",block:"center"});
   form.reset();updateDemoConversion();
@@ -1083,8 +1086,8 @@ document.getElementById("demo-topup-form").addEventListener("submit",async event
  try{
   const {error}=await supabase.from("demo_topup_requests").insert({user_id:currentUserId,amount:Math.round(amount*100)/100,note,status:"pending"});
   if(error)throw error;
+  await recordInsightActivity("demo_topup_request");
   status.textContent="Request submitted. Your demo balance will change only if the owner approves it.";
-  document.getElementById("demo-topup-form").reset();
   await loadCustomerTopupRequests(currentUserId);
  }catch(error){status.textContent="Request not submitted: "+(error.message||"Please try again.");}
  finally{button.disabled=false;button.textContent="Submit top-up request";}
@@ -1323,6 +1326,7 @@ menu.querySelectorAll("a").forEach(link=>link.addEventListener("click",closeCust
 signoutButton.addEventListener("click",async()=>{
   signoutButton.disabled=true;
   statusEl.textContent="Signing out…";
+  await recordInsightActivity("logout");
   const {error}=await supabase.auth.signOut();
   if(error){statusEl.textContent=error.message;signoutButton.disabled=false;return;}
   window.location.replace("login.html");

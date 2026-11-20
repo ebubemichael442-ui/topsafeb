@@ -62,3 +62,46 @@ after insert on auth.users
 for each row execute function public.insight_hub_record_customer_signup();
 
 revoke all on function public.insight_hub_record_customer_signup() from public;
+
+
+-- Capture successful simulated transactions and top-up requests server-side.
+create or replace function public.insight_hub_record_demo_transaction()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.action = 'transfer' then
+    insert into public.insight_hub_activity_events(user_id,event_type)
+    values(new.user_id,'demo_transfer');
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists insight_hub_demo_transaction_event on public.demo_transactions;
+create trigger insight_hub_demo_transaction_event
+after insert on public.demo_transactions
+for each row execute function public.insight_hub_record_demo_transaction();
+
+create or replace function public.insight_hub_record_demo_topup_request()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.insight_hub_activity_events(user_id,event_type)
+  values(new.user_id,'demo_topup_request');
+  return new;
+end;
+$$;
+
+drop trigger if exists insight_hub_demo_topup_request_event on public.demo_topup_requests;
+create trigger insight_hub_demo_topup_request_event
+after insert on public.demo_topup_requests
+for each row execute function public.insight_hub_record_demo_topup_request();
+
+revoke all on function public.insight_hub_record_demo_transaction() from public;
+revoke all on function public.insight_hub_record_demo_topup_request() from public;

@@ -36,6 +36,8 @@
 <div style="grid-column:1/-1"><label for="recipient-address">Customer delivery address</label><textarea id="recipient-address" maxlength="500" placeholder="House/building number, street, area, city, postal code and country" required></textarea></div>
 <div><label for="dispatch">Dispatch date</label><input id="dispatch" type="date"></div>
 <div><label for="estimate">Estimated delivery date</label><input id="estimate" type="date"></div>
+<div><label for="carrier-name">Courier / carrier name (optional)</label><input id="carrier-name" maxlength="120" placeholder="e.g. DHL, FedEx, UPS"></div>
+<div><label for="carrier-tracking-number">Courier-issued tracking number (optional)</label><input id="carrier-tracking-number" maxlength="160" placeholder="Enter the real number issued by the courier"></div>
 <div><label for="initial-status">Initial status</label><select id="initial-status"><option>Pending</option><option>Dispatched</option><option>In Transit</option></select></div>
 <div><label for="location">Current update location</label><input id="location" maxlength="160" placeholder="City or logistics hub"></div>
 </div>
@@ -96,7 +98,7 @@
   try{
    const tracking="TSB-"+Array.from(crypto.getRandomValues(new Uint8Array(12))).map(v=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[v%32]).join("");
    const statusValue=document.getElementById("initial-status").value;
-   const payload={tracking_number:tracking,recipient_address:document.getElementById("recipient-address").value.trim(),sender_name:document.getElementById("sender").value.trim(),recipient_name:document.getElementById("recipient").value.trim(),origin:document.getElementById("origin").value.trim(),destination:document.getElementById("destination").value.trim(),dispatch_date:document.getElementById("dispatch").value||null,estimated_delivery_date:document.getElementById("estimate").value||null,status:statusValue,created_by:owner.id};
+   const payload={tracking_number:tracking,recipient_address:document.getElementById("recipient-address").value.trim(),sender_name:document.getElementById("sender").value.trim(),recipient_name:document.getElementById("recipient").value.trim(),origin:document.getElementById("origin").value.trim(),destination:document.getElementById("destination").value.trim(),dispatch_date:document.getElementById("dispatch").value||null,estimated_delivery_date:document.getElementById("estimate").value||null,carrier_name:document.getElementById("carrier-name").value.trim()||null,carrier_tracking_number:document.getElementById("carrier-tracking-number").value.trim()||null,status:statusValue,created_by:owner.id};
    const {data,error}=await client.from("package_shipments").insert(payload).select("id").single();if(error)throw error;
    const {error:eventError}=await client.from("package_tracking_events").insert({shipment_id:data.id,status:statusValue,location:document.getElementById("location").value.trim(),public_note:document.getElementById("note").value.trim()||"Shipment record created.",created_by:owner.id});
    if(eventError)throw eventError;

@@ -73,7 +73,19 @@ form.addEventListener("submit",async event=>{
    if(error)throw error;say("Registration request received. Check your email for a confirmation link before signing in.");
   }else{
    const {data,error}=await withTimeout(supabase.auth.signInWithPassword({email,password}),"Sign-in request");
-   if(error)throw error;await recordInsightActivity(data.user?.id,"login");window.location.assign("dashboard.html?tsb_build=20261111e");
+   if(error)throw error;
+   const {data:accountBlocked,error:accessError}=await withTimeout(supabase.rpc("customer_login_access_is_blocked"),"Account access check");
+   if(accessError){
+    const missingFunction=accessError.code==="PGRST202"||accessError.code==="42883"||/customer_login_access_is_blocked.*(not found|schema cache)|could not find the function/i.test(accessError.message||"");
+    if(!missingFunction)throw accessError;
+    console.warn("Customer account blocking will activate after the updated Supabase SQL migration is applied.");
+   }
+   if(accountBlocked){
+    await supabase.auth.signOut();
+    say("This customer account's sign-in and dashboard access have been blocked by the TopSafeB owner. Please contact TopSafeB support.");
+    return;
+   }
+   await recordInsightActivity(data.user?.id,"login");window.location.assign("dashboard.html?tsb_build=20261111e");
   }
  }catch(error){say(error.message||"Something went wrong. Please try again.");}
  finally{submitButton.disabled=false;}

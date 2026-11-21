@@ -358,7 +358,7 @@ let customerProfiles=[];
 let activeManagedCustomer=null;
 const noSearchResults=document.createElement("tr");
 const noSearchResultsCell=document.createElement("td");
-noSearchResultsCell.colSpan=6;noSearchResultsCell.textContent="No customers match your search.";
+noSearchResultsCell.colSpan=8;noSearchResultsCell.textContent="No customers match your search.";
 noSearchResults.append(noSearchResultsCell);noSearchResults.hidden=true;
 function filterCustomers(){
  const query=customerSearch.value.trim().toLocaleLowerCase();

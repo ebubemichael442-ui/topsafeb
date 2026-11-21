@@ -1154,6 +1154,14 @@ async function loadSession(){
   if(error) throw error;
   if(!session){window.location.replace("login.html");return;}
   const user=session.user;
+  const {data:accountBlocked,error:accountAccessError}=await supabase.rpc("customer_login_access_is_blocked");
+  if(accountAccessError)throw accountAccessError;
+  if(accountBlocked){
+    statusEl.textContent="This customer account has been blocked by the TopSafeB owner. You are being signed out.";
+    await supabase.auth.signOut();
+    window.location.replace("login.html?access=blocked");
+    return;
+  }
   // Transfer restrictions do not affect customer dashboard sign-in or access.
   nameEl.textContent=user.user_metadata?.full_name || "TopSafeB customer";
   const bankCustomerName=document.getElementById("bank-customer-name");

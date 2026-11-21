@@ -1,99 +1,78 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="TopSafeB customer support.">
-<title>TopSafeB Support</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="TopSafeB — accessible financial education, practical learning resources and clearly labelled demonstration tools.">
+<meta name="theme-color" content="#123f32">
+<title>TopSafeB | Financial Learning & Safety</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:#f3f6fa;font-family:Arial,Helvetica,sans-serif;color:#183252}
-header{padding:22px 6%;background:#102b50;color:#fff;font-size:25px;font-weight:800}
-.brand-mark{display:inline-grid;place-items:center;width:42px;height:42px;border:2px solid #dfbd70;border-radius:12px;color:#dfbd70;margin-right:9px}
-main{max-width:680px;margin:48px auto;padding:0 20px}
-.panel{background:#fff;border:1px solid #e1e7ef;border-radius:16px;padding:28px;box-shadow:0 8px 28px #102b5010}
-h1{margin:0 0 10px;color:#102b50;font-size:28px}
-p{line-height:1.6}
-.email-link{display:inline-block;margin-top:10px;padding:13px 18px;background:#dfbd70;color:#102b50;text-decoration:none;font-weight:700;border-radius:9px;overflow-wrap:anywhere}
-.small{color:#657286;font-size:14px}
-.language-row{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:14px;font-size:14px}
-select{padding:8px;border:1px solid #cbd4df;border-radius:8px;background:#fff;color:#183252;font:inherit}
-@media(max-width:480px){main{margin:28px auto}.panel{padding:22px}}
+:root{--green:#176b4b;--deep:#103b30;--ink:#19372d;--muted:#65786e;--pale:#f2f7f3;--line:#dfeae2;--white:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--pale);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+a{color:inherit}a:focus-visible{outline:3px solid #d7b866;outline-offset:3px}
+header{background:var(--deep);color:white;padding:15px max(18px,calc((100% - 1160px)/2));display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.brand{font-size:23px;font-weight:900;letter-spacing:.02em}.brand span{color:#d7b866}
+nav{display:flex;align-items:center;gap:17px;flex-wrap:wrap}nav a{color:#edf6ef;text-decoration:none;font-size:14px;font-weight:700}nav a:hover{text-decoration:underline;text-underline-offset:5px}
+main{max-width:1160px;margin:auto;padding:34px 18px 64px}
+.hero{padding:clamp(26px,5vw,54px);border-radius:24px;background:linear-gradient(120deg,#103b30,#176b4b 68%,#24845d);color:white;box-shadow:0 16px 40px #123f3220}
+.eyebrow{font-size:12px;font-weight:900;letter-spacing:.16em;color:#e7cf91}.hero h1{max-width:760px;margin:10px 0 14px;font-size:clamp(34px,6vw,58px);line-height:1.08;letter-spacing:-.035em}.hero p{max-width:690px;color:#e3efe7;font-size:18px;margin:0}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}.btn{display:inline-flex;justify-content:center;align-items:center;padding:12px 18px;border-radius:11px;text-decoration:none;font-weight:850;background:#fff;color:#15553c}.btn.secondary{background:#ffffff16;border:1px solid #ffffff80;color:white}
+.section-head{margin:38px 0 16px}.section-head h2{font-size:25px;margin:0;color:var(--deep)}.section-head p{margin:5px 0 0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{background:white;border:1px solid var(--line);border-radius:17px;padding:21px;box-shadow:0 7px 22px #153c2910}
+.card .icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#e8f4eb;color:var(--green);font-size:21px;font-weight:900}
+.card h3{margin:13px 0 5px;color:var(--deep);font-size:18px}.card p{margin:0 0 14px;color:var(--muted);font-size:14px}.card a{color:var(--green);font-weight:850;text-decoration:none}.card a:hover{text-decoration:underline}
+.access{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.access .card{display:flex;align-items:center;justify-content:space-between;gap:16px}.access h3{margin:0 0 4px}.access p{margin:0}.access a{flex:none}
+.note{margin-top:24px;padding:17px 19px;border-left:4px solid #d7b866;border-radius:10px;background:#fffaf0;color:#5d5237;font-size:13px}
+footer{background:#103b30;color:#dce9e0;padding:26px max(18px,calc((100% - 1160px)/2));font-size:13px}footer p{margin:5px 0}footer a{color:#e7cf91;text-decoration:none;margin-right:12px}
+@media(max-width:760px){header{align-items:flex-start;flex-direction:column}nav{gap:11px}nav a{font-size:13px}.grid{grid-template-columns:1fr 1fr}.access{grid-template-columns:1fr}.access .card{align-items:flex-start;flex-direction:column}.hero{border-radius:18px}}
+@media(max-width:460px){.grid{grid-template-columns:1fr}.actions .btn{width:100%}}
 </style>
 </head>
 <body>
-<header><span class="brand-mark" aria-hidden="true">T</span>TopSafeB</header>
+<header>
+ <a class="brand" href="index.html" aria-label="TopSafeB home" style="color:white;text-decoration:none"><span>◆</span> TopSafeB</a>
+ <nav aria-label="Main navigation">
+  <a href="about.html">About</a><a href="investment-basics.html">Investing</a><a href="financial-safety.html">Financial Safety</a><a href="online-banking-demo.html">Banking Demo</a><a href="package-tracking.html">Track a Package</a><a href="contact.html">Contact</a>
+ </nav>
+</header>
 <main>
-<div class="language-row"><label for="language-choice" id="language-label">Language</label><select id="language-choice" aria-label="Choose language"><option value="auto">Automatic</option><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="de">Deutsch</option><option value="ar">العربية</option></select></div>
-<section class="panel" aria-labelledby="support-title">
-<h1 id="support-title">Customer Support</h1>
-<p id="intro">Need help? Start a live chat using the chat bubble on this page, or contact TopSafeB by email.</p>
-<p><a class="email-link" id="email-button" href="mailto:ebubemichael442@gmail.com?subject=TopSafeB%20Customer%20Support">Email TopSafeB Support</a></p>
-<p class="small" id="email-label">Email: ebubemichael442@gmail.com</p>
-<p class="small" id="safety-note">Our support team is here to help with questions about the TopSafeB website and learning resources.</p>
-</section>
+ <section class="hero">
+  <div class="eyebrow">LEARN · PLAN · STAY SAFE</div>
+  <h1>Build confidence with everyday financial knowledge.</h1>
+  <p>Explore practical guides on saving, budgeting, investing concepts and online safety, alongside clearly labelled learning demonstrations.</p>
+  <div class="actions"><a class="btn" href="login.html">Customer Login / Sign Up</a><a class="btn secondary" href="about.html">Discover TopSafeB</a></div>
+ </section>
+ <div class="section-head"><h2>Explore TopSafeB</h2><p>Useful learning resources and services in one place.</p></div>
+ <section class="grid" aria-label="TopSafeB resources">
+  <article class="card"><div class="icon" aria-hidden="true">◎</div><h3>Investment Basics</h3><p>Understand risk, diversification, common investments and long-term planning.</p><a href="investment-basics.html">Explore investing →</a></article>
+  <article class="card"><div class="icon" aria-hidden="true">⌂</div><h3>Financial Safety</h3><p>Learn to protect sign-in details, recognise warning signs and verify requests.</p><a href="financial-safety.html">Learn safety tips →</a></article>
+  <article class="card"><div class="icon" aria-hidden="true">▤</div><h3>Banking Demonstration</h3><p>View an illustrative banking interface created for education and practice.</p><a href="online-banking-demo.html">View demo →</a></article>
+  <article class="card"><div class="icon" aria-hidden="true">▣</div><h3>Package Tracking</h3><p>Look up a shipment using the tracking number supplied by its sender.</p><a href="package-tracking.html">Track a package →</a></article>
+  <article class="card"><div class="icon" aria-hidden="true">✉</div><h3>Customer Support</h3><p>Find support information and contact TopSafeB with website questions.</p><a href="support.html">Open support →</a></article>
+  <article class="card"><div class="icon" aria-hidden="true">◈</div><h3>About TopSafeB</h3><p>Learn about the platform, its purpose and the principles behind its resources.</p><a href="about.html">About us →</a></article>
+ </section>
+ <div class="section-head"><h2>Account access</h2><p>Separate access points for customers and the authorised owner.</p></div>
+ <section class="access" aria-label="Account access">
+  <article class="card"><div><h3>Customer Area</h3><p>Sign in or create your TopSafeB learning account.</p></div><a href="login.html">Customer sign in →</a></article>
+  <article class="card"><div><h3>Owner Control Centre</h3><p>Restricted access for the authorised platform owner.</p></div><a href="admin.html">Owner access →</a></article>
+ </section>
+ <div class="note"><strong>Important:</strong> TopSafeB is an independent financial education platform, not a bank, broker or licensed financial institution. Its banking features are demonstrations only. It does not accept deposits, hold funds, process real payments or provide personalised financial or investment advice. Never enter real banking passwords, PINs, card details or one-time passcodes.</div>
 </main>
+<footer>
+ <strong>◆ TopSafeB</strong><p>Accessible financial knowledge and online safety education.</p>
+ <p><a href="privacy-policy.html">Privacy Policy</a><a href="contact.html">Contact</a><a href="support.html">Customer Support</a><a href="login.html">Customer Login</a></p>
+ <p>© 2026 TopSafeB.</p>
+</footer>
 <script>
 (function(){
-const translations={
-en:{title:"Customer Support",intro:"Need help? Start a live chat using the chat bubble on this page, or contact TopSafeB by email.",button:"Email TopSafeB Support",email:"Email:",safety:"Welcome to TopSafeB Support! We’re glad you’re here. Send us a message or email us whenever you need help.",language:"Language",subject:"TopSafeB Customer Support"},
-es:{title:"Atención al cliente",intro:"¿Necesitas ayuda? Inicia un chat en directo con el icono de chat de esta página o contacta con TopSafeB por correo electrónico.",button:"Enviar un correo a TopSafeB",email:"Correo electrónico:",safety:"¡Te damos la bienvenida al soporte de TopSafeB! Nos alegra que estés aquí. Envíanos un mensaje o un correo si necesitas ayuda.",language:"Idioma",subject:"Atención al cliente de TopSafeB"},
-fr:{title:"Assistance clientèle",intro:"Besoin d’aide ? Lancez une conversation avec la bulle de chat sur cette page ou contactez TopSafeB par e-mail.",button:"Envoyer un e-mail à TopSafeB",email:"E-mail :",safety:"Bienvenue au support TopSafeB ! Nous sommes ravis de vous accueillir. Envoyez-nous un message ou un e-mail si vous avez besoin d’aide.",language:"Langue",subject:"Assistance clientèle TopSafeB"},
-pt:{title:"Suporte ao cliente",intro:"Precisa de ajuda? Inicie uma conversa pelo balão de chat nesta página ou contacte a TopSafeB por e-mail.",button:"Enviar e-mail para a TopSafeB",email:"E-mail:",safety:"Boas-vindas ao suporte da TopSafeB! Ficamos felizes com sua visita. Envie-nos uma mensagem ou um e-mail sempre que precisar de ajuda.",language:"Idioma",subject:"Suporte ao cliente TopSafeB"},
-de:{title:"Kundensupport",intro:"Benötigen Sie Hilfe? Starten Sie über die Chat-Blase auf dieser Seite einen Live-Chat oder kontaktieren Sie TopSafeB per E-Mail.",button:"E-Mail an TopSafeB",email:"E-Mail:",safety:"Willkommen beim TopSafeB-Support! Schön, dass Sie da sind. Schreiben Sie uns eine Nachricht oder E-Mail, wenn Sie Hilfe benötigen.",language:"Sprache",subject:"TopSafeB Kundensupport"},
-ar:{title:"دعم العملاء",intro:"هل تحتاج إلى مساعدة؟ ابدأ محادثة مباشرة عبر فقاعة الدردشة في هذه الصفحة أو تواصل مع TopSafeB عبر البريد الإلكتروني.",button:"راسل دعم TopSafeB",email:"البريد الإلكتروني:",safety:"مرحبًا بك في دعم TopSafeB! يسعدنا وجودك هنا. أرسل لنا رسالة أو بريدًا إلكترونيًا متى احتجت إلى المساعدة.",language:"اللغة",subject:"دعم عملاء TopSafeB"}
-};
-const choice=document.getElementById("language-choice");
-function browserLanguage(){
- const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||"en"];
- for(const raw of langs){const code=String(raw).toLowerCase().split("-")[0];if(translations[code])return code;}
- return "en";
-}
-function applyLanguage(code){
- const t=translations[code]||translations.en;
- document.documentElement.lang=code;
- document.documentElement.dir=code==="ar"?"rtl":"ltr";
- document.getElementById("support-title").textContent=t.title;
- document.getElementById("intro").textContent=t.intro;
- document.getElementById("email-button").textContent=t.button;
- document.getElementById("email-label").textContent=t.email+" ebubemichael442@gmail.com";
- document.getElementById("safety-note").textContent=t.safety;
- document.getElementById("language-label").textContent=t.language;
- document.getElementById("email-button").href="mailto:ebubemichael442@gmail.com?subject="+encodeURIComponent(t.subject);
-}
-const detected=browserLanguage();
-choice.value="auto";
-applyLanguage(detected);
-choice.addEventListener("change",function(){applyLanguage(this.value==="auto"?browserLanguage():this.value);});
-})();
-</script>
-<!-- TopSafeB live customer support chat -->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6af6db32e84c933e6cc13be6/default';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!-- TopSafeB privacy-conscious page-view counter: path and timestamp only -->
-<script>
-(function(){
-  try {
-    var endpoint="https://wivxqaratjrrhpeeeboc.supabase.co/rest/v1/insight_hub_pageviews";
-    var key="sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
-    var path=window.location.pathname || "/";
-    if(path.length>160 || !/^\/[A-Za-z0-9_./-]*$/.test(path)) return;
-    fetch(endpoint,{
-      method:"POST",
-      headers:{"apikey":key,"Authorization":"Bearer "+key,"Content-Type":"application/json","Prefer":"return=minimal"},
-      body:JSON.stringify({page_path:path}),
-      keepalive:true
-    }).catch(function(){});
-  } catch(e) {}
+ try{
+  var endpoint="https://wivxqaratjrrhpeeeboc.supabase.co/rest/v1/insight_hub_pageviews";
+  var key="sb_publishable_Q3EaQdfgUFy0LCU53qK23A_hEuAjUm6";
+  var path=window.location.pathname||"/";
+  if(path.length>160||!/^\/[A-Za-z0-9_./-]*$/.test(path))return;
+  fetch(endpoint,{method:"POST",headers:{"apikey":key,"Authorization":"Bearer "+key,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({page_path:path}),keepalive:true}).catch(function(){});
+ }catch(e){}
 })();
 </script>
 </body>

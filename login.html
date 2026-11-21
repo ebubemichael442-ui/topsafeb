@@ -84,7 +84,7 @@ resetButton.addEventListener("click",async()=>{
  try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error)throw error;say("If an account exists for that email, a password reset link will be sent.");}
  catch(error){say(error.message||"Unable to request a password reset.");}
 });
-withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your account.");if(session)window.location.assign("dashboard.html?tsb_build=20261111e");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
+withTimeout(supabase.auth.getSession(),"Initial secure connection").then(({data:{session},error})=>{if(error)throw error;const blockedNotice=new URLSearchParams(window.location.search).get("access")==="blocked";if(blockedNotice){say("This customer account's sign-in and dashboard access have been blocked by the TopSafeB owner. Please contact TopSafeB support.");return;}say(session?"You are already signed in. Opening your dashboard…":"Connection ready. You can sign in or create your account.");if(session)window.location.assign("dashboard.html?tsb_build=20261111e");}).catch(error=>{say("Could not confirm the secure connection: "+(error.message||"Please refresh and try again."));});
 }
 function loadSupabaseLibrary(){
  if(supabaseSourceIndex>=supabaseSources.length){

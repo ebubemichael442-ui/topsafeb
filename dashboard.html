@@ -1155,7 +1155,11 @@ async function loadSession(){
   if(!session){window.location.replace("login.html");return;}
   const user=session.user;
   const {data:accountBlocked,error:accountAccessError}=await supabase.rpc("customer_login_access_is_blocked");
-  if(accountAccessError)throw accountAccessError;
+  if(accountAccessError){
+    const missingFunction=accountAccessError.code==="PGRST202"||accountAccessError.code==="42883"||/customer_login_access_is_blocked.*(not found|schema cache)|could not find the function/i.test(accountAccessError.message||"");
+    if(missingFunction)console.warn("TopSafeB account blocking is not active until the updated customer-access-controls.sql migration is run.");
+    else throw accountAccessError;
+  }
   if(accountBlocked){
     statusEl.textContent="This customer account has been blocked by the TopSafeB owner. You are being signed out.";
     await supabase.auth.signOut();
